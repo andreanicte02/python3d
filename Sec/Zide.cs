@@ -13,6 +13,7 @@ namespace Sec
         private Button btnAnalizar;
         private Button btnCrearPestaña;
         private Analizador3D analizar3d;
+        private AanalizadorAltoNivel analizarAltoNivel;
         
         public Zide():base()
         {
@@ -20,6 +21,8 @@ namespace Sec
             crear();
             agregaPestaña();
             this.analizar3d= new Analizador3D();
+            this.analizarAltoNivel = new AanalizadorAltoNivel();
+            
 
         }
 
@@ -63,7 +66,7 @@ namespace Sec
 
         public void agregaPestaña()
         {
-        
+
             RichTextBox t = new RichTextBox();
             t.SetBounds(5, 5, 480, 360);
             string title = "New File " + (tabEditor.TabCount + 1).ToString();
@@ -73,11 +76,16 @@ namespace Sec
         
         }
 
+       
+
         private void analizar_click(object sender, EventArgs e)
         {
             String entrada = tabEditor.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is RichTextBox)?.Text;
-            analizar3d.ejecutarAnalizador(entrada);
+            //analizar3d.ejecutarAnalizador(entrada);
             //Console.WriteLine("hola");
+   
+            analizarAltoNivel.probarAnalizadorAltoNivel(entrada);
+            
 
         }
 
@@ -85,7 +93,8 @@ namespace Sec
         {
             agregaPestaña();
         }
-
+        
+     
 
     }
 }

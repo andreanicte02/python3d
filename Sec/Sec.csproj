@@ -43,8 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analizadores\AanalizadorAltoNivel.cs" />
     <Compile Include="Analizadores\Analizador3D.cs" />
     <Compile Include="Analizadores\Gramatica3D.cs" />
+    <Compile Include="Analizadores\GramaticaPython.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Zide.cs" />
