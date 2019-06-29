@@ -80,11 +80,9 @@ namespace Sec
 
         private void analizar_click(object sender, EventArgs e)
         {
-            String entrada = tabEditor.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is RichTextBox)?.Text;
-            //analizar3d.ejecutarAnalizador(entrada);
-            //Console.WriteLine("hola");
-   
-            analizarAltoNivel.probarAnalizadorAltoNivel(entrada);
+      
+            analizarAltoNivel = new AanalizadorAltoNivel();
+            analizarAltoNivel.probarAnalizadorAltoNivel(leer());
             
 
         }
@@ -92,6 +90,13 @@ namespace Sec
         private void btnCrearPestaña_click(object sender, EventArgs e)
         {
             agregaPestaña();
+        }
+        
+        static String leer()
+        {
+            string text = System.IO.File.ReadAllText(@"/home/nicte/Escritorio/prueba.pyton");
+            System.Console.WriteLine("Contenido del archivo = {0}", text);
+            return text;
         }
         
      
