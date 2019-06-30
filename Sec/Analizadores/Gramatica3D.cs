@@ -1,5 +1,8 @@
 
+using System;
 using Irony.Parsing;
+
+using static Sec.Analizadores.IronyUtils;
 
 namespace Sec.Analizadores
 {
@@ -7,6 +10,7 @@ namespace Sec.Analizadores
     {
           public Gramatica3D():  base(caseSensitive: true)
         {
+            LanguageFlags |= LanguageFlags.CreateAst;
             
             CommentTerminal COMENTARIO_SIMPLE = new CommentTerminal("comentario_simple", "//", "\n", "\r\n");
             CommentTerminal COMENTARIO_MULT = new CommentTerminal("comentario_mult", "/*", "*/");
@@ -77,46 +81,56 @@ namespace Sec.Analizadores
 
 
             //-------------------------------------------------------------NO TERMINALES
-            var INICIO = new NonTerminal("INICIO");
-            var assigment = new NonTerminal("assigment");
-            var op = new NonTerminal("op");
-            var literal = new NonTerminal("literal");
+            var INICIO = new AutoNonTerminal("INICIO");
+            var assigment = new AutoNonTerminal("assigment");
+            var op = new AutoNonTerminal("op");
+            var literal = new AutoNonTerminal("literal");
             
-            var inconditionalJump = new NonTerminal("inconditionalJump");
-            var destiniOfJump = new NonTerminal("destiniOfJump");
-            var conditionalJump = new NonTerminal("conditionalJump");
-            var relationalOperation = new NonTerminal("relationalOperation");
-            var conditionalJumpIfFalse = new NonTerminal("conditionalJumpIfFalse");
-            var methodDeclaration = new NonTerminal("methodDeclaration");
-            var methodInvocation = new NonTerminal("methodInvocation");
-            var methodBody = new NonTerminal("methodBody");
-            var sentenciaMetodo = new NonTerminal("sentenciaMetodo");
-            var sentenciasMetodo = new NonTerminal("sentenciasMetodo");
+            var inconditionalJump = new AutoNonTerminal("inconditionalJump");
+            var destiniOfJump = new AutoNonTerminal("destiniOfJump");
+            var conditionalJump = new AutoNonTerminal("conditionalJump");
+            var relationalOperation = new AutoNonTerminal("relationalOperation");
+            var conditionalJumpIfFalse = new AutoNonTerminal("conditionalJumpIfFalse");
+            var methodDeclaration = new AutoNonTerminal("methodDeclaration");
+            var methodInvocation = new AutoNonTerminal("methodInvocation");
+            var methodBody = new AutoNonTerminal("methodBody");
+            var sentenciaMetodo = new AutoNonTerminal("sentenciaMetodo");
+            var sentenciasMetodo = new AutoNonTerminal("sentenciasMetodo");
 
-            var cleanScope = new NonTerminal("cleanScope");
+            var cleanScope = new AutoNonTerminal("cleanScope");
             
 
             
-            var printStatement = new NonTerminal("printStatement");
-            var varDeclaration = new NonTerminal("varDeclaration");
+            var printStatement = new AutoNonTerminal("printStatement");
+            var varDeclaration = new AutoNonTerminal("varDeclaration");
 
-            var idList = new NonTerminal("idList");
+            var idList = new AutoNonTerminal("idList");
             
            
-            var sentencia = new NonTerminal("sentencia");
-            var sentencias = new NonTerminal("sentencias");
-            var listaSentencia = new  NonTerminal("listaSentencia");
+            var sentencia = new AutoNonTerminal("sentencia");
+            var sentencias = new AutoNonTerminal("sentencias");
+            var listaSentencia = new  AutoNonTerminal("listaSentencia");
             
             
-            var inputStatement = new  NonTerminal("inputStatement");
+            var inputStatement = new  AutoNonTerminal("inputStatement");
 
 
             
             //---------------------> ER
            
-            RegexBasedTerminal numero = new RegexBasedTerminal("numero", "[0-9]+");
-            RegexBasedTerminal decimall = new RegexBasedTerminal("decimal", "[0-9]+[.][0-9]+");
+//            var numero = new RegexBasedTerminal("numero", "[0-9]+");
+//            numero._accion((values, node) => node.Token)
+
+            var numero = new NumberLiteral("Entero", NumberOptions.IntOnly | NumberOptions.NoDotAfterInt);
+            numero._accion((v, n) => n.Token.Value);
+            
+            var decimall = new NumberLiteral("Decimal");
+            decimall._accion((v, n) => n.Token.Value);
+
+
+//            RegexBasedTerminal decimall = new RegexBasedTerminal("decimal", "[0-9]+[.][0-9]+");
             RegexBasedTerminal id = new RegexBasedTerminal("id", "[A-Za-z]([A-Za-z|_|0-9]+)?");
+            id._accion((values, node) => node.Token.Text);
 
 
             
@@ -141,7 +155,13 @@ namespace Sec.Analizadores
 
 
 
-            assigment.Rule = id + igual + op + pcoma
+            assigment.Rule = produccion(id + igual + op + pcoma)._accion(values =>
+                             {
+                                 Console.WriteLine("Se encontro una asignacion ");
+                                 Console.WriteLine(values[0]);
+                                 Console.WriteLine(values[2]);
+                                 return null;
+                             })
                              | stack + acor + literal + ccor + igual + literal + pcoma
                              | heap + acor + literal + ccor + igual + literal + pcoma
                              | id + igual + heap + acor + literal + ccor + pcoma
@@ -226,15 +246,15 @@ namespace Sec.Analizadores
                       | literal + por + literal
                       | literal + div + literal
                       
-                      | literal
+                      | produccion(literal)._accion(values => values[0])
                 ;
 
 
             
 
-            literal.Rule = numero
-                            | id
-                            | decimall
+            literal.Rule = produccion(numero)._accion(values => values[0])
+                            | produccion(id)._accion(values => values[0])
+                            | produccion(decimall)._accion(values => values[0])
                 ;
             
             //----------------------------------------------------------------------------------
