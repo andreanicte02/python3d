@@ -42,6 +42,18 @@ namespace Sec.Analizadores
              MarkReservedWords("float");
              MarkReservedWords("str");
              MarkReservedWords("is");
+             MarkReservedWords("import");
+             MarkReservedWords("del");
+             MarkReservedWords("pass");
+             MarkReservedWords("continue");
+             MarkReservedWords("break");
+             MarkReservedWords("lambda");
+             MarkReservedWords("None");
+             MarkReservedWords("type");
+             MarkReservedWords("len");
+             MarkReservedWords("int");
+             MarkReservedWords("input");
+             
              
              var @class = ToTerm("class");
              var print = ToTerm("print");
@@ -64,9 +76,20 @@ namespace Sec.Analizadores
              var @float = ToTerm("float");
              var str = ToTerm("str");
              var @is = ToTerm("is");
-
+             var import = ToTerm("import");
+             var del = ToTerm("del");
+             var pass = ToTerm("pass");
+             var @continue = ToTerm("continue");
+             var @break = ToTerm("break");
+             var lambda = ToTerm("lambda");
+             var None = ToTerm("None");
              
-            
+             var type = ToTerm("type");
+             var len = ToTerm("len");
+             var @int = ToTerm("int");
+             var input = ToTerm("input");
+             
+
 
             //-----------------------------------------------SIGNOS PELA
            
@@ -76,6 +99,8 @@ namespace Sec.Analizadores
             Terminal cpar = ToTerm(")");
             Terminal acor = ToTerm("[");
             Terminal ccor = ToTerm("]");
+            Terminal alla = ToTerm("{");
+            Terminal clla = ToTerm("}");
             //operadores aritmeticos
             Terminal por = ToTerm("*");
             Terminal div = ToTerm("/");
@@ -88,7 +113,7 @@ namespace Sec.Analizadores
             
             
             Terminal punto = ToTerm(".");
-            Terminal igual = ToTerm("=");
+           
             Terminal igualIgual = ToTerm("==");
             Terminal diferenteQue = ToTerm("!=");     
            
@@ -111,7 +136,16 @@ namespace Sec.Analizadores
             Terminal not = ToTerm("not");
             Terminal isNot = ToTerm("is not");
             Terminal notIn = ToTerm("not in");
-
+            
+            //asignacion
+            Terminal igual = ToTerm("=");
+            Terminal masIgual = ToTerm("+=");
+            Terminal menosIgual = ToTerm("-=");
+            Terminal porIgual = ToTerm("*=");
+            Terminal divIgual = ToTerm("/=");
+            Terminal modIgual = ToTerm("%=");
+            Terminal potIgual = ToTerm("**=");
+            Terminal dobleDivIgual = ToTerm("//=");
 
             
 
@@ -130,10 +164,12 @@ namespace Sec.Analizadores
             var exp = new  NonTerminal("exp");
             var crearClase = new  NonTerminal("crearClase");
             
+            //pdoruccion de sentencias de clase
             var sentenciaClase = new  NonTerminal("sentenciaClase");
             var sentenciasClases = new  NonTerminal("sentenciasClases");
             var bloqueClase = new  NonTerminal("bloqueClase");
             
+            //prouccion de sentencias locales
             var sentenciaLocal = new NonTerminal("sentenciaLocal");
             var bloqueLocal = new NonTerminal("bloqueLocal");
             var sentenciasLocales = new NonTerminal("sentenciasLocal");
@@ -153,10 +189,39 @@ namespace Sec.Analizadores
             var invocacionPunto       = new NonTerminal("invocacionPunto");
             var invocacion       = new NonTerminal("invocacion");    
             var sentenciaFor       = new NonTerminal("sentenciaFor");
+            var sentenciaImport  = new NonTerminal("sentenciaImport");
 
-
-                
             
+            
+            //arrayInit produccion de tuplas, arreglos, diccionarios conjunto
+            var arrayInit  = new NonTerminal("arrayInit");
+            
+            var cuerpoArray  = new NonTerminal("cuerpoArray");
+            var arrayElemento  = new NonTerminal("arrayElemento");
+            var arrayElementos  = new NonTerminal("arrayElementos");
+            
+          
+
+            var sentenciaDel  = new NonTerminal("sentenciaDel");
+            
+            //sentencia para esignar exp = linitAisgnar
+            var initAsignar  = new NonTerminal("initAsignar");
+            var lInitAsignar =  new NonTerminal("lInitAsignar");
+            
+            
+            //sentencias de diccionario
+            var cuerpoDiccionario = new NonTerminal("cuerpoDiccionario");
+            var elementosDiccionario = new NonTerminal("elementosDiccionario");
+            var elementoDiccionario = new NonTerminal("elementoDiccionario");
+            
+            
+            var sentenciaOpTernario = new NonTerminal("sentenciaOpTernario");
+
+            var sentenciaLambda = new NonTerminal("sentenciaLambda");
+
+
+
+
             //---------------------> ER
            
             RegexBasedTerminal numero = new RegexBasedTerminal("numero", "[0-9]+");
@@ -178,7 +243,9 @@ namespace Sec.Analizadores
                               | sentencia;
 
             sentencia.Rule = asignar + Eos
-                            |crearClase;
+                             | crearClase
+                             | sentenciaImport + Eos
+                             | sentenciasLocales;
 
             crearClase.Rule = @class + id + dosp +Eos+ bloqueClase;
 
@@ -195,10 +262,11 @@ namespace Sec.Analizadores
             sentenciaClase.Rule = asignar + Eos
                                   | crearMetodo;
                            
-            //locales
+            //crear metodo
 
             crearMetodo.Rule = def + id + apar + parametros + cpar + dosp  + Eos+ bloqueLocal ;
             
+            //bloque con las sentencias locales
             bloqueLocal.Rule = Indent + sentenciasLocales + Dedent
                                | Empty;
             
@@ -213,19 +281,40 @@ namespace Sec.Analizadores
                                   | sentenciaIf
                                   | sentenciaReturn + Eos
                                   | sentenciaFor
-                                  | exp + Eos; //llamadas a metodos objetos
-                                    
+                                  | sentenciaDel + Eos
+                                  | exp + Eos //llamadas a metodos objetos
+                                  | pass + Eos
+                                  | @continue + Eos
+                                  | @break + Eos;
+
 
 
 
 
 
             sentenciaPrint.Rule = print + apar + listaExp + cpar;
-                                 
-            asignar.Rule = exp + igual + exp;
 
-            sentenciaAlcance.Rule = global + exp
-                                    | nonlocal + exp;
+            asignar.Rule = exps + igual + lInitAsignar
+                           | exps + masIgual + lInitAsignar
+                           | exps + menosIgual + lInitAsignar
+                           | exps + porIgual + lInitAsignar
+                           | exps + divIgual + lInitAsignar
+                           | exps + modIgual + lInitAsignar
+                           | exps + potIgual + lInitAsignar
+                           | exps + dobleDivIgual + lInitAsignar;
+
+
+            lInitAsignar.Rule = lInitAsignar + coma + initAsignar //lista de posibles asignaciones
+                                | initAsignar;
+
+            initAsignar.Rule = exp
+                               | arrayInit;
+                               
+            
+            
+
+            sentenciaAlcance.Rule = global + exps
+                                    | nonlocal + exps;
             
 
             listaExp.Rule = exps 
@@ -256,78 +345,94 @@ namespace Sec.Analizadores
 
             sentenciaReturn.Rule = @return + exp;
 
-            sentenciaFor.Rule = @for + exp + @in + exp+ dosp + Eos + bloqueLocal;
+            sentenciaFor.Rule =
+                @for + exp + dosp + Eos + bloqueLocal //exps -> xq aveces puede estar iterando diccionarios
+                | @for + exp + dosp + Eos + bloqueLocal + @else+dosp + Eos + bloqueLocal; // hay un for con else :(
+                    //me faltaria el for para el que se usa parr recorre los diccionarios    
 
-            exp.Rule = exp + mas+ exp
-                       | exp + menos+ exp
+            exp.Rule = exp + mas + exp
+                       | exp + menos + exp
                        | exp + por + exp
-                       | exp + div  + exp
+                       | exp + div + exp
                        | exp + divDoble + exp
 
-                       
+
                        | exp + igualIgual + exp
                        | exp + diferenteQue + exp
-                       
-                       
-                       
-                       
+
+
+
+
                        | exp + mayor + exp
                        | exp + menor + exp
                        | exp + mayorIgualQue + exp
-                       | exp + menorIgualQue  + exp
-                       
+                       | exp + menorIgualQue + exp
+
                        | exp + or + exp
                        | exp + and + exp
                        | not + exp
                        | exp + isNot + exp
-                       
+
                        | exp + notIn + exp
-                       
+
                        | exp + andBinario + exp
                        | exp + orBinario + exp
-                       | exp  + xorBinario + exp
-                        
-                       
-
-
-
-
-
+                       | exp + xorBinario + exp
 
 
                        | self //es como el this
-                       
+
                        | id
                        | numero
                        | @decimal
                        | cadena
                        | @true
                        | @false
-                       
-                       
+                       | None
+
+
                        | invocacionPunto
                        | invocacion
                        | exp + punto + id
-                       | @new + id + apar + listaExp + cpar
+                       | @new + id + apar + listaExp + cpar  //alparecer ni se usa
+                       
+                       
                        | @bool + apar + exp + cpar
                        | chr + apar + exp + cpar
                        | @float + apar + exp + cpar
                        | str + apar + exp + cpar //falta la fncion type
+                       
 
-                       
                        | exp + acor + pot + exp + ccor
-                       
+
                        | exp + shiftLet + exp
                        | exp + shiftRight + exp
-                       
-                       
-                       
-                       
 
-                       | apar + exp + cpar;
 
-    
+
+
+
+                       | apar + exp + cpar
+                       | sentenciaOpTernario
+                       | sentenciaLambda
+                       
+                       | type + apar + exp + cpar //devuele el tipo de loq ue se lemanda
+                       | type + apar + exp+ coma + exp + coma + exp + cpar //dice que devuele un nuevo tipo de objeto
+                       | len  + apar + exp  + cpar
+                       | @int + apar + exp   + cpar
+                       | @int + apar + exp + coma + exp + cpar
+                       | input + apar + cpar
+                       
+                       
+                       | exp +@in +exp
+                       | exp + @is + exp 
+                       
+                ;
             
+            
+            //nose si agregar la funcion range, enumerate, dic, rservate, sorted
+
+
             invocacion.Rule = id + apar +listaExp + cpar; 
 
 
@@ -335,7 +440,37 @@ namespace Sec.Analizadores
 
             invocacionPunto.Rule = exp + punto+ id+ apar +listaExp +cpar;
 
+            sentenciaImport.Rule = import + cadena;
+
+            arrayInit.Rule = acor + cuerpoArray + ccor           //listas
+                             | apar + cuerpoArray + cpar        //tuplas y secuencias
+                             | alla + cuerpoArray + clla        //conjuntos
+                             | alla + cuerpoDiccionario + clla; //diccionarios
+
+            cuerpoDiccionario.Rule = elementosDiccionario
+                                     | Empty;
             
+            elementosDiccionario.Rule = elementosDiccionario + coma +elementoDiccionario
+                                        | elementoDiccionario;
+
+            elementoDiccionario.Rule = exp + dosp + exp;
+
+
+            cuerpoArray.Rule = arrayElementos
+                               | Empty;
+
+            arrayElementos.Rule = arrayElementos + coma+ arrayElemento
+                                  | arrayElemento;
+
+            arrayElemento.Rule = exp
+                                 | arrayInit; //no se si agregar : [:]
+
+            sentenciaDel.Rule = del +exp;
+
+            sentenciaOpTernario.Rule = exp + @if + exp + @else + exp;
+
+            sentenciaLambda.Rule = lambda + parametros + dosp + exp; 
+
             //----------------------------------------------------------------------------------
 
             
@@ -348,31 +483,37 @@ namespace Sec.Analizadores
             
 
 
-            RegisterOperators(13, Associativity.Right, @new); 
+            RegisterOperators(14, Associativity.Right, @new); 
 
-            RegisterOperators(12, Associativity.Left, por, div,modulo, divDoble); 
+            RegisterOperators(13, Associativity.Left, por, div,modulo, divDoble); 
            
-            RegisterOperators(11, Associativity.Left, mas, menos); 
+            RegisterOperators(12, Associativity.Left, mas, menos); 
            
-            RegisterOperators(10, Associativity.Left, shiftLet, shiftRight); 
+            RegisterOperators(11, Associativity.Left, shiftLet, shiftRight); 
             
-            RegisterOperators(9, Associativity.Left , mayor, menor, mayorIgualQue, menorIgualQue, isNot, notIn, @in, @is);
+            RegisterOperators(10, Associativity.Left , mayor, menor, mayorIgualQue, menorIgualQue, isNot, notIn, @in, @is);
             
-            RegisterOperators(7, Associativity.Left, igualIgual, diferenteQue);
+            RegisterOperators(9, Associativity.Left, igualIgual, diferenteQue);
             
        
-            RegisterOperators(6, Associativity.Left, andBinario);
+            RegisterOperators(8, Associativity.Left, andBinario);
             
-            RegisterOperators(5, Associativity.Left, xorBinario);
+            RegisterOperators(7, Associativity.Left, xorBinario);
             
-            RegisterOperators(4, Associativity.Left, orBinario);
+            RegisterOperators(6, Associativity.Left, orBinario);
             
-            RegisterOperators(3, Associativity.Left, and);
+            RegisterOperators(5, Associativity.Left, and);
             
             
-            RegisterOperators(2, Associativity.Left, or);
+            RegisterOperators(4, Associativity.Left, or);
            
-            RegisterOperators(1, Associativity.Right, igual);
+            RegisterOperators(3, Associativity.Right, @if,@else);
+            
+            
+            RegisterOperators(2, Associativity.Right, lambda);
+
+
+            RegisterOperators(1, Associativity.Right, igual,masIgual,menosIgual,divIgual,porIgual,modIgual,potIgual,dobleDivIgual);
 
 
 
