@@ -1,6 +1,7 @@
 
 using System;
 using Irony.Parsing;
+using Sec.Interprete3D;
 using Sec.Interprete3D.Instruccion;
 using static Sec.Analizadores.IronyUtils;
 
@@ -115,6 +116,8 @@ namespace Sec.Analizadores
             var inputStatement = new  AutoNonTerminal("inputStatement");
 
 
+            var idStatment = new  AutoNonTerminal("idStatment");
+
             
             //---------------------> ER
            
@@ -187,9 +190,9 @@ namespace Sec.Analizadores
 
             varDeclaration.Rule = varr + stack + acor + ccor + pcoma
                                   | varr + heap + acor + ccor + pcoma
-                                  | varr + idList + pcoma
+                                  | produccion( varr + idList + pcoma)._accion(values => new NodoDeclararVars(null))
                                   | varr + id + igual + literal + pcoma;
-                ;
+                
 
             
             
@@ -225,22 +228,25 @@ namespace Sec.Analizadores
                                    | inputStatement
                                     ;
 
+            
 
-
-
-            idList.Rule = idList + coma + id
-                          | id
+            this.ConfigList<Instruccion3d>(false,idList, idStatment,",");
+            
+            idList.Rule = produccion(idList + coma + idStatment)
+                          | produccion(idStatment)
                 ;
+
+            idStatment.Rule = produccion(id)._accion(values=> new NodoDeclararVar(values[0]));
             
 
 
 
-            relationalOperation.Rule = literal + mayor + literal
-                      | literal + menor + literal
-                      | literal + mayorIgual + literal
-                      | literal + menorIgual + literal
-                      | literal + igualIgual + literal
-                      | literal + diferente + literal
+            relationalOperation.Rule = produccion(literal + mayor + literal)._accion(values => new NodoMayor(values[0], values[2]))
+                      | produccion(literal + menor + literal)._accion(values => new NodoMenor(values[0], values[2]))
+                      | produccion(literal + mayorIgual + literal)._accion(values => new NodoMayorIgual(values[0], values[2]))
+                      | produccion(literal + menorIgual + literal)._accion(values => new NodoMenorIgual(values[0], values[2]))
+                      | produccion(literal + igualIgual + literal)._accion(values => new NodoIgualQue(values[0], values[2]))
+                      | produccion(literal + diferente + literal)._accion(values => new NodoDifernteQue(values[0], values[2]))
                 ;
 
 

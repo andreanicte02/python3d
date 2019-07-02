@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Sec.Interprete3D.Entorno
@@ -9,6 +10,8 @@ namespace Sec.Interprete3D.Entorno
         //ya no se va usar
         public entorno3d anterior;
         public Dictionary<String, Simbolo3d> tablaS;
+        ArrayList stack = new ArrayList();
+        ArrayList heap = new ArrayList();
 
         //array y heap
         
