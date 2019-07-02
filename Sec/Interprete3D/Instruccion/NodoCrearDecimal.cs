@@ -15,7 +15,7 @@ namespace Sec.Interprete3D.Instruccion
         public override object ejecutarSin(entorno3d e)
         {
 
-            return new Decimal(valor);
+            return new Decmal(valor);
         }
     }
 }

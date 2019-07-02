@@ -28,13 +28,14 @@ namespace Sec.Interprete3D.Entorno
                 return tablaS[id];
             }
 
-            return null;
+            throw new SemanticError3d("no existe el id");
         }
 
         public void  setSimbol(String id, Simbolo3d valor)
         {
             if (tablaS.ContainsKey(id))
             {
+                throw new SemanticError3d("ya se registro el id");
                 
             }
             else

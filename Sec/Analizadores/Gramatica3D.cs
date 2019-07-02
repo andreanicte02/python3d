@@ -244,10 +244,10 @@ namespace Sec.Analizadores
                 ;
 
 
-            op.Rule = literal + mas + literal
-                      | literal + menos + literal
-                      | literal + por + literal
-                      | literal + div + literal
+            op.Rule =  produccion(literal + mas + literal)._accion(values=> new NodoSuma(values[0], values[2]))
+                      | produccion(literal + menos + literal)._accion(values=> new NodoResta(values[0], values[2]))
+                      | produccion(literal + por + literal)._accion(values=> new NodoMultiplicacion(values[0], values[2]))
+                      | produccion(literal + div + literal)._accion(values=> new NodoDivision(values[0], values[2]))
                       | produccion(literal)._accion(values => values[0]) //se sube el dato
                 ;
 

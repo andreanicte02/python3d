@@ -1,4 +1,5 @@
 using Sec.Interprete3D.Entorno;
+using Sec.Interprete3D.Primitivos;
 
 namespace Sec.Interprete3D.Instruccion
 {
@@ -15,7 +16,7 @@ namespace Sec.Interprete3D.Instruccion
 
         public  override object ejecutarSin(entorno3d e)
         {
-            return null;
+            return new Numero(valor);
 
         }
         

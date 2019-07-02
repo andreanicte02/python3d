@@ -3,14 +3,13 @@ using Sec.Interprete3D.Entorno;
 
 namespace Sec.Interprete3D.Primitivos
 {
-    public class Decimal:Instancia_3d
+    public class Decmal: Instancia_3d
     {
         private double valor;
-
-        public Decimal(double valor): base("instancia@entero", null, TipoPrimitivo.tipoDecimal)
+        
+        public Decmal(double valor) : base("instancia@decimal", null, TipoPrimitivo.tipoDecimal)
         {
             this.valor = valor;
-
         }
         
         public double obtenerValor()
