@@ -1,7 +1,7 @@
 
 using System;
 using Irony.Parsing;
-
+using Sec.Interprete3D.Instruccion;
 using static Sec.Analizadores.IronyUtils;
 
 namespace Sec.Analizadores
@@ -151,15 +151,18 @@ namespace Sec.Analizadores
                              | methodDeclaration
                              | varDeclaration;
 
+            
 
-
-
-
+            //la accion que se registra solo a no termianles
+            //asignacion debe tener obligatoriamente metodo nodecreathor
             assigment.Rule = produccion(id + igual + op + pcoma)._accion(values =>
                              {
                                  Console.WriteLine("Se encontro una asignacion ");
                                  Console.WriteLine(values[0]);
                                  Console.WriteLine(values[2]);
+                                 
+                                 //---------------------------------------------->
+                                 
                                  return null;
                              })
                              | stack + acor + literal + ccor + igual + literal + pcoma
@@ -245,16 +248,15 @@ namespace Sec.Analizadores
                       | literal + menos + literal
                       | literal + por + literal
                       | literal + div + literal
-                      
-                      | produccion(literal)._accion(values => values[0])
+                      | produccion(literal)._accion(values => values[0]) //se sube el dato
                 ;
 
 
             
 
-            literal.Rule = produccion(numero)._accion(values => values[0])
-                            | produccion(id)._accion(values => values[0])
-                            | produccion(decimall)._accion(values => values[0])
+            literal.Rule = produccion(numero)._accion(values => new NodoCrearNumero(values[0]))
+                            | produccion(id)._accion(values => new NodoBuscarId(values[0]))
+                            | produccion(decimall)._accion(values => new NodoCrearDecimal(values[0]))
                 ;
             
             //----------------------------------------------------------------------------------
