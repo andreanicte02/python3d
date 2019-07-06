@@ -18,8 +18,9 @@ namespace Sec.Interprete3D.Instruccion.Metodos
 
         public override object ejecutarSin(entorno3d e)
         {
-
-            Utilidades.ejecutarInstrucciones(e, instrucciones);
+            
+            //no se si viene un proc de la nada ejecutar o no 
+            //Utilidades.ejecutarInstrucciones(e, instrucciones);
 
 
             return null;
@@ -32,5 +33,11 @@ namespace Sec.Interprete3D.Instruccion.Metodos
 
             return null;
         }
+
+        public List<Instruccion3d> obenterInstruccioes()
+        {
+            return instrucciones;
+        }
+        
     }
 }

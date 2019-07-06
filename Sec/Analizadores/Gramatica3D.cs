@@ -98,7 +98,6 @@ namespace Sec.Analizadores
             var conditionalJumpIfFalse = new AutoNonTerminal("conditionalJumpIfFalse");
             var methodDeclaration = new AutoNonTerminal("methodDeclaration");
             var methodInvocation = new AutoNonTerminal("methodInvocation");
-            var methodBody = new AutoNonTerminal("methodBody");
             var sentenciaMetodo = new AutoNonTerminal("sentenciaMetodo");
             var sentenciasMetodo = new AutoNonTerminal("sentenciasMetodo");
 
@@ -184,7 +183,7 @@ namespace Sec.Analizadores
 
             conditionalJumpIfFalse.Rule = produccion(ifFalse + apar + relationalOperation + cpar + goTo + id + pcoma)._accion(values => new NodoIfFalse(values[2],new NodoJumpLabel(values [5])));
 
-            methodInvocation.Rule = call + id + pcoma;
+            methodInvocation.Rule = produccion(call + id + pcoma)._accion(values=> new NodoCallMetodo(values[1]));
 
             varDeclaration.Rule = produccion(varr + stack + acor + ccor + pcoma)._accion(values=> new NodoDeclararStack())
                                   | produccion(varr + heap + acor + ccor + pcoma)._accion(values => new NodoDeclararHeap())

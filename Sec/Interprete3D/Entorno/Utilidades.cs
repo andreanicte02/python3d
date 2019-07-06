@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.CSharp.RuntimeBinder;
 using Sec.Interprete3D.Instruccion.Label;
+using Sec.Interprete3D.Instruccion.Metodos;
 
 namespace Sec.Interprete3D.Entorno
 {
@@ -32,58 +33,109 @@ namespace Sec.Interprete3D.Entorno
             for (int i =0; i<instrucciones.Count; i++)
             {
 
-                instrucciones[i].recogerEtiquetas(e);
+
+                if (instrucciones[i] is NodoDeclararMetodo)
+                {
+                    instrucciones[i].recogerEtiquetas(e);
+                    recogerEtiquetaMetodo(e, ((NodoDeclararMetodo) instrucciones[i]).obenterInstruccioes());
+                }
+                else
+                {
+                    
+                    instrucciones[i].recogerEtiquetas(e);
+                }
 
             }
 
 
             return null;
         }
+
+        /// <summary>
+        /// recoge los temporales, etiquetas declaradas en en un metodo
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="instrucciones"></param>
+        /// <returns></returns>
+        public static Object recogerEtiquetaMetodo(entorno3d e, List<Instruccion3d> instrucciones)
+        {
+
+            for (int i = 0; i < instrucciones.Count; i++)
+            {
+                instrucciones[i].recogerEtiquetas(e);
+            }
+
+            return null;
+        }
+        
+        /// <summary>
+        /// ejecutar las intrucciones
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="instrucciones"></param>
+        /// <returns></returns>
 
         public static Object ejecutarInstrucciones(entorno3d e, List<Instruccion3d> instrucciones)
         {
 
             for (int i =0; i<instrucciones.Count; i++)
             {
-
+                
                 var result = instrucciones[i].ejecutarSin(e);
-                //si existe un call jump
+
                 if (result is SaltoLabel)
                 {
-                    //se reconfugar la poscion en donde se va estar ejecutando
                     i = ((SaltoLabel) result).obetnerIndex();
-
                 }
-                
+
+
 
             }
 
             return null;
         }
 
- 
+     
 
-        public static int buscarIndiceLabel(entorno3d e, String nombre)
+
+        public static SaltoLabel buscarIndiceLabel(entorno3d e, String nombre, List<Instruccion3d> ins)
         {
 
-            for (int i = 0; i < lInstrucciones.Count; i++)
+            if (ins == null)
             {
-                var result = lInstrucciones[i];
-                if (result is NodoLabel)
-                {
-                    if (nombre.Equals(((NodoLabel) result).obtenerLabel()))
-                    {
-                        Console.WriteLine("match con el label " +nombre);
-                        return i;
-                    }
-
-                }
-
+                ins = lInstrucciones;
             }
 
-            return -1;
-        }
+            for (int x = 0; x < ins.Count; x++)
+            {
+                if (ins[x] is NodoLabel)
+                {
+                    if (nombre.Equals(((NodoLabel) ins[x]).obtenerLabel()))
+                    {
+                        return  new SaltoLabel(x);
+                        
+                    }
+                }else if (ins[x] is NodoCallMetodo)
+                {
+                    //buscar salots de label en los temporales
+                     SaltoLabel result = buscarIndiceLabel(e, nombre, e.funciones[((NodoCallMetodo) ins[x]).obenterNombre()]);
+                     if (result.obetnerIndex() == -1)
+                     {
+                         //no pasa nada
+                     }
+                     else
+                     {
+                         return result;
+                     }
+                }
+            }
 
+
+            return null;
+            // return new SaltoLabel(-1);
+        }
+        
+      
 
 
     }

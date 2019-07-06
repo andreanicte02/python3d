@@ -18,14 +18,12 @@ namespace Sec.Interprete3D.Instruccion.Label
            
             if (!e.tablaS.ContainsKey(nombreLabel))
             {
-                throw new SemanticError3d("no se encuentra registrado el label");
+                throw new SemanticError3d("no se encuentra registrado el label -> " +nombreLabel);
             }
+
+            return Utilidades.buscarIndiceLabel(e,nombreLabel, null);
             
             
-            int x = Utilidades.buscarIndiceLabel(e, nombreLabel);
-
-
-            return new SaltoLabel(x);
 
         }
 
@@ -34,6 +32,11 @@ namespace Sec.Interprete3D.Instruccion.Label
             return null;
         }
 
-        
+        public String obtenerNombre()
+        {
+            return nombreLabel;
+        }
+
+
     }
 }
