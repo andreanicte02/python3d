@@ -1,8 +1,12 @@
 
 using System;
+using System.Collections.Generic;
 using Irony.Parsing;
 using Sec.Interprete3D;
 using Sec.Interprete3D.Instruccion;
+using Sec.Interprete3D.Instruccion.Imprimir;
+using Sec.Interprete3D.Instruccion.Label;
+using Sec.Interprete3D.Instruccion.Metodos;
 using static Sec.Analizadores.IronyUtils;
 
 namespace Sec.Analizadores
@@ -139,103 +143,90 @@ namespace Sec.Analizadores
             
             //----------------------------------------------------------------------------------
 
-            this.Root = INICIO;
+            this.Root = produccion(INICIO)._accion(values => values[0]);
 
-            INICIO.Rule = listaSentencia;
+            INICIO.Rule = produccion(listaSentencia)._accion(values=> values[0]);
 
-            listaSentencia.Rule = sentencias
-                                    |Empty;
+            listaSentencia.Rule = produccion(sentencias)._accion(values => values[0])
+                                    |Empty._accion(values => new List<Instruccion3d>());
+            
+            this.ConfigList<Instruccion3d>(false,sentencias,sentencia,"");
 
-            sentencias.Rule = sentencias + sentencia
-                              | sentencia
-                ;
 
-            sentencia.Rule = sentenciaMetodo
-                             | methodDeclaration
-                             | varDeclaration;
+            sentencia.Rule = produccion(sentenciaMetodo)._accion(values => values[0])
+                             | produccion(methodDeclaration)._accion(values => values[0])
+                             | produccion(varDeclaration)._accion(values => values[0]);
 
             
 
             //la accion que se registra solo a no termianles
             //asignacion debe tener obligatoriamente metodo nodecreathor
-            assigment.Rule = produccion(id + igual + op + pcoma)._accion(values =>
-                             {
-                                 Console.WriteLine("Se encontro una asignacion ");
-                                 Console.WriteLine(values[0]);
-                                 Console.WriteLine(values[2]);
-                                 
-                                 //---------------------------------------------->
-                                 
-                                 return null;
-                             })
-                             | stack + acor + literal + ccor + igual + literal + pcoma
-                             | heap + acor + literal + ccor + igual + literal + pcoma
-                             | id + igual + heap + acor + literal + ccor + pcoma
-                             | id + igual + stack + acor + literal + ccor + pcoma
+            assigment.Rule = produccion(id + igual + op + pcoma)._accion(values => new NodoAsignar(values[0], values[1]))
+                             | produccion(stack + acor + literal + ccor + igual + literal + pcoma)._accion(values=> new NodoStackId(values[2],values[5]))
+                             | produccion(heap + acor + literal + ccor + igual + literal + pcoma)._accion(values => new NodoAsignarHeapId(values[2],values[5]))
+                             | produccion(id + igual + heap + acor + literal + ccor + pcoma)._accion(values=> new NodoAsignarIdHeap(values[0], values[4]))
+                             | produccion(id + igual + stack + acor + literal + ccor + pcoma)._accion(values=> new NodoAsingarIdStack(values[0],values[4]))
                 ;
                 
 
                             
                 
             
-            destiniOfJump.Rule = id + dosp;
+            destiniOfJump.Rule = produccion(id + dosp)._accion(values => new NodoLabel(values[0].ToString()));
             
-            inconditionalJump.Rule = goTo + id + pcoma;
+            inconditionalJump.Rule = produccion(goTo + id + pcoma)._accion(values => new NodoJumpLabel(values[0].ToString()));
 
-            conditionalJump.Rule = iff + apar + relationalOperation + cpar + goTo+id+pcoma;
+            conditionalJump.Rule = produccion(iff + apar + relationalOperation + cpar + goTo+id+pcoma)._accion(values=> new NodoIf(values[2], new NodoJumpLabel(values[5])));
 
-            conditionalJumpIfFalse.Rule = ifFalse + apar + relationalOperation + cpar + goTo + id + pcoma;
+            conditionalJumpIfFalse.Rule = produccion(ifFalse + apar + relationalOperation + cpar + goTo + id + pcoma)._accion(values => new NodoIfFalse(values[2],new NodoJumpLabel(values [5])));
 
             methodInvocation.Rule = call + id + pcoma;
 
-            varDeclaration.Rule = varr + stack + acor + ccor + pcoma
-                                  | varr + heap + acor + ccor + pcoma
-                                  | produccion( varr + idList + pcoma)._accion(values => new NodoDeclararVars(null))
-                                  | varr + id + igual + literal + pcoma;
+            varDeclaration.Rule = produccion(varr + stack + acor + ccor + pcoma)._accion(values=> new NodoDeclararStack())
+                                  | produccion(varr + heap + acor + ccor + pcoma)._accion(values => new NodoDeclararHeap())
+                                  | produccion( varr + idList + pcoma)._accion(values => new NodoDeclararVars(values[1]))
+                                  | produccion(varr + id + igual + literal + pcoma)._accion(values => new NodoSoloDeclarar(values[1],values[3]));
                 
 
             
             
-            printStatement.Rule = print + apar +comilla + pc + comilla + coma +literal+ cpar + pcoma
-                                  |print + apar +comilla + pd + comilla + coma +literal+ cpar + pcoma
-                                  |print + apar +comilla + pi + comilla + coma +literal+ cpar + pcoma
+            printStatement.Rule = produccion(print + apar +comilla + pc + comilla + coma +literal+ cpar + pcoma)._accion(values => new NodoPrintC(values[6]))
+                                  |produccion(print + apar +comilla + pd + comilla + coma +literal+ cpar + pcoma)._accion(values => new NodoPrintF(values[6]))
+                                  |produccion(print + apar +comilla + pi + comilla + coma +literal+ cpar + pcoma)._accion(values => new NodoPrintI(values[6]))
 
                 ;
 
             cleanScope.Rule = clean + apar + literal + coma + literal + cpar + pcoma;
 
 
-            methodDeclaration.Rule = proc + id + begin + methodBody+ end;
+            methodDeclaration.Rule = produccion(proc + id + begin + methodBody+ end)._accion(values => new NodoDeclararMetodo(values[0],values[3]) );
 
-            methodBody.Rule= sentenciasMetodo
-                            | Empty;
 
-            sentenciasMetodo.Rule = sentenciasMetodo + sentenciaMetodo
-                                    | sentenciaMetodo
-                ;
+            methodBody.Rule = produccion(sentenciasMetodo)._accion(values => values[0])
+                              | produccion(Empty)._accion(values => new List<Instruccion3d>());
+            
+            this.ConfigList<Instruccion3d>(false,sentenciasMetodo,sentenciaMetodo,"");
+            
 
             inputStatement.Rule = input + apar + literal +cpar + pcoma;
 
             sentenciaMetodo.Rule = 
-                                    printStatement
-                                   | methodInvocation
-                                   | assigment
-                                   | destiniOfJump
-                                   | inconditionalJump
-                                   | conditionalJump
-                                   | conditionalJumpIfFalse
+                                    produccion(printStatement)._accion(values => values[0])
+                                   | produccion(methodInvocation)._accion(values => values[0])
+                                   | produccion(assigment)._accion(values=> values[0])
+                                   | produccion(destiniOfJump)._accion(values => values [0])
+                                   | produccion(inconditionalJump)._accion(values => values [0])
+                                   | produccion(conditionalJump)._accion(values => values [0])
+                                   | produccion(conditionalJumpIfFalse)._accion(values => values[0])
                                    | cleanScope 
                                    | inputStatement
                                     ;
 
             
 
-            this.ConfigList<Instruccion3d>(false,idList, idStatment,",");
+            this.ConfigList<Instruccion3d>(false,idList,idStatment,",");
+     
             
-            idList.Rule = produccion(idList + coma + idStatment)
-                          | produccion(idStatment)
-                ;
-
             idStatment.Rule = produccion(id)._accion(values=> new NodoDeclararVar(values[0]));
             
 

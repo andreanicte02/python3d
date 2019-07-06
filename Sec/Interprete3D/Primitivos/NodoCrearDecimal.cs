@@ -17,5 +17,11 @@ namespace Sec.Interprete3D.Instruccion
 
             return new Decmal(valor);
         }
+
+        public override object recogerEtiquetas(entorno3d e)
+        {
+            
+            return null;
+        }
     }
 }

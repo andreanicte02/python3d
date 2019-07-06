@@ -14,12 +14,25 @@ namespace Sec.Interprete3D.Instruccion
         }
 
         public override object ejecutarSin(entorno3d e)
+        
         {
+            /*
            Simbolo3d s = new Simbolo3d(TipoPrimitivo.instanciaNulo);
            
            e.setSimbol(this.id,s);
            
+           */
+           
            return null;
+        }
+
+        public override object recogerEtiquetas(entorno3d e)
+        {
+            Simbolo3d s = new Simbolo3d(TipoPrimitivo.instanciaNulo);
+           
+            e.setSimbol(this.id,s);
+
+            return null;
         }
     }
 }

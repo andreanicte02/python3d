@@ -4,13 +4,12 @@ using Sec.Interprete3D.Primitivos;
 
 namespace Sec.Interprete3D.Instruccion
 {
-    public class NodoMenorIgual:Instruccion3d
+    public class NodoDivision: Instruccion3d
     {
-            
         private Instruccion3d l1; //literal 1
         private Instruccion3d l2; //literal 2
 
-        public NodoMenorIgual(Instruccion3d l1, Instruccion3d l2)
+        public NodoDivision(Instruccion3d l1, Instruccion3d l2)
         {
             this.l1 = l1;
             this.l2 = l2;
@@ -30,30 +29,70 @@ namespace Sec.Interprete3D.Instruccion
             {
                 Numero n1 = (Numero) valor1;
                 Numero n2 = (Numero) valor2;
-                return new Bol(n1.obtenerValor() <= n2.obtenerValor());
+
+                if (isZero(n2.obtenerValor()+0.0))
+                {
+                   throw new SemanticError3d("division 0");
+                }
+
+
+                return new Numero(n1.obtenerValor() / n2.obtenerValor());
                 
             }else if (valor1 is Decmal && valor2 is Decmal)
             {
                 Decmal n1 = (Decmal) valor1;
                 Decmal n2 = (Decmal) valor2;
-                return  new Bol(n1.obtenerValor() <= n2.obtenerValor());
+                
+                if (isZero(n2.obtenerValor()+0.0))
+                {
+                    throw new SemanticError3d("division 0");
+                }
+                
+                return  new Decmal(n1.obtenerValor() / n2.obtenerValor());
                
             }else if (valor1 is Decmal && valor2 is Numero)
             {
                 Decmal n1 = (Decmal) valor1;
                 Numero n2 = (Numero) valor2;
-                return  new Bol(n1.obtenerValor() <= n2.obtenerValor());
+                
+                if (isZero(n2.obtenerValor()+0.0))
+                {
+                    throw new SemanticError3d("division 0");
+                }
+
+                
+                return  new Decmal(n1.obtenerValor() / n2.obtenerValor());
                 
             }else if (valor1 is Numero && valor2 is Decmal)
             {
                 
                 Numero n1 = (Numero) valor1;
                 Decmal n2 = (Decmal) valor2;
-                return  new Bol(n1.obtenerValor() <= n2.obtenerValor());
+                
+                if (isZero(n2.obtenerValor()+0.0))
+                {
+                    throw new SemanticError3d("division 0");
+                }
+
+                
+                
+                return  new Decmal(n1.obtenerValor() / n2.obtenerValor());
                 
             }
 
-            throw  new SemanticError3d("Erro al ejecutar <=");
+            return null;
+        }
+
+        public override object recogerEtiquetas(entorno3d e)
+        {
+            
+            return null;
+        }
+
+        public bool isZero(double d)
+        {
+            return d == 0;
+
         }
     }
 }

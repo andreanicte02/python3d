@@ -8,18 +8,23 @@ namespace Sec.Interprete3D.Entorno
     {
 
         //ya no se va usar
+        /****************************/
+        /**/
         public entorno3d anterior;
         public Dictionary<String, Simbolo3d> tablaS;
-        ArrayList stack = new ArrayList();
-        ArrayList heap = new ArrayList();
+        public Dictionary<String, List<Instruccion3d>> funciones;
+        public ArrayList stack = new ArrayList();
+        public ArrayList heap = new ArrayList();
 
         //array y heap
         
         public entorno3d(entorno3d anterior)
         {
 
+            this.heap = new ArrayList();
             this.anterior = anterior;
             this.tablaS = new Dictionary<string, Simbolo3d>();
+            this.funciones = new Dictionary<string, List<Instruccion3d>>();
         }
         
 
@@ -50,6 +55,36 @@ namespace Sec.Interprete3D.Entorno
 
             
         }
+
+        public void setFuncion(String id, List<Instruccion3d> instrucciones)
+        {
+            if (funciones.ContainsKey(id))
+            {
+                throw new SemanticError3d("ya se registro el id de etiqueta");
+            }
+            else
+            {
+               funciones.Add(id,instrucciones); 
+            }
+
+        }
+
+        public List<Instruccion3d>  getFuncion(String id)
+        {
+
+            if (funciones.ContainsKey(id))
+            {
+                return funciones[id];
+
+            }
+            else
+            {
+                throw new SemanticError3d("ya se registro el id de etiqueta");
+            }
+            
+            
+        }
+
 
 
 

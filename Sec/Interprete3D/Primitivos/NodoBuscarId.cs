@@ -18,6 +18,12 @@ namespace Sec.Interprete3D.Instruccion
             return buscarId(e, id);
         }
 
+        public override object recogerEtiquetas(entorno3d e)
+        {
+            
+            return null;
+        }
+
         public static Simbolo3d buscarId(entorno3d e, String id)
         {
 

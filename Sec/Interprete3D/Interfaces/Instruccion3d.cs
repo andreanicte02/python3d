@@ -8,6 +8,8 @@ namespace Sec.Interprete3D
 
         abstract public Object ejecutarSin(entorno3d e);
 
+        abstract public Object recogerEtiquetas(entorno3d e);
+
 
 
     }

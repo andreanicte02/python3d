@@ -81,8 +81,9 @@ namespace Sec
         private void analizar_click(object sender, EventArgs e)
         {
       
-            analizarAltoNivel = new AanalizadorAltoNivel();
-            analizarAltoNivel.probarAnalizadorAltoNivel(leer());
+            analizar3d = new Analizador3D();
+            String entada = leer();
+            analizar3d.ejecutarAnalizador(entada);
             
 
         }
@@ -94,7 +95,7 @@ namespace Sec
         
         static String leer()
         {
-            string text = System.IO.File.ReadAllText(@"/home/nicte/Escritorio/prueba.pyton");
+            string text = System.IO.File.ReadAllText(@"/home/nicte/Escritorio/prueba3d.pyton");
             System.Console.WriteLine("Contenido del archivo = {0}", text);
             return text;
         }

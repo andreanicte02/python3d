@@ -56,6 +56,10 @@ namespace Sec.Interprete3D.Instruccion
             throw  new SemanticError3d("Erro al ejecutar !=");
         }
 
-        
+        public override object recogerEtiquetas(entorno3d e)
+        {
+            
+            return null;
+        }
     }
 }

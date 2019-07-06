@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Microsoft.CSharp.RuntimeBinder;
 
 namespace Sec.Interprete3D.Entorno
 {
@@ -17,12 +19,40 @@ namespace Sec.Interprete3D.Entorno
             }
 
 
-            return null;
-            //throw new RuntimeException("Estas utilizando un valor que no es ni Instancia ni Simbolo");
+            throw new RuntimeBinderException("Estas utilizando un valor que no es ni Instancia ni Simbolo");
 
         }
 
-        
-        
+        public static Object ejecutarInstrucciones(entorno3d e, List<Instruccion3d> instrucciones)
+        {
+
+            for (int i =0; i<instrucciones.Count; i++)
+            {
+
+                instrucciones[i].ejecutarSin(e);
+
+                Console.WriteLine("hola");
+                
+            }
+
+            return null;
+        }
+
+        public static Object recogerEtiquetas(entorno3d e, List<Instruccion3d> instrucciones)
+        {
+            
+            for (int i =0; i<instrucciones.Count; i++)
+            {
+
+                instrucciones[i].ejecutarSin(e);
+
+            }
+
+
+            return null;
+        }
+
+
+
     }
 }

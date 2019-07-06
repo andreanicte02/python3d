@@ -15,7 +15,19 @@ namespace Sec.Interprete3D.Instruccion
 
         public override object ejecutarSin(entorno3d e)
         {
+            /*
 
+            foreach (var ix in listaId)
+            {
+                ix.ejecutarSin(e);
+
+            }*/
+
+            return null;
+        }
+
+        public override object recogerEtiquetas(entorno3d e)
+        {
             foreach (var ix in listaId)
             {
                 ix.ejecutarSin(e);
