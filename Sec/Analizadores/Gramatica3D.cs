@@ -125,17 +125,19 @@ namespace Sec.Analizadores
             
             //---------------------> ER
            
-//            var numero = new RegexBasedTerminal("numero", "[0-9]+");
-//            numero._accion((values, node) => node.Token)
+            RegexBasedTerminal numero = new RegexBasedTerminal("numero", "[0-9]+");
+            numero._accion((values, node) => node.Token.Text);
 
-            var numero = new NumberLiteral("Entero", NumberOptions.IntOnly | NumberOptions.NoDotAfterInt);
+            /*var numero = new NumberLiteral("Entero", NumberOptions.IntOnly | NumberOptions.NoDotAfterInt);
             numero._accion((v, n) => n.Token.Value);
             
             var decimall = new NumberLiteral("Decimal");
-            decimall._accion((v, n) => n.Token.Value);
+            decimall._accion((v, n) => n.Token.Value);*/
 
 
-//            RegexBasedTerminal decimall = new RegexBasedTerminal("decimal", "[0-9]+[.][0-9]+");
+            RegexBasedTerminal decimall = new RegexBasedTerminal("decimal", "[0-9]+[.][0-9]+");
+            decimall._accion((values, node) => node.Token.Text);
+            
             RegexBasedTerminal id = new RegexBasedTerminal("id", "[A-Za-z]([A-Za-z|_|0-9]+)?");
             id._accion((values, node) => node.Token.Text);
 
@@ -174,9 +176,9 @@ namespace Sec.Analizadores
                             
                 
             
-            destiniOfJump.Rule = produccion(id + dosp)._accion(values => new NodoLabel(values[0].ToString()));
+            destiniOfJump.Rule = produccion(id + dosp)._accion(values => new NodoLabel(values[0]));
             
-            inconditionalJump.Rule = produccion(goTo + id + pcoma)._accion(values => new NodoJumpLabel(values[0].ToString()));
+            inconditionalJump.Rule = produccion(goTo + id + pcoma)._accion(values => new NodoJumpLabel(values[1]));
 
             conditionalJump.Rule = produccion(iff + apar + relationalOperation + cpar + goTo+id+pcoma)._accion(values=> new NodoIf(values[2], new NodoJumpLabel(values[5])));
 
@@ -251,9 +253,9 @@ namespace Sec.Analizadores
 
             
 
-            literal.Rule = produccion(numero)._accion(values => new NodoCrearNumero(values[0]))
+            literal.Rule = produccion(numero)._accion(values => new NodoCrearNumero( int.Parse(values[0])))
                             | produccion(id)._accion(values => new NodoBuscarId(values[0]))
-                            | produccion(decimall)._accion(values => new NodoCrearDecimal(values[0]))
+                            | produccion(decimall)._accion(values => new NodoCrearDecimal(double.Parse(values[0])))
                 ;
             
             
@@ -263,9 +265,7 @@ namespace Sec.Analizadores
             //----------------------------------------------------------------------------------
 
 
-            //this.MarkPunctuation("(",")");
-            //this.MarkPunctuation(";");
-          
+      
 
 
         }

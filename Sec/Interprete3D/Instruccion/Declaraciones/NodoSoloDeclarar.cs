@@ -41,6 +41,7 @@ namespace Sec.Interprete3D.Instruccion
         {
             
             e.setSimbol(id,new Simbolo3d(TipoPrimitivo.instanciaNulo));
+            Console.WriteLine("se declaro una algo (var id = exp)-> " +id);
        
             return null;
 

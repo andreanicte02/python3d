@@ -72,6 +72,7 @@
     <Compile Include="Interprete3D\Instruccion\Imprimir\NodoPrintI.cs" />
     <Compile Include="Interprete3D\Instruccion\Label\NodoJumpLabel.cs" />
     <Compile Include="Interprete3D\Instruccion\Label\NodoLabel.cs" />
+    <Compile Include="Interprete3D\Instruccion\Label\SaltoLabel.cs" />
     <Compile Include="Interprete3D\Instruccion\Metodos\NodoDeclararMetodo.cs" />
     <Compile Include="Interprete3D\Instruccion\OperacionesAritmeticas3\NodoDivision.cs" />
     <Compile Include="Interprete3D\Instruccion\OperacionesAritmeticas3\NodoModular.cs" />

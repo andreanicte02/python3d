@@ -15,12 +15,25 @@ namespace Sec.Interprete3D.Instruccion.Label
         public override object ejecutarSin(entorno3d e)
         {
 
-            return this.nombreLabel;
+           
+            if (!e.tablaS.ContainsKey(nombreLabel))
+            {
+                throw new SemanticError3d("no se encuentra registrado el label");
+            }
+            
+            
+            int x = Utilidades.buscarIndiceLabel(e, nombreLabel);
+
+
+            return new SaltoLabel(x);
+
         }
 
         public override object recogerEtiquetas(entorno3d e)
         {
-            throw new NotImplementedException();
+            return null;
         }
+
+        
     }
 }

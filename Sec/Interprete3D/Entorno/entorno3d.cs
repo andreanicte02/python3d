@@ -36,14 +36,14 @@ namespace Sec.Interprete3D.Entorno
                 return tablaS[id];
             }
 
-            throw new SemanticError3d("no existe el id");
+            throw new SemanticError3d("no existe el id -> "+ id);
         }
 
         public void  setSimbol(String id, Simbolo3d valor)
         {
             if (tablaS.ContainsKey(id))
             {
-                throw new SemanticError3d("ya se registro el id");
+                throw new SemanticError3d("ya se registro el id -> " + id);
                 
             }
             else
@@ -62,10 +62,9 @@ namespace Sec.Interprete3D.Entorno
             {
                 throw new SemanticError3d("ya se registro el id de etiqueta");
             }
-            else
-            {
-               funciones.Add(id,instrucciones); 
-            }
+          
+            funciones.Add(id,instrucciones); 
+            
 
         }
 

@@ -32,6 +32,7 @@ namespace Sec.Interprete3D.Instruccion
            
             e.setSimbol(this.id,s);
 
+            Console.WriteLine("se declaro variable -> "+id);
             return null;
         }
     }

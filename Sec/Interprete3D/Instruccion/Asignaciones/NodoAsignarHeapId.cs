@@ -32,7 +32,7 @@ namespace Sec.Interprete3D.Instruccion
             }else if (index is Numero)
             {
                 Numero n = (Numero)index;
-                e.heap[n.obtenerValor()]=valorAsignar;
+                e.heap.Insert(n.obtenerValor(), valorAsignar);
                 
 
             }

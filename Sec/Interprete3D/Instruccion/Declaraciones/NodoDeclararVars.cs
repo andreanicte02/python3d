@@ -15,13 +15,13 @@ namespace Sec.Interprete3D.Instruccion
 
         public override object ejecutarSin(entorno3d e)
         {
-            /*
+            
 
             foreach (var ix in listaId)
             {
                 ix.ejecutarSin(e);
 
-            }*/
+            }
 
             return null;
         }
@@ -30,7 +30,8 @@ namespace Sec.Interprete3D.Instruccion
         {
             foreach (var ix in listaId)
             {
-                ix.ejecutarSin(e);
+                ix.recogerEtiquetas(e);
+                
 
             }
 

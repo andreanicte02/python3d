@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sec.Interprete3D.Entorno;
 
 namespace Sec.Interprete3D

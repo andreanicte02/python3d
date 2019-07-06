@@ -31,7 +31,8 @@ namespace Sec.Interprete3D.Instruccion
             }else if (index is Numero)
             {
                 Numero n = (Numero)index;
-                e.stack[n.obtenerValor()]=valorAsignar;
+                
+                e.stack.Insert(n.obtenerValor(),valorAsignar);
                 
 
             }

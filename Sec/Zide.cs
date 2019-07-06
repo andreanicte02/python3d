@@ -95,13 +95,12 @@ namespace Sec
         
         static String leer()
         {
-//            string text = System.IO.File.ReadAllText(@"/home/nicte/Escritorio/prueba3d.pyton");
+       string text = System.IO.File.ReadAllText(@"/home/nicte/Escritorio/prueba3d.pyton");
 
-            var text = @"
+/*            var text = @"
 t1 = 3;
-";
+";*/
             
-            System.Console.WriteLine("Contenido del archivo = {0}", text);
             return text;
         }
         

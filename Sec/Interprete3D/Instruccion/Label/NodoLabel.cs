@@ -16,13 +16,8 @@ namespace Sec.Interprete3D.Instruccion.Label
         public override object ejecutarSin(entorno3d e)
         {
 
-            /*
-            Simbolo3d s = new Simbolo3d(TipoPrimitivo.instanciaNulo);
             
-            e.setSimbol(label, s);*/
-            
-            
-            return null;
+            return label;
         }
 
         public override object recogerEtiquetas(entorno3d e)
@@ -30,6 +25,7 @@ namespace Sec.Interprete3D.Instruccion.Label
             Simbolo3d s = new Simbolo3d(TipoPrimitivo.instanciaNulo);
             
             e.setSimbol(label, s);
+            
             return null;
         }
 

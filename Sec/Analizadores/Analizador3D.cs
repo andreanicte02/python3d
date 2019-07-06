@@ -40,10 +40,13 @@ namespace Sec.Analizadores
                 }
             }
 
+            Utilidades.lInstrucciones = new List<Instruccion3d>();
             var instrucciones = (List<Instruccion3d>) arbol.Root.AstNode;
+            Utilidades.lInstrucciones = instrucciones;
             
             entorno3d entornoGlobal = new entorno3d(null);
             Utilidades.recogerEtiquetas(entornoGlobal,instrucciones);
+            Utilidades.ejecutarInstrucciones(entornoGlobal, instrucciones);
 
         }
 

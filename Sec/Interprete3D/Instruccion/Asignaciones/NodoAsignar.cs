@@ -20,7 +20,8 @@ namespace Sec.Interprete3D.Instruccion
         public override object ejecutarSin(entorno3d e)
         {
 
-            var simb = NodoBuscarId.buscarId(e,id);
+            Simbolo3d simb = NodoBuscarId.buscarId(e,id);
+            
             var algo1 = valor.ejecutarSin(e);
             var valor1 = Utilidades.desenvolver(algo1);
             
