@@ -50,7 +50,6 @@ namespace Sec.Analizadores
             
             
             // Reglas
-
             inicio.Rule = produccion(sentencias)._accion(v => v[0]);
                 ;
 
@@ -76,6 +75,7 @@ namespace Sec.Analizadores
                     ._accion(v => new TNodoDeclaracionFuncion(v[0], v[1], v[3], v[6]))
                 ;
 
+            //configuracion de listas
             this.ConfigList<NodoAst>(false, declaracionesParametro, declaracionParametro, ",");
             
             declaracionParametro.Rule = produccion(tipo + id)._accion(v => new TNodoDeclaracionVar(v[0], v[1]));

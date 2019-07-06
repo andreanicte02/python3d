@@ -15,6 +15,8 @@ namespace Sec.Analizadores
         {
             return IntentarGenerarCodigo(entorno);
         }
+        
+        //
 
         public abstract Codigo IntentarGenerarCodigo(ZEntorno entorno);
     }

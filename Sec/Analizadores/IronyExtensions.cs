@@ -11,6 +11,7 @@ namespace Sec.Analizadores
     {
         public AutoNonTerminal(string name = "") : base(name)
         {
+            //sintentizar el primer valor ast
             AstConfig.NodeCreator = (context, node) =>
             {
                 if (node.ChildNodes.Count > 0)
@@ -22,7 +23,10 @@ namespace Sec.Analizadores
     }
 
     public static class IronyUtils
+    
     {
+        
+        //equivalente a crear un no terminal y definir reglas.....
         public static NonTerminal produccion(BnfExpression _)
         {
 //            var nonTerminal = new NonTerminal("") {Rule = expression};

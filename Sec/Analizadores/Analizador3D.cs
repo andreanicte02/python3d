@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using Irony.Parsing;
+using Sec.Interprete3D;
+using Sec.Interprete3D.Entorno;
 
 namespace Sec.Analizadores
 {
@@ -17,8 +20,10 @@ namespace Sec.Analizadores
             Parser parser = new Parser(ga);
 
             ParseTree arbol = parser.Parse(entrada);
+
             ParseTreeNode raiz = arbol.Root;
 
+            
             if (raiz == null || arbol.ParserMessages.Count > 0 || arbol.HasErrors())
             {
 
@@ -34,6 +39,12 @@ namespace Sec.Analizadores
                     return;
                 }
             }
+
+            var instrucciones = (List<Instruccion3d>) arbol.Root.AstNode;
+            
+            entorno3d entornoGlobal = new entorno3d(null);
+            Utilidades.recogerEtiquetas(entornoGlobal,instrucciones);
+
         }
 
     }
