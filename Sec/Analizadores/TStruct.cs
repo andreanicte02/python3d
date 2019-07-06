@@ -16,14 +16,16 @@ namespace Sec.Analizadores
 
     public class ZTipos
     {
-        public static readonly ZEntorno tipoInt = new ZEntorno();
-        public static readonly ZEntorno tipoDouble = new ZEntorno();
-        public static readonly ZEntorno tipoVoid = new ZEntorno();
+        public static readonly ZEntorno tipoInt = new ZEntorno(null, "int");
+        public static readonly ZEntorno tipoDouble = new ZEntorno(null, "double");
+        public static readonly ZEntorno tipoVoid = new ZEntorno(null, "void");
     }
     
     
     public class Codigo
     {
+        
+        
         
         public static Codigo vacio = new Codigo();
 
@@ -39,17 +41,45 @@ namespace Sec.Analizadores
         }
 
         public ZEntorno tipo { get; set; }
+
         public string apuntador { get; set; }
+        public string textoValor { get; set; }
+       
         public string extra { get; set; }
+
+        public void append(Codigo codigoSentencia)
+        {
+            append(codigoSentencia.texto);
+        }
+
+        public string texto => string.Join("\n", _lineas);
+
+        public void comentar(string comentario)
+        {
+            if (_lineas.Count == 0)
+                return;
+
+            var ultimaLinea = _lineas[_lineas.Count - 1];
+            _lineas.RemoveAt(_lineas.Count - 1);
+
+            if (ultimaLinea.Length < 25)
+            {
+                ultimaLinea = ultimaLinea.PadRight(25);
+            }
+
+            ultimaLinea += "// " + comentario;
+            _lineas.Add(ultimaLinea);
+            
+        }
     }
     
     public class ZReferencia: ZEntorno
     {
-        private readonly ZEntorno _tipo;
+        public ZEntorno tipo { get; }
 
         public ZReferencia(ZEntorno tipo)
         {
-            _tipo = tipo;
+            this.tipo = tipo;
         }
     }
 
@@ -57,7 +87,7 @@ namespace Sec.Analizadores
     {
         private readonly List<NodoAst> _declaraciones;
         
-        public ZStruct(ZEntorno entornoPadre, List<NodoAst> declaraciones): base(entornoPadre)
+        public ZStruct(ZEntorno entornoPadre, string nombre, List<NodoAst> declaraciones): base(entornoPadre, nombre)
         {
             _declaraciones = declaraciones;
         }
@@ -73,16 +103,34 @@ namespace Sec.Analizadores
     
     public class ZEntorno
     {
+        
+        public string labelFin { get; set; }
 
-        private readonly ZEntorno entornoPadre;
+        public ZEntorno entornoPadre { get;  }
+        public string Nombre { get; }
+
         private readonly Dictionary<string, ZEntorno> _tipos = new Dictionary<string, ZEntorno>();
 //        private readonly OrderedDictionary _propiedades = new OrderedDictionary();
+        
         private readonly Dictionary<string, ZEntorno> _propiedades = new Dictionary<string, ZEntorno>();
+        private readonly List<string> _indices = new List<string>();
+        
         private readonly Dictionary<string, ZFuncion> _zFunciones = new Dictionary<string, ZFuncion>();
 
-        public ZEntorno(ZEntorno entornoPadre = null)
+        public ZEntorno(ZEntorno entornoPadre = null, string nombre = "")
         {
             this.entornoPadre = entornoPadre;
+            Nombre = nombre;
+
+            if (entornoPadre != null)
+            {
+                labelFin = entornoPadre.labelFin;
+            }
+        }
+
+        public List<ZFuncion> obtenerFunciones()
+        {
+            return _zFunciones.Values.ToList();
         }
 
         public List<ZEntorno> obtenerTipos()
@@ -120,23 +168,36 @@ namespace Sec.Analizadores
             }
             _tipos[id] = tipo;
         }
-
-//        public void contienePropiedad(string id)
-//        {
-//            foreach (var entrada in _propiedades.Keys) {
-//            }
-//
-//        }
+        
 
         public void declararPropiedad(string id, ZEntorno zEntorno)
         {
-
             if (_propiedades.ContainsKey(id))
             {
                 throw new SemanticException($"var {id} ya declarado");
             }
+
+            _indices.Add(id);
             _propiedades[id] = zEntorno;
         }
+
+        public bool tienePropiedad(string id)
+        {
+            return _propiedades.ContainsKey(id);
+        }
+
+        public (ZEntorno, int) obtenerPropiedadConDireccionRelativa(string id)
+        {
+            if (!_propiedades.ContainsKey(id))
+            {
+                throw new SemanticException($"var {id} no declarado");
+            }
+
+            return ( _propiedades[id], _indices.IndexOf(id));
+        }
+
+        public int espacioEnMemoria => _indices.Count;
+        
 
         public void imprimirTipos()
         {

@@ -27,16 +27,18 @@ namespace Sec.Analizadores
 
             var declaracionesParametro = new AutoNonTerminal();
             var declaracionParametro = new AutoNonTerminal();
-            
+
+            var argumentos = new AutoNonTerminal();
 
             var tipo = new AutoNonTerminal();
 
             var declaracion = new AutoNonTerminal();
             var asignacion = new AutoNonTerminal();
+            var retorno = new AutoNonTerminal();
             
             var expr = new AutoNonTerminal();
+            var invocacion = new AutoNonTerminal();
 
-            
             var @int = new NumberLiteral("Entero", NumberOptions.IntOnly | NumberOptions.NoDotAfterInt);
             @int._accion((v, n) => n.Token.Value);
             var @double = new NumberLiteral("Decimal");
@@ -81,8 +83,9 @@ namespace Sec.Analizadores
 
             this.ConfigList<NodoAst>(false, sentenciasFuncion, sentenciaFuncion);
             
-            sentenciaFuncion.Rule = produccion(asignacion)._accion(v => v[0])
+            sentenciaFuncion.Rule = produccion(asignacion + ";")._accion(v => v[0])
                                     | produccion(declaracion + ";")._accion(v => v[0])
+                                    | produccion(retorno + ";")._accion(v => v[0])
                 ;
 
             declaracion.Rule = produccion(tipo + id + "=" + expr)
@@ -91,16 +94,32 @@ namespace Sec.Analizadores
                 ;
 
             asignacion.Rule = produccion(expr + "=" + expr)
+                    ._accion(v => new TNodoAsignacion(v[0], v[2]))
                 ;
-
-            expr.Rule = produccion(expr + "+" + expr)
-                        | produccion(@double)._accion(v => new TNodoCrearDouble(v[0]))
-                        | produccion(@int)._accion(v => new TNodoCrearInt(v[0]))
-                        | produccion(id)
+            retorno.Rule = produccion("return" + expr)._accion(v => new TNodoReturn(v[1]))
+                | produccion("return")._accion(v => new TNodoReturn() )
                 ;
             
 
+            expr.Rule = produccion(expr + "+" + expr)._accion(v => new TNodoSuma(v[0], v[2]))
+                        | produccion("#" + expr + "#")._accion(v => new TNodoReservarMemoria(v[1]))
+                        | produccion("(" + id + ")" + expr)._accion(v => new TNodoCasteo(v[1], v[3]))
+                        | produccion("(" + expr + ")")._accion(v => v[1])
+                        | produccion(@double)._accion(v => new TNodoCrearDouble(v[0]))
+                        | produccion(@int)._accion(v => new TNodoCrearInt(v[0]))
+                        | produccion(id)._accion(v => new TNodoBuscarPropiedad(v[0]))
+                        | invocacion
+                ;
+            
+            invocacion.Rule = produccion(id + "(" + argumentos  + ")")
+            ;
 
+            this.ConfigList<NodoAst>(false, argumentos, expr, ",");
+
+            
+            RegisterOperators(1, "+", "-");
+//            RegisterOperators(2,  "(");
+            RegisterOperators(3, ".");
 
             LanguageFlags |= LanguageFlags.CreateAst;
             Root = inicio;
