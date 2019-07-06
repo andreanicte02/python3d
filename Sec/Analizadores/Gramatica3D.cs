@@ -142,13 +142,11 @@ namespace Sec.Analizadores
 
             
             //----------------------------------------------------------------------------------
+            
 
-            this.Root = produccion(INICIO)._accion(values => values[0]);
+            INICIO.Rule = produccion(sentencias)._accion(values=> values[0]);
 
-            INICIO.Rule = produccion(listaSentencia)._accion(values=> values[0]);
-
-            listaSentencia.Rule = produccion(sentencias)._accion(values => values[0])
-                                    |Empty._accion(values => new List<Instruccion3d>());
+     
             
             this.ConfigList<Instruccion3d>(false,sentencias,sentencia,"");
 
@@ -199,11 +197,9 @@ namespace Sec.Analizadores
             cleanScope.Rule = clean + apar + literal + coma + literal + cpar + pcoma;
 
 
-            methodDeclaration.Rule = produccion(proc + id + begin + methodBody+ end)._accion(values => new NodoDeclararMetodo(values[0],values[3]) );
+            methodDeclaration.Rule = produccion(proc + id + begin + sentenciasMetodo+ end)._accion(values => new NodoDeclararMetodo(values[0],values[3]) );
 
 
-            methodBody.Rule = produccion(sentenciasMetodo)._accion(values => values[0])
-                              | produccion(Empty)._accion(values => new List<Instruccion3d>());
             
             this.ConfigList<Instruccion3d>(false,sentenciasMetodo,sentenciaMetodo,"");
             
@@ -224,7 +220,7 @@ namespace Sec.Analizadores
 
             
 
-            this.ConfigList<Instruccion3d>(false,idList,idStatment,",");
+            this.ConfigList<Instruccion3d>(true,idList,idStatment,",");
      
             
             idStatment.Rule = produccion(id)._accion(values=> new NodoDeclararVar(values[0]));
@@ -256,11 +252,15 @@ namespace Sec.Analizadores
                             | produccion(decimall)._accion(values => new NodoCrearDecimal(values[0]))
                 ;
             
+            
+            LanguageFlags |= LanguageFlags.CreateAst;
+            Root = INICIO;
+            
             //----------------------------------------------------------------------------------
 
 
-            this.MarkPunctuation("(",")");
-            this.MarkPunctuation(";");
+            //this.MarkPunctuation("(",")");
+            //this.MarkPunctuation(";");
           
 
 

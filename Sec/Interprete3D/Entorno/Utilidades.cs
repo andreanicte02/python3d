@@ -44,7 +44,7 @@ namespace Sec.Interprete3D.Entorno
             for (int i =0; i<instrucciones.Count; i++)
             {
 
-                instrucciones[i].ejecutarSin(e);
+                instrucciones[i].recogerEtiquetas(e);
 
             }
 

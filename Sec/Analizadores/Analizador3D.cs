@@ -43,7 +43,7 @@ namespace Sec.Analizadores
             var instrucciones = (List<Instruccion3d>) arbol.Root.AstNode;
             
             entorno3d entornoGlobal = new entorno3d(null);
-            Utilidades.ejecutarInstrucciones(entornoGlobal,instrucciones);
+            Utilidades.recogerEtiquetas(entornoGlobal,instrucciones);
 
         }
 
