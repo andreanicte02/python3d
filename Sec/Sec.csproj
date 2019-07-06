@@ -86,6 +86,7 @@
     <Compile Include="Interprete3D\Instruccion\OperacionesRelacionales3\NodoMayorIgual.cs" />
     <Compile Include="Interprete3D\Instruccion\OperacionesRelacionales3\NodoMenor.cs" />
     <Compile Include="Interprete3D\Instruccion\OperacionesRelacionales3\NodoMenorIgual.cs" />
+    <Compile Include="Interprete3D\Instruccion\Sentecnias\NodoCleanScope.cs" />
     <Compile Include="Interprete3D\Instruccion\Sentecnias\NodoIf.cs" />
     <Compile Include="Interprete3D\Instruccion\Sentecnias\NodoIfFalse.cs" />
     <Compile Include="Interprete3D\Interfaces\Instruccion3d.cs" />
