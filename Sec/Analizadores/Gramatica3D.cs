@@ -148,7 +148,7 @@ namespace Sec.Analizadores
 
      
             
-            this.ConfigList<Instruccion3d>(false,sentencias,sentencia,"");
+            this.ConfigList<Instruccion3d>(false,sentencias,sentencia);
 
 
             sentencia.Rule = produccion(sentenciaMetodo)._accion(values => values[0])
@@ -159,7 +159,11 @@ namespace Sec.Analizadores
 
             //la accion que se registra solo a no termianles
             //asignacion debe tener obligatoriamente metodo nodecreathor
-            assigment.Rule = produccion(id + igual + op + pcoma)._accion(values => new NodoAsignar(values[0], values[1]))
+            assigment.Rule = produccion(id + igual + op + pcoma)._accion(values =>
+                             {
+                                 Console.WriteLine($"Reconoci una asignacion para {values[0]} ");
+                                 return new NodoAsignar(values[0], values[2]);
+                             })
                              | produccion(stack + acor + literal + ccor + igual + literal + pcoma)._accion(values=> new NodoStackId(values[2],values[5]))
                              | produccion(heap + acor + literal + ccor + igual + literal + pcoma)._accion(values => new NodoAsignarHeapId(values[2],values[5]))
                              | produccion(id + igual + heap + acor + literal + ccor + pcoma)._accion(values=> new NodoAsignarIdHeap(values[0], values[4]))
@@ -197,11 +201,11 @@ namespace Sec.Analizadores
             cleanScope.Rule = clean + apar + literal + coma + literal + cpar + pcoma;
 
 
-            methodDeclaration.Rule = produccion(proc + id + begin + sentenciasMetodo+ end)._accion(values => new NodoDeclararMetodo(values[0],values[3]) );
+            methodDeclaration.Rule = produccion(proc + id + begin + sentenciasMetodo+ end)._accion(values => new NodoDeclararMetodo(values[1],values[3]) );
 
 
             
-            this.ConfigList<Instruccion3d>(false,sentenciasMetodo,sentenciaMetodo,"");
+            this.ConfigList<Instruccion3d>(false,sentenciasMetodo,sentenciaMetodo);
             
 
             inputStatement.Rule = input + apar + literal +cpar + pcoma;
