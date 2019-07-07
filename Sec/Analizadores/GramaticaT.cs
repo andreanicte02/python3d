@@ -56,9 +56,11 @@ namespace Sec.Analizadores
             sentencia.Rule = produccion(declaracionStruct)._accion(values => values[0])
                              | produccion(declaracionFuncion)._accion(values => values[0])
                 ;
-            
+
             declaracionStruct.Rule = produccion("struct" + id + "{" + declaracionesPropiedad + "}")
-                    ._accion(v => new TNodoDeclaracionStruct(v[1], v[3]))
+                                         ._accion(v => new TNodoDeclaracionStruct(v[1], v[3]))
+//                                     | produccion(ToTerm("struct") + "$" + "{" + declaracionesPropiedad + "}")
+//                                         ._accion(v => new TNodoDeclaracionStruct(v[1], v[3]))
                 ;
             declaracionPropiedad.Rule = produccion(tipo + id + ";")
                     ._accion(v => new TNodoDeclaracionVar(v[0], v[1]))
@@ -86,6 +88,9 @@ namespace Sec.Analizadores
             sentenciaFuncion.Rule = produccion(asignacion + ";")._accion(v => v[0])
                                     | produccion(declaracion + ";")._accion(v => v[0])
                                     | produccion(retorno + ";")._accion(v => v[0])
+                                    | invocacion + ";"
+                                    | produccion(ToTerm("!") + "print" + "(" + id + "," + expr + ")" + ";")._accion(v => new TNodoPrintSimple(v[3], v[5]))
+                                    | produccion("throw" + expr + ";" )._accion(v => new TNodoThrow(v[1]))
                 ;
 
             declaracion.Rule = produccion(tipo + id + "=" + expr)
@@ -99,19 +104,21 @@ namespace Sec.Analizadores
             retorno.Rule = produccion("return" + expr)._accion(v => new TNodoReturn(v[1]))
                 | produccion("return")._accion(v => new TNodoReturn() )
                 ;
-            
+
 
             expr.Rule = produccion(expr + "+" + expr)._accion(v => new TNodoSuma(v[0], v[2]))
+                        | produccion(expr + "." + id)._accion(v => new TNodoAccessoPunto(v[0], v[2]))
                         | produccion("#" + expr + "#")._accion(v => new TNodoReservarMemoria(v[1]))
                         | produccion("(" + id + ")" + expr)._accion(v => new TNodoCasteo(v[1], v[3]))
                         | produccion("(" + expr + ")")._accion(v => v[1])
+                        | produccion("@" + tipo)._accion(v => new TNodoObtenerEspacio(v[1]))
                         | produccion(@double)._accion(v => new TNodoCrearDouble(v[0]))
                         | produccion(@int)._accion(v => new TNodoCrearInt(v[0]))
                         | produccion(id)._accion(v => new TNodoBuscarPropiedad(v[0]))
                         | invocacion
                 ;
             
-            invocacion.Rule = produccion(id + "(" + argumentos  + ")")
+            invocacion.Rule = produccion(id + "(" + argumentos  + ")")._accion( v => new TNodoInvocar(v[0], v[2]))
             ;
 
             this.ConfigList<NodoAst>(false, argumentos, expr, ",");

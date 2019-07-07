@@ -14,11 +14,37 @@ namespace Sec.Analizadores
         }
     }
 
+
+    public class PropiedadDollar
+    {
+        public const string hayError = "$hayError";
+        public const string linea = "$linea";
+        public const string columna = "$columna";
+        public const string valor = "$valor";
+    }
+
     public class ZTipos
     {
         public static readonly ZEntorno tipoInt = new ZEntorno(null, "int");
         public static readonly ZEntorno tipoDouble = new ZEntorno(null, "double");
         public static readonly ZEntorno tipoVoid = new ZEntorno(null, "void");
+        
+        public static readonly ZEntorno tipoDollar = new ZEntorno(null, "$");
+        public static readonly Codigo codigoDollar = new Codigo();
+
+        static ZTipos()
+        {
+
+            tipoDollar.declararPropiedad(PropiedadDollar.hayError, new ZReferencia(tipoInt));
+            tipoDollar.declararPropiedad(PropiedadDollar.linea, new ZReferencia(tipoInt));
+            tipoDollar.declararPropiedad(PropiedadDollar.columna, new ZReferencia(tipoInt));
+            tipoDollar.declararPropiedad(PropiedadDollar.valor, new ZReferencia(tipoInt));
+
+            codigoDollar.apuntador = "0";
+            codigoDollar.extra = "$";
+            codigoDollar.tipo = tipoDollar;
+        }
+
     }
     
     
@@ -31,7 +57,7 @@ namespace Sec.Analizadores
 
         private readonly List<string> _lineas = new List<string>();
 
-        public void append(string texto)
+        public void agregar(string texto)
         {
             if (texto.Trim().Length == 0)
             {
@@ -47,9 +73,9 @@ namespace Sec.Analizadores
        
         public string extra { get; set; }
 
-        public void append(Codigo codigoSentencia)
+        public void agregar(Codigo codigoSentencia)
         {
-            append(codigoSentencia.texto);
+            agregar(codigoSentencia.texto);
         }
 
         public string texto => string.Join("\n", _lineas);
@@ -70,6 +96,16 @@ namespace Sec.Analizadores
             ultimaLinea += "// " + comentario;
             _lineas.Add(ultimaLinea);
             
+        }
+
+        public Codigo copiaApuntador()
+        {
+            var codigo = new Codigo();
+            codigo.apuntador = this.apuntador;
+            codigo.extra = this.extra;
+            codigo.tipo = this.tipo;
+            codigo.textoValor = this.textoValor;
+            return codigo;
         }
     }
     
@@ -117,6 +153,8 @@ namespace Sec.Analizadores
         
         private readonly Dictionary<string, ZFuncion> _zFunciones = new Dictionary<string, ZFuncion>();
 
+        public List<string> NombresPropiedad => _indices;
+
         public ZEntorno(ZEntorno entornoPadre = null, string nombre = "")
         {
             this.entornoPadre = entornoPadre;
@@ -151,6 +189,18 @@ namespace Sec.Analizadores
             throw new SemanticException($"tipo {id} no declarado");
         }
 
+        public ZFuncion obtenerZFuncionDeclarado(string id)
+        {
+            for (ZEntorno temporal = this; temporal != null; temporal = temporal.entornoPadre )
+            {
+                if (temporal._zFunciones.ContainsKey(id))
+                {
+                    return temporal._zFunciones[id];
+                }
+            }
+            
+            throw new SemanticException($"funcion {id} no declarado");
+        }
         public void declararZFuncion(string id, ZFuncion zFuncion)
         {
             if (_zFunciones.ContainsKey(id))
@@ -180,6 +230,11 @@ namespace Sec.Analizadores
             _indices.Add(id);
             _propiedades[id] = zEntorno;
         }
+
+//        public bool tieneZFuncion(string id)
+//        {
+//            return _zFunciones.ContainsKey(id);
+//        }
 
         public bool tienePropiedad(string id)
         {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sec.Analizadores
 {
@@ -41,6 +42,42 @@ namespace Sec.Analizadores
             var tipo = new ZStruct(entorno, _id, _declaraciones);
             entorno.declararTipo(_id, tipo);
 
+            return codigo;
+        }
+    }
+
+    public class TNodoThrow : TNodo
+    {
+        private readonly NodoAst _nodoExpr;
+
+        public TNodoThrow(NodoAst nodoExpr)
+        {
+            _nodoExpr = nodoExpr;
+        }
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+
+            var codigoExpr = TUtils.desenvolver(_nodoExpr.GenerarCodigo(entorno));
+            
+            var codigo = new Codigo();
+
+            var codigoHayError = TUtils.accesoPunto(ZTipos.codigoDollar, PropiedadDollar.hayError);
+            var codigoAsignacionHayError = TUtils.asignar(codigoHayError, TNodoCrearInt.crearCodigoInt(1));
+            
+            // TODO: captura de linea
+//            var codigoLinea = TUtils.accesoPunto(ZTipos.codigoDollar, PropiedadDollar.hayError);
+//            var codigoAsignacionHayError = TUtils.asignar(codigoHayError, TNodoCrearInt.crearCodigoInt(1));
+//            
+            // TODO: Captura de columna
+//            var codigoHayError = TUtils.accesoPunto(ZTipos.codigoDollar, PropiedadDollar.hayError);
+//            var codigoAsignacionHayError = TUtils.asignar(codigoHayError, TNodoCrearInt.crearCodigoInt(1));
+
+            var codigoValor = TUtils.accesoPunto(ZTipos.codigoDollar, PropiedadDollar.valor);
+            var codigoAsignacionValor = TUtils.asignar(codigoValor, codigoExpr);
+            
+            codigo.agregar(codigoAsignacionHayError);
+            codigo.agregar(codigoAsignacionValor);
+            codigo.agregar($"goto {entorno.labelFin};");
             return codigo;
         }
     }
@@ -96,48 +133,55 @@ namespace Sec.Analizadores
             return Codigo.vacio;
         }
     }
+    
+
 
     public class ZFuncion
     {
+        public ZEntorno TipoRetorno { get; }
         public const string RETURN = "return";
         
-        private readonly ZEntorno _tipoRetorno;
-        private readonly string _id;
+//        private readonly ZEntorno _tipoRetorno;
+//        private readonly string _id;
+        public string Id { get; }
         private readonly List<NodoAst> _sentencias;
-        private readonly ZEntorno _entorno;
+        public ZEntorno Entorno { get; }
+
+        public List<string> NombresParametro => Entorno.NombresPropiedad.Where(s => s != RETURN).ToList();
 
         public ZFuncion(ZEntorno entornoPadre, ZEntorno tipoRetorno, string id, List<NodoAst> nodosParametro, List<NodoAst> sentencias)
         {
-            _entorno = new ZEntorno(entornoPadre);
+            TipoRetorno = tipoRetorno;
+            Entorno = new ZEntorno(entornoPadre);
             
-            _entorno.declararPropiedad(RETURN, new ZReferencia(tipoRetorno));
+            Entorno.declararPropiedad(RETURN, new ZReferencia(tipoRetorno));
                 
             // se registran los parametros en el entorno de la funcion
             foreach (var nodoParametro in nodosParametro)
             {
-                nodoParametro.GenerarCodigo(_entorno);
+                nodoParametro.GenerarCodigo(Entorno);
             }
-
-            _tipoRetorno = tipoRetorno;
-            _id = id;
+            
+            Id = id;
             _sentencias = sentencias;
         }
 
         public Codigo generarCodigoZFuncion()
         {
-            _entorno.labelFin = TUtils.generarLabel();
+            Entorno.labelFin = TUtils.generarLabel();
 
             var codigo = new Codigo();
-            codigo.append($"proc {_id} begin");
+            codigo.agregar($"proc {Id} begin");
 
             foreach (var sentencia in _sentencias)
             {
-                var codigoSentencia = sentencia.GenerarCodigo(_entorno);
-                codigo.append(codigoSentencia);
+                GestorTemp.limpiar();
+                var codigoSentencia = sentencia.GenerarCodigo(Entorno);
+                codigo.agregar(codigoSentencia);
             }
             
-            codigo.append($"{_entorno.labelFin}:");
-            codigo.append($"end");
+            codigo.agregar($"{Entorno.labelFin}:");
+            codigo.agregar($"end");
             return codigo;
         }
     }
@@ -178,7 +222,7 @@ namespace Sec.Analizadores
             {
                 var c1 = _e1.GenerarCodigo(entorno);
                 var codigoAsignar = TUtils.asignar(TUtils.obtenerPropiedad(entorno, ZFuncion.RETURN), c1);
-                codigo.append(codigoAsignar);
+                codigo.agregar(codigoAsignar);
             }
             else
             {
@@ -187,10 +231,10 @@ namespace Sec.Analizadores
                 c.apuntador = "0";
                 c.extra = "void";
                 var codigoAsignar = TUtils.asignar(TUtils.obtenerPropiedad(entorno, ZFuncion.RETURN), c);
-                codigo.append(codigoAsignar);
+                codigo.agregar(codigoAsignar);
             }
             
-            codigo.append($"goto {entorno.labelFin};");
+            codigo.agregar($"goto {entorno.labelFin};");
             codigo.comentar($"return;");
 
             return codigo;
@@ -224,7 +268,7 @@ namespace Sec.Analizadores
 
             if (_nodoExpr != null)
             {
-                Console.WriteLine($"hay una asignacion a {_id}");
+//                Console.WriteLine($"hay una asignacion a {_id}");
                 
                 return TUtils.asignar(
                     TUtils.obtenerPropiedad(entorno, _id),
@@ -236,6 +280,45 @@ namespace Sec.Analizadores
         }
     }
 
+    public class TNodoInvocar : TNodo
+    {
+        private readonly string _id;
+        private readonly List<NodoAst> _nodosArgumento;
+
+        public TNodoInvocar(string id, List<NodoAst> nodosArgumento)
+        {
+            _id = id;
+            _nodosArgumento = nodosArgumento;
+        }
+        
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+
+            var codigosArgumento = _nodosArgumento.Select(n => TUtils.desenvolver(n.GenerarCodigo(entorno))).ToList();
+            return TUtils.invocar(entorno, _id, codigosArgumento);
+
+        }
+    }
+
+    public class TNodoAccessoPunto : TNodo
+    {
+        private readonly NodoAst _nodoValor;
+        private readonly string _id;
+
+        public TNodoAccessoPunto(NodoAst nodoValor, string id)
+        {
+            _nodoValor = nodoValor;
+            _id = id;
+        }
+        
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            var codigoValor = TUtils.desenvolver(_nodoValor.GenerarCodigo(entorno));
+            
+            return TUtils.accesoPunto(codigoValor, _id);
+        }
+    }
+    
     public class TNodoBuscarPropiedad: TNodo
     {
         private readonly string _id;
@@ -254,6 +337,26 @@ namespace Sec.Analizadores
 
 
 
+    public class TNodoObtenerEspacio : TNodo
+    {
+        private readonly NodoAst _nodoTipo;
+
+        public TNodoObtenerEspacio(NodoAst nodoTipo)
+        {
+            _nodoTipo = nodoTipo;
+        }
+        
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            var codigoTipo = _nodoTipo.GenerarCodigo(entorno);
+            
+            var codigo = new Codigo();
+            codigo.tipo = ZTipos.tipoInt;
+            codigo.apuntador = $"{codigoTipo.tipo.espacioEnMemoria}";
+            codigo.extra = $"sizeof {codigoTipo.tipo.Nombre}";
+            return codigo;
+        }
+    }
     public class TNodoCasteo : TNodo
     {
 //        private readonly NodoAst _nodoTipo;
@@ -271,13 +374,13 @@ namespace Sec.Analizadores
         {
 //            var codigoTipo = _nodoTipo.GenerarCodigo(entorno);
             var tipo = entorno.obtenerTipoDeclarado(_idTipo);
-
-            var c = TUtils.generarYDesenvolver(_e, entorno);
+            
+            var c = TUtils.desenvolver(_e.GenerarCodigo(entorno));
             
             var codigo = new Codigo();
             codigo.tipo = tipo;
             
-            codigo.append(c);
+            codigo.agregar(c);
             codigo.apuntador = c.apuntador;
             codigo.extra = $"(({codigo.tipo.Nombre}) {c.extra}";
 
@@ -297,7 +400,7 @@ namespace Sec.Analizadores
         
         public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
         {
-            var c1 = TUtils.generarYDesenvolver(_e1, entorno);
+            var c1 = TUtils.desenvolver(_e1.GenerarCodigo(entorno));
             if (c1.tipo != ZTipos.tipoInt)
             {
                 throw new SemanticException($"Solo se puede reservar una cantidad entera de memoria");
@@ -309,10 +412,10 @@ namespace Sec.Analizadores
             codigo.apuntador = TUtils.generarTemporal();
             GestorTemp.agregarTemp(codigo.apuntador);
             
-            codigo.append(c1);
-            codigo.append($"{codigo.apuntador} = H;");
+            codigo.agregar(c1);
+            codigo.agregar($"{codigo.apuntador} = H;");
             codigo.comentar($"captura de direccion");
-            codigo.append($"H = H + {c1.apuntador}; ");
+            codigo.agregar($"H = H + {c1.apuntador}; ");
             codigo.comentar($"({c1.extra}) bloques reservados");
 
             codigo.extra = $"[({c1.extra}) bloques]";
@@ -337,8 +440,8 @@ namespace Sec.Analizadores
         
         public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
         {
-            var c1 = TUtils.generarYDesenvolver(_e1, entorno);
-            var c2 = TUtils.generarYDesenvolver(_e2, entorno);
+            var c1 = TUtils.desenvolver(_e1.GenerarCodigo(entorno));
+            var c2 = TUtils.desenvolver(_e2.GenerarCodigo(entorno));
 
             var tipo = TUtils.expandirTipoNumerico(c1.tipo, c2.tipo);
 
@@ -349,15 +452,15 @@ namespace Sec.Analizadores
             
             var codigo = new Codigo();
             codigo.tipo = tipo;
-            codigo.append(c1);
-            codigo.append(c2);
+            codigo.agregar(c1);
+            codigo.agregar(c2);
             codigo.apuntador = TUtils.generarTemporal();
 
             GestorTemp.usarTemp(c1.apuntador);
             GestorTemp.usarTemp(c2.apuntador);
             GestorTemp.agregarTemp(codigo.apuntador);
             
-            codigo.append($"{codigo.apuntador} = {c1.apuntador} + {c2.apuntador};");
+            codigo.agregar($"{codigo.apuntador} = {c1.apuntador} + {c2.apuntador};");
             codigo.comentar($"{c1.extra} + {c2.extra}");
             codigo.extra = $"{c1.extra} + {c2.extra}";
             
@@ -374,13 +477,18 @@ namespace Sec.Analizadores
         {
             _valor = valor;
         }
-        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+
+        public static Codigo crearCodigoInt(int valor)
         {
             var codigo = new Codigo();
             codigo.tipo = ZTipos.tipoInt;
-            codigo.apuntador = $"{_valor}";
-            codigo.extra = $"{_valor}";
+            codigo.apuntador = $"{valor}";
+            codigo.extra = $"{valor}";
             return codigo;
+        }
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            return crearCodigoInt(_valor);
         }
     }
 
@@ -399,6 +507,45 @@ namespace Sec.Analizadores
             codigo.tipo = ZTipos.tipoDouble;
             codigo.apuntador = $"{_valor}";
             codigo.extra = $"{_valor}";
+            return codigo;
+        }
+    }
+
+    public class TNodoPrintSimple : TNodo
+    {
+        private readonly string _id;
+        private readonly NodoAst _nodoValor;
+
+        public TNodoPrintSimple(string id, NodoAst nodoValor)
+        {
+            _id = id;
+            _nodoValor = nodoValor;
+
+            switch (id)
+            {
+                case "c":
+                case "e":
+                case "d":
+                    break;
+                default:
+                    throw new SemanticException($"Letra {id} no soportado para simplePrint");
+            }
+        }
+        
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+
+            var codigoValor = TUtils.desenvolver(_nodoValor.GenerarCodigo(entorno));
+
+            if (codigoValor.tipo != ZTipos.tipoInt && codigoValor.tipo != ZTipos.tipoDouble)
+            {
+                throw new SemanticException("Simple print solo soporta entero o double");
+            }
+
+            var codigo = new Codigo();
+            codigo.agregar(codigoValor);
+            codigo.agregar($"print(\"%{_id}\", {codigoValor.apuntador});");
+            
             return codigo;
         }
     }
