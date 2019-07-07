@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using FastColoredTextBoxNS;
 
 namespace Sec
 {
@@ -19,7 +20,8 @@ namespace Sec
         private Button btnCrearPestaña;
         private Analizador3D analizar3d;
         private AanalizadorAltoNivel analizarAltoNivel;
-        private int num_linea;
+        private Dictionary<int, int> breakPoints;
+        private Button bntAbrirArchivo;
         
         public Zide():base()
         {
@@ -34,34 +36,36 @@ namespace Sec
 
         void instanciar()
         {
-            this.tabEditor = new TabControl();
-            this.panel = new FlowLayoutPanel(); 
-            this.btnAnalizar = new Button();
-            this.btnCrearPestaña = new Button();
-            this.panelBotones = new FlowLayoutPanel();
+            tabEditor = new TabControl();
+            panel = new FlowLayoutPanel(); 
+            btnAnalizar = new Button();
+            btnCrearPestaña = new Button();
+            panelBotones = new FlowLayoutPanel();
+            breakPoints = new Dictionary<int, int>();
+            bntAbrirArchivo = new Button();
 
         }
 
         public void crear()
         {
-            this.btnAnalizar.Text = "Analizar";
-            this.btnCrearPestaña.Text = "Add";
+            btnAnalizar.Text = "Analizar";
+            btnCrearPestaña.Text = "Add";
+            bntAbrirArchivo.Text = "Abrir";
             
             this.SetBounds(0,0,1000,720);
             this.panelBotones.FlowDirection = FlowDirection.BottomUp;
             this.panelBotones.SetBounds(0,0,500,50);
             this.tabEditor.SetBounds(0,0,500,400);
             this.panel.SetBounds(0,0,1000,700);
-            
-
-
 
             this.btnAnalizar.Click += new EventHandler(analizar_click);
             this.btnCrearPestaña.Click += new EventHandler(btnCrearPestaña_click);
+            
           
             //panel dos para botnes-------------------------------------------
             this.panelBotones.Controls.Add(btnAnalizar);
             this.panelBotones.Controls.Add(btnCrearPestaña);
+            this.panelBotones.Controls.Add(bntAbrirArchivo);
             //----------------------------------------------------------------
             
             this.panel.Controls.Add(panelBotones);
@@ -72,32 +76,79 @@ namespace Sec
 
         public void agregaPestaña()
         {
-
-            RichTextBox tTexbox = new RichTextBox();
-            Label lLabel = new Label();
-            tTexbox.SetBounds(25, 5, 480, 360);
+           
+            FastColoredTextBox fastColor = new FastColoredTextBox();
+            AutocompleteMenu auto = new AutocompleteMenu(fastColor);
+            auto.Items.SetAutocompleteItems(palabrasReservadas());
+      
+            fastColor.SetBounds(0, 5, 480, 360);
+            fastColor.MouseDoubleClick += pintarBrekPoint;
+            fastColor.BookmarkColor=Color.Red;
+            fastColor.LineNumberColor= Color.White;
+            fastColor.IndentBackColor = Color.Black;
+            fastColor.Language = Language.PHP;
             
-            tTexbox.TextChanged += textChange;
-            
-            
-            tTexbox.VScroll += richTextBox1_VScroll;
             string title = "New File " + (tabEditor.TabCount + 1).ToString();
             TabPage myTabPage = new TabPage(title);
-            myTabPage.Controls.Add(tTexbox);
-            myTabPage.Controls.Add(lLabel);
-            this.tabEditor.TabPages.Add(myTabPage);
-        
+            myTabPage.Controls.Add(fastColor);
+            tabEditor.TabPages.Add(myTabPage); 
+            
         }
 
-        private void textChange(object sender, EventArgs e)
+        List<String> palabrasReservadas()
         {
+            List<String> pr = new List<string>();
+            pr.Add("False");
+            pr.Add("None");
+            pr.Add("True");
+            pr.Add("and");
+            pr.Add("as");
+            pr.Add("break");
+            pr.Add("class");
+            pr.Add("continue");
+            pr.Add("def");
+            pr.Add("elif");
+            pr.Add("for");
+            pr.Add("from");
+            pr.Add("or");
+            pr.Add("not");
+            pr.Add("lambda");
+            pr.Add("import");
+            pr.Add("return");
             
+
+
+            return pr;
+        }
+
+
+
+        void pintarBrekPoint(object sender, MouseEventArgs e)
+        {
+            Range selec = ((FastColoredTextBox) sender).Selection;
+            int numeroLinea = selec.Start.iLine;
             
-            udpateEnumeracion();
+            if (e.Button == MouseButtons.Right && !breakPoints.ContainsKey(numeroLinea)) {
+                
+                ((FastColoredTextBox) sender).BookmarkLine(selec.Start.iLine);
+                breakPoints.Add(numeroLinea,numeroLinea);
+            }else if (e.Button == MouseButtons.Right && breakPoints.ContainsKey(numeroLinea))
+            {
+                ((FastColoredTextBox) sender).UnbookmarkLine(selec.Start.iLine);
+                breakPoints.Remove(numeroLinea);
+                
+            }
 
 
         }
 
+    
+
+        #region todo a pata
+
+        
+
+       
         public void udpateEnumeracion()
         {
             var entrada = tabEditor.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is RichTextBox);
@@ -142,6 +193,42 @@ namespace Sec
             udpateEnumeracion();
 
         }
+        
+        void pintarBreakPoint(object sender, EventArgs e)
+        {
+        
+            var entrada = tabEditor.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is RichTextBox);
+          
+            int firstcharindex = ((RichTextBox) entrada).GetFirstCharIndexOfCurrentLine();
+
+            int currentline = ((RichTextBox) entrada).GetLineFromCharIndex(firstcharindex);
+            int pos = ((RichTextBox) entrada).GetCharIndexFromPosition(Cursor.Position);
+            Console.WriteLine(pos);
+            Console.WriteLine(currentline);
+            
+                
+                
+            
+
+        }
+        
+        public int obTamLinea(String text, int linea)
+        {
+            String []t2 = text.Split('\n');
+            return t2[linea].Length-1;
+        }
+        
+        
+        private void textChange(object sender, EventArgs e)
+        {
+            
+            
+            udpateEnumeracion();
+
+
+        }
+
+        #endregion
 
 
         private void analizar_click(object sender, EventArgs e)
@@ -154,6 +241,10 @@ namespace Sec
 
         }
 
+       
+        
+     
+
         private void btnCrearPestaña_click(object sender, EventArgs e)
         {
             agregaPestaña();
@@ -161,7 +252,7 @@ namespace Sec
         
         static String leer()
         {
-       string text = System.IO.File.ReadAllText(@"/home/nicte/Escritorio/prueba3d.pyton");
+            string text = System.IO.File.ReadAllText(@"/home/nicte/Escritorio/prueba3d.pyton");
 
  
             return text;

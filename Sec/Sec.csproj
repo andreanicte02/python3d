@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FastColoredTextBox, Version=2.16.11.0, Culture=neutral, PublicKeyToken=fb8aa12b994ef61b">
+      <HintPath>..\lib\FastColoredTextBox.dll</HintPath>
+    </Reference>
     <Reference Include="Irony, Version=1.1.0.0, Culture=neutral, PublicKeyToken=ca48ace7223ead47">
       <HintPath>..\packages\Irony.1.1.0\lib\net40\Irony.dll</HintPath>
       <Private>True</Private>
