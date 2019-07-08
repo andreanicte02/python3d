@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms.VisualStyles;
 using FastColoredTextBoxNS;
 
@@ -27,6 +28,8 @@ namespace Sec
         private Button bntAbrirArchivo;
         private TabControl tabeEditor3D;
 
+
+        //-------------------
         public TabControl tabConosola;
         //consolas de salidas
         public static FastColoredTextBox console;
@@ -38,6 +41,11 @@ namespace Sec
         //breakpoints listas
         Dictionary<int, int> breakPoints;
         Dictionary<int,int> breakPoints3d;
+        
+        //botn guardasr -----
+
+        private Button btnGuardar;
+
         
         public Zide():base()
         {
@@ -71,14 +79,17 @@ namespace Sec
             console = new FastColoredTextBox();
             consoleErrores = new FastColoredTextBox();
             
+            //mas botones
+            btnGuardar = new Button();
 
         }
 
         public void crear()
         {
             btnAnalizar.Text = "Traducir3D";
-            btnCrearPestaña.Text = "Add\nPestaña";
+            btnCrearPestaña.Text = "AddPestaña";
             bntAbrirArchivo.Text = "Abrir";
+            btnGuardar.Text = "Guardar";
 
 
             WindowState = FormWindowState.Maximized;
@@ -103,11 +114,13 @@ namespace Sec
             btnAnalizar.Click +=  analizar_click;
             btnCrearPestaña.Click += btnCrearPestaña_click;
             bntAbrirArchivo.Click += btnAbirirArchivo_click;
+            btnGuardar.Click += btnGuardarArchivo_click;
           
             //panel dos para botnes-------------------------------------------
             panelBotones.Controls.Add(btnAnalizar);
             panelBotones.Controls.Add(btnCrearPestaña);
             panelBotones.Controls.Add(bntAbrirArchivo);
+            panelBotones.Controls.Add(btnGuardar);
             
             //editor del 3d----------------------------------------------------
          
@@ -199,7 +212,7 @@ namespace Sec
             fastColor.IndentBackColor = Color.Black;
             fastColor.Language = Language.VB;
             
-            string title = "New File " + (tabEditor.TabCount + 1).ToString();
+            string title = "New File:";
             TabPage myTabPage = new TabPage(title);
             myTabPage.Controls.Add(fastColor);
             tabEditor.TabPages.Add(myTabPage);
@@ -304,6 +317,44 @@ namespace Sec
 
         }
 
+        void btnGuardarArchivo_click(object sender, EventArgs e)
+        {
+            TabPage actual = tabEditor.SelectedTab;
+            var entrada = tabEditor.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is FastColoredTextBox);
+            if (actual.Text == "New File:")
+            {
+                SaveFileDialog saveArch = new SaveFileDialog();
+ 
+                StreamWriter myStream ;
+                
+                saveArch.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*"  ;
+                saveArch.FilterIndex = 2 ;
+               // saveArch.RestoreDirectory = true ;
+ 
+                if(saveArch.ShowDialog() == DialogResult.OK)
+                {
+                    //Console.WriteLine(saveArch.FileName);
+                    using (StreamWriter writer = new StreamWriter(saveArch.FileName))
+                    {
+                        writer.Write(entrada.Text);
+                    }
+
+                    actual.Text = saveArch.FileName;
+                }
+            }
+            else
+            {
+                using (StreamWriter writer = new StreamWriter(actual.Text))
+                {
+                    writer.Write(entrada.Text);
+                    MessageBox.Show("[Archivo guardado] ["+actual.Text+"]");  
+                }
+
+            }
+
+
+        }
+
 
         private void btnCrearPestaña_click(object sender, EventArgs e)
         {
@@ -313,8 +364,7 @@ namespace Sec
         static String leer()
         {
             string text = System.IO.File.ReadAllText(@"/home/nicte/Escritorio/prueba3d.pyton");
-
- 
+            
             return text;
         }
 
