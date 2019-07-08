@@ -41,8 +41,8 @@ namespace Sec.Analizadores
             MarkReservedWords("ifFalse");
             MarkReservedWords("$$_clean_scope");
 
-            var pd = ToTerm("%f");
-            var pi = ToTerm("%i");
+            var pf = ToTerm("%d");
+            var pe = ToTerm("%e");
             var pc = ToTerm("%c");
             var print = ToTerm("print");
             var iff = ToTerm("if");
@@ -194,8 +194,8 @@ namespace Sec.Analizadores
             
             
             printStatement.Rule = produccion(print + apar +comilla + pc + comilla + coma +literal+ cpar + pcoma)._accion(values => new NodoPrintC(values[6]))
-                                  |produccion(print + apar +comilla + pd + comilla + coma +literal+ cpar + pcoma)._accion(values => new NodoPrintF(values[6]))
-                                  |produccion(print + apar +comilla + pi + comilla + coma +literal+ cpar + pcoma)._accion(values => new NodoPrintI(values[6]))
+                                  |produccion(print + apar +comilla + pf + comilla + coma +literal+ cpar + pcoma)._accion(values => new NodoPrintF(values[6]))
+                                  |produccion(print + apar +comilla + pe + comilla + coma +literal+ cpar + pcoma)._accion(values => new NodoPrintI(values[6]))
 
                 ;
 

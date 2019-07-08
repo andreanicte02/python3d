@@ -7,7 +7,7 @@ namespace Sec.Interprete3D.Primitivos
     {
         private double valor;
         
-        public Decmal(double valor) : base("instancia@decimal", null, TipoPrimitivo.tipoDecimal)
+        public Decmal(double valor) : base("instancia@decimal")
         {
             this.valor = valor;
         }

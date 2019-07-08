@@ -6,7 +6,7 @@ namespace Sec.Interprete3D.Primitivos
     {
         private bool valor;
 
-        public Bol(bool valor) : base("instancia@Booleano", null, TipoPrimitivo.tipBool)
+        public Bol(bool valor) : base("instancia@Booleano")
         {
             this.valor = valor;
         }

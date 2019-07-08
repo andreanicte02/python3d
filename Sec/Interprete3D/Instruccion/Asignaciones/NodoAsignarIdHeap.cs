@@ -30,9 +30,9 @@ namespace Sec.Interprete3D.Instruccion
               
             }else if (valor1 is Numero)
             {
-                Numero n = (Numero)valor1;
-                var val = e.heap[n.obtenerValor()];
-                simb.definirValor((Instancia_3d)val);
+                int n = ((Numero)valor1).obtenerValor();
+                var val = e.heap[n];
+                simb.definirValor(val);
 
             }
 

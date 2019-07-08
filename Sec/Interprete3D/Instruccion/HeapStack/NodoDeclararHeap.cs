@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Sec.Interprete3D.Entorno;
 
 namespace Sec.Interprete3D.Instruccion
@@ -13,7 +14,7 @@ namespace Sec.Interprete3D.Instruccion
 
         public override object ejecutarSin(entorno3d e)
         {
-            e.heap = new ArrayList();
+            e.heap = new List<Instancia_3d>();
             return null;
         }
 

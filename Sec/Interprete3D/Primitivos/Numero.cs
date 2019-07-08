@@ -8,7 +8,7 @@ namespace Sec.Interprete3D.Primitivos
         private int valor;
 
 
-        public Numero(int valor) : base("instancia@entero", null, TipoPrimitivo.tipoNumero)
+        public Numero(int valor) : base("instancia@entero")
         {
             this.valor = valor;
         }

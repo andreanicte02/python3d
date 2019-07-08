@@ -23,7 +23,7 @@ namespace Sec
         private TabControl tabEditor;
         private Button btnAnalizar;
         private Button btnCrearPestaña;
-        private Analizador3D analizar3d;
+        
         private AanalizadorAltoNivel analizarAltoNivel;
         private Button bntAbrirArchivo;
         private TabControl tabeEditor3D;
@@ -45,6 +45,7 @@ namespace Sec
         //botn guardasr -----
 
         private Button btnGuardar;
+        private Button btnEjecutar3D;
 
         
         public Zide():base()
@@ -52,7 +53,7 @@ namespace Sec
             instanciar();   
             crear();
             agregaPestaña();
-            analizar3d= new Analizador3D();
+            
             analizarAltoNivel = new AanalizadorAltoNivel();
             
 
@@ -78,9 +79,13 @@ namespace Sec
             tabConosola = new TabControl();
             console = new FastColoredTextBox();
             consoleErrores = new FastColoredTextBox();
+            console.Text = "";
+            consoleErrores.Text = "";
             
             //mas botones
             btnGuardar = new Button();
+            btnEjecutar3D = new Button();
+            
 
         }
 
@@ -90,6 +95,7 @@ namespace Sec
             btnCrearPestaña.Text = "AddPestaña";
             bntAbrirArchivo.Text = "Abrir";
             btnGuardar.Text = "Guardar";
+            btnEjecutar3D.Text = "Ejecutar3D";
 
 
             WindowState = FormWindowState.Maximized;
@@ -115,12 +121,14 @@ namespace Sec
             btnCrearPestaña.Click += btnCrearPestaña_click;
             bntAbrirArchivo.Click += btnAbirirArchivo_click;
             btnGuardar.Click += btnGuardarArchivo_click;
+            btnEjecutar3D.Click += btnEjecutar3d_Click;
           
             //panel dos para botnes-------------------------------------------
             panelBotones.Controls.Add(btnAnalizar);
             panelBotones.Controls.Add(btnCrearPestaña);
             panelBotones.Controls.Add(bntAbrirArchivo);
             panelBotones.Controls.Add(btnGuardar);
+            panelBotones.Controls.Add(btnEjecutar3D);
             
             //editor del 3d----------------------------------------------------
          
@@ -192,11 +200,7 @@ namespace Sec
             
 
         }
-
-        void crearConsolaSalida()
-        {
-            
-        }
+        
 
         public void agregaPestaña()
         {
@@ -288,9 +292,7 @@ namespace Sec
         private void analizar_click(object sender, EventArgs e)
         {
       
-            analizar3d = new Analizador3D();
             String entada = leer();
-            analizar3d.ejecutarAnalizador(entada);
             
 
         }
@@ -324,8 +326,7 @@ namespace Sec
             if (actual.Text == "New File:")
             {
                 SaveFileDialog saveArch = new SaveFileDialog();
- 
-                StreamWriter myStream ;
+                
                 
                 saveArch.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*"  ;
                 saveArch.FilterIndex = 2 ;
@@ -367,6 +368,18 @@ namespace Sec
             
             return text;
         }
+        
+        private void btnEjecutar3d_Click(object sender, EventArgs e)
+        {
+            console.Text = "";
+            TabPage actual = tabeEditor3D.SelectedTab;
+            var entrada = tabeEditor3D.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is FastColoredTextBox);
+            Analizador3D analizar = new Analizador3D();
+            analizar.ejecutarAnalizador(entrada.Text);
+            
+           
+        }
+        
 
     
 

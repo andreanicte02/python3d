@@ -18,6 +18,7 @@ namespace Sec.Interprete3D.Instruccion.Imprimir
             var val = Utilidades.desenvolver(algo);
             
             Console.WriteLine("sentencia print-> "+ val.stringBonito());
+            Zide.console.Text += val.stringBonito()+"\n";
             return null;
         }
 

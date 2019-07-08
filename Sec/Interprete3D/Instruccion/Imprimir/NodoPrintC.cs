@@ -22,16 +22,19 @@ namespace Sec.Interprete3D.Instruccion.Imprimir
             {
                 case Numero numero:
                 {
-                    var caracter = (char) numero.obtenerValor();
-                    Console.WriteLine("sentencia print-> "+ caracter);
+                    char caracter = (char) numero.obtenerValor();
+                    Console.WriteLine(caracter);
+                    Console.WriteLine("sentencia print-> "+ caracter.ToString()+"\n");
+                    Zide.console.Text += caracter;
                 
                     return null;
                 }
 
                 case Decmal decmal:
                 {
-                    var caracter = (char) decmal.obtenerValor();
-                    Console.WriteLine("sentencia print-> "+ caracter);
+                    char caracter = (char) decmal.obtenerValor();
+                    Console.WriteLine("sentencia print-> "+ caracter.ToString()+"\n");
+                    Zide.console.Text += caracter+"\n";
                 
                     return null;
                 }
