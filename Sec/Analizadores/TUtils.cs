@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Irony.Parsing;
 
 namespace Sec.Analizadores
 {
@@ -342,6 +343,87 @@ namespace Sec.Analizadores
             }
 
             return codigo;
+        }
+
+        public static string generarCodigo3D(string entrada)
+        {
+            var ga = new GramaticaT();
+            var parser = new Parser(ga);
+            
+            var arbol = parser.Parse(entrada);
+
+            var raiz = arbol.Root;
+            
+            if (raiz == null || arbol.ParserMessages.Count > 0 || arbol.HasErrors())
+            {
+                //---------------------> Hay Errores      
+
+                foreach (var item in arbol.ParserMessages)
+                {
+//                    MessageBox.Show("Error->"+item.Message+" Line:"+item.Location.Line);
+                    Console.WriteLine("Error->"+item.Message+" Line:"+item.Location.Line + " Column: " + item.Location.Column);
+
+                }
+
+                return null;
+            }
+
+            return generarCodigo3D((List<NodoAst>) raiz.AstNode);
+
+        }
+        
+        public static string generarCodigo3D(List<NodoAst> sentencias){
+            
+            
+            var entornoGlobal = new ZEntorno();
+            entornoGlobal.declararTipo("int", ZTipos.tipoInt);
+            entornoGlobal.declararTipo("double", ZTipos.tipoDouble);
+            entornoGlobal.declararTipo("void", ZTipos.tipoVoid);
+
+            foreach (var sentencia in sentencias)
+            {
+                sentencia.GenerarCodigo(entornoGlobal);
+            }
+
+            // se procesan los tipos
+            foreach (var tipo in entornoGlobal.obtenerTipos())
+            {
+                if (tipo is ZStruct zStruct)
+                {
+                    zStruct.declararMiembros();
+                }
+            }
+
+            var codigo = new Codigo();
+            foreach (var zFuncion in entornoGlobal.obtenerFunciones())
+            {
+                var c = zFuncion.generarCodigoZFuncion();
+                codigo.agregar(c);
+            }
+
+            // se verifica que exista un main
+            entornoGlobal.obtenerZFuncionDeclarado("main");
+            
+            codigo.agregar("//=======================================");
+//            codigo.comentar("========================");
+            codigo.agregar($"H = {ZTipos.tipoDollar.espacioEnMemoria};");
+            codigo.agregar("call main;");
+            
+            var codigoHayError = TUtils.desenvolver(TUtils.accesoPunto(ZTipos.codigoDollar, PropiedadDollar.hayError));
+            codigo.agregar(codigoHayError);
+            codigo.agregar(TUtils.textoComoPrints("\n>> Finalizado con codigo: "));
+            codigo.agregar($"print(\"%e\", {codigoHayError.apuntador});");
+
+
+            var codigoFinal = new Codigo();
+            codigoFinal.agregar($"var H, P;");
+            codigoFinal.agregar(TUtils.generarDeclaracionesTemporales());
+            codigoFinal.agregar(codigo);
+            
+//            Console.WriteLine(codigoFinal.texto);
+
+            return codigoFinal.texto;
+
         }
         
     }
