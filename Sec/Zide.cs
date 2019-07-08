@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Windows.Forms.VisualStyles;
 using FastColoredTextBoxNS;
 
 namespace Sec
@@ -16,6 +17,8 @@ namespace Sec
         private FlowLayoutPanel panel;
         private FlowLayoutPanel panelBotones;
         private FlowLayoutPanel panelEditores;
+        private FlowLayoutPanel panelSalidas;
+        
         private TabControl tabEditor;
         private Button btnAnalizar;
         private Button btnCrearPestaña;
@@ -23,6 +26,14 @@ namespace Sec
         private AanalizadorAltoNivel analizarAltoNivel;
         private Button bntAbrirArchivo;
         private TabControl tabeEditor3D;
+
+        public TabControl tabConosola;
+        //consolas de salidas
+        public static FastColoredTextBox console;
+        public static FastColoredTextBox consoleErrores;
+        
+        
+        //
         
         //breakpoints listas
         Dictionary<int, int> breakPoints;
@@ -53,6 +64,13 @@ namespace Sec
             //break points
             breakPoints = new Dictionary<int, int>();
             breakPoints3d = new Dictionary<int, int >();
+            
+            
+            panelSalidas = new FlowLayoutPanel();
+            tabConosola = new TabControl();
+            console = new FastColoredTextBox();
+            consoleErrores = new FastColoredTextBox();
+            
 
         }
 
@@ -64,13 +82,17 @@ namespace Sec
 
 
             WindowState = FormWindowState.Maximized;
+            panel.FlowDirection = FlowDirection.TopDown;
             panelBotones.FlowDirection = FlowDirection.BottomUp;
             panelEditores.FlowDirection = FlowDirection.LeftToRight;
+            panelSalidas.FlowDirection = FlowDirection.LeftToRight;
             
             //paneles
             panelEditores.SetBounds(0,0,1500,400);
             panelBotones.SetBounds(0,0,500,50);
-            panel.SetBounds(0,0,2000,700);
+            panelSalidas.SetBounds(0,0,1360,280);
+            
+            panel.SetBounds(0,0,2000,900);
 
             
             //editores
@@ -99,8 +121,43 @@ namespace Sec
             
             panel.Controls.Add(panelBotones);
             panel.Controls.Add(panelEditores);
+            consolasCrear();
+            panel.Controls.Add(panelSalidas);
+            
+            
             Controls.Add(panel);
             
+        }
+
+        void consolasCrear()
+        {
+            tabConosola.SetBounds(0,0,1310,270);
+            
+            TabPage pageConsola = new TabPage("Console");
+            pageConsola.BorderStyle = BorderStyle.Fixed3D;
+            pageConsola.Controls.Add(console);
+            tabConosola.TabPages.Add(pageConsola);
+            console.SetBounds(0,0,1300,250);
+            console.ReadOnly = false;
+            
+            TabPage pageErrores = new TabPage("Console Erroes");
+            pageErrores.BorderStyle = BorderStyle.Fixed3D;
+            pageErrores.Controls.Add(consoleErrores);
+            tabConosola.TabPages.Add(pageErrores);
+            consoleErrores.SetBounds(0,0,1300,250);
+            consoleErrores.ReadOnly = true;
+            
+            
+            
+            
+            //agregar al panel
+            panelSalidas.Controls.Add(tabConosola);
+            
+            
+            
+
+
+
         }
 
         public void editor3DCrear()
@@ -121,6 +178,11 @@ namespace Sec
             tabeEditor3D.TabPages.Add(myTabPage); 
             
 
+        }
+
+        void crearConsolaSalida()
+        {
+            
         }
 
         public void agregaPestaña()
@@ -241,9 +303,6 @@ namespace Sec
 
 
         }
-
-
-
 
 
         private void btnCrearPestaña_click(object sender, EventArgs e)
