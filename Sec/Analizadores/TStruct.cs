@@ -140,6 +140,8 @@ namespace Sec.Analizadores
     public class ZEntorno
     {
         
+        public bool TieneReturn { get; set; }
+        
         public string labelFin { get; set; }
 
         public ZEntorno entornoPadre { get;  }

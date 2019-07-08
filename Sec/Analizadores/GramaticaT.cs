@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Irony.Parsing;
 using static Sec.Analizadores.IronyUtils;
 
@@ -34,6 +35,7 @@ namespace Sec.Analizadores
 
             var declaracion = new AutoNonTerminal();
             var asignacion = new AutoNonTerminal();
+            var sentenciaIf = new AutoNonTerminal();
             var retorno = new AutoNonTerminal();
             
             var expr = new AutoNonTerminal();
@@ -89,6 +91,7 @@ namespace Sec.Analizadores
                                     | produccion(declaracion + ";")._accion(v => v[0])
                                     | produccion(retorno + ";")._accion(v => v[0])
                                     | invocacion + ";"
+                                    | sentenciaIf
                                     | produccion(ToTerm("!") + "print" + "(" + id + "," + expr + ")" + ";")._accion(v => new TNodoPrintSimple(v[3], v[5]))
                                     | produccion("throw" + expr + ";" )._accion(v => new TNodoThrow(v[1]))
                 ;
@@ -98,6 +101,18 @@ namespace Sec.Analizadores
                                | produccion(tipo + id)._accion(v => new TNodoDeclaracionVar(v[0], v[1]))
                 ;
 
+
+            sentenciaIf.Rule = produccion(ToTerm("if") + "(" + expr + ")" + "{" + sentenciasFuncion + "}" + "else" +
+                                          "{" + sentenciasFuncion + "}")
+                                   ._accion(v => new TNodoIf(v[2], v[5], v[9]))
+                               | produccion(ToTerm("if") + "(" + expr + ")" + "{" + sentenciasFuncion + "}")
+                                   ._accion(v => new TNodoIf(v[2], v[5], new List<NodoAst>()))
+                               | produccion(ToTerm("if") + "(" + expr + ")" + "{" + sentenciasFuncion + "}" + "else" +
+                                            sentenciaIf)
+                                   ._accion(v => new TNodoIf(v[2], v[5], new List<NodoAst>() {v[8]}))
+
+                ;
+            
             asignacion.Rule = produccion(expr + "=" + expr)
                     ._accion(v => new TNodoAsignacion(v[0], v[2]))
                 ;
@@ -107,7 +122,9 @@ namespace Sec.Analizadores
 
 
             expr.Rule = produccion(expr + "+" + expr)._accion(v => new TNodoSuma(v[0], v[2]))
+                        | produccion(expr + "-" + expr)._accion(v => new TNodoResta(v[0], v[2]))
                         | produccion(expr + "." + id)._accion(v => new TNodoAccessoPunto(v[0], v[2]))
+                        | produccion(expr + "==" + expr)._accion(v => new TNodoIgualIgual(v[0], v[2]))
                         | produccion("#" + expr + "#")._accion(v => new TNodoReservarMemoria(v[1]))
                         | produccion("(" + id + ")" + expr)._accion(v => new TNodoCasteo(v[1], v[3]))
                         | produccion("(" + expr + ")")._accion(v => v[1])
@@ -124,9 +141,10 @@ namespace Sec.Analizadores
             this.ConfigList<NodoAst>(false, argumentos, expr, ",");
 
             
-            RegisterOperators(1, "+", "-");
+            RegisterOperators(5, "+", "-");
+            RegisterOperators(2, "==", "!=");
 //            RegisterOperators(2,  "(");
-            RegisterOperators(3, ".");
+            RegisterOperators(13, ".");
 
             LanguageFlags |= LanguageFlags.CreateAst;
             Root = inicio;

@@ -36,6 +36,20 @@ namespace Sec.Analizadores
     
     public class TUtils
     {
+
+        public static string generarDeclaracionesTemporales()
+        {
+            var result = "var t0";
+            for (var i = 1; i < contadorTemporal; i++)
+            {
+                if (i % 20 == 0)
+                {
+                    result += "\n";
+                }
+                result += $", t{i}";
+            }
+            return result + ";";
+        }
         
         private static int contadorTemporal = 0;
         private static int contadorLabel = 0;
@@ -50,6 +64,19 @@ namespace Sec.Analizadores
         }
 
 
+        public static Codigo generarCodigoBloque(List<NodoAst> sentencias, ZEntorno entorno)
+        {
+            var codigo = new Codigo();
+            foreach (var sentencia in sentencias)
+            {
+                GestorTemp.limpiar();
+                var codigoSentencia = sentencia.GenerarCodigo(entorno);
+                codigo.agregar(codigoSentencia);
+            }
+
+            return codigo;
+        }
+
 
         public static int espacioAlOrigen(ZEntorno entorno)
         {
@@ -60,6 +87,11 @@ namespace Sec.Analizadores
             }
 
             return total;
+        }
+
+        public static bool esNumerico(ZEntorno e1)
+        {
+            return e1 == ZTipos.tipoInt || e1 == ZTipos.tipoDouble;
         }
 
         public static ZEntorno expandirTipoNumerico(ZEntorno e1, ZEntorno e2)
@@ -149,7 +181,7 @@ namespace Sec.Analizadores
             }
 
             // invocacion
-            codigo.agregar($"call ${zFuncion.Id};");
+            codigo.agregar($"call {zFuncion.Id};");
             codigo.comentar($"call {zFuncion.Id}");
             
             // captura de retorno
@@ -181,7 +213,7 @@ namespace Sec.Analizadores
                 codigo.agregar($"{GestorTemp.obtenerTemporal(i)} = P + {espacioAlOrigen(entorno) + entorno.espacioEnMemoria + i};");
                 codigo.comentar($"& Backup {GestorTemp.obtenerTemporal(i)}");
                 
-                codigo.agregar($"stack[{GestorTemp.obtenerTemporal(i)}] = stack{GestorTemp.obtenerTemporal(i)};");
+                codigo.agregar($"{GestorTemp.obtenerTemporal(i)} = stack[{GestorTemp.obtenerTemporal(i)}];");
                 codigo.comentar($" {GestorTemp.obtenerTemporal(i)} = Backup {GestorTemp.obtenerTemporal(i)}");
             }
 

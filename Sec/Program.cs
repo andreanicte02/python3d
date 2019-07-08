@@ -23,20 +23,30 @@ namespace Sec
 
             var entrada = @"
 
-int malloc(int size){
-    return #size#;
+int fibbonacci(int n) {
+   if(n == 0){
+      return 0;
+   } else if(n == 1) {
+      return 1;
+   }
+    return fibbonacci(n-1) + fibbonacci(n-2);
 }
 
-void printNumero(int i){
+
+void printlnNumber(int i){
     !print(e, i);
+    !print(c, 10);
 }
 
 void main(){
-    sumar(2,3);
+    printlnNumber(fibbonacci(0));
+    printlnNumber(fibbonacci(1));
+    printlnNumber(fibbonacci(2));
+    printlnNumber(fibbonacci(3));
+    printlnNumber(fibbonacci(4));
+    printlnNumber(fibbonacci(5));
 }
-int sumar(int a, int b){
-    throw 1993;
-}
+
 
 ";
             
@@ -106,14 +116,19 @@ int sumar(int a, int b){
             
             var codigoHayError = TUtils.desenvolver(TUtils.accesoPunto(ZTipos.codigoDollar, PropiedadDollar.hayError));
             codigo.agregar(codigoHayError);
-            codigo.agregar(TUtils.textoComoPrints(">> Finalizado con codigo: "));
-            codigo.agregar($"print(\"%e\", {codigoHayError.apuntador};");
+            codigo.agregar(TUtils.textoComoPrints("\n>> Finalizado con codigo: "));
+            codigo.agregar($"print(\"%e\", {codigoHayError.apuntador});");
+
+
+            var codigoFinal = new Codigo();
+            codigoFinal.agregar($"var H, P;");
+            codigoFinal.agregar(TUtils.generarDeclaracionesTemporales());
+            codigoFinal.agregar(codigo);
             
-            
-            Console.WriteLine(codigo.texto);
+            Console.WriteLine(codigoFinal.texto);
             
 
-            Console.WriteLine("fin");
+//            Console.WriteLine("fin");
 
 
 //            Zide f = new Zide();
