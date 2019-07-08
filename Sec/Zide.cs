@@ -15,21 +15,26 @@ namespace Sec
     {
         private FlowLayoutPanel panel;
         private FlowLayoutPanel panelBotones;
+        private FlowLayoutPanel panelEditores;
         private TabControl tabEditor;
         private Button btnAnalizar;
         private Button btnCrearPestaña;
         private Analizador3D analizar3d;
         private AanalizadorAltoNivel analizarAltoNivel;
-        private Dictionary<int, int> breakPoints;
         private Button bntAbrirArchivo;
+        private TabControl tabeEditor3D;
+        
+        //breakpoints listas
+        Dictionary<int, int> breakPoints;
+        Dictionary<int,int> breakPoints3d;
         
         public Zide():base()
         {
             instanciar();   
             crear();
             agregaPestaña();
-            this.analizar3d= new Analizador3D();
-            this.analizarAltoNivel = new AanalizadorAltoNivel();
+            analizar3d= new Analizador3D();
+            analizarAltoNivel = new AanalizadorAltoNivel();
             
 
         }
@@ -41,37 +46,81 @@ namespace Sec
             btnAnalizar = new Button();
             btnCrearPestaña = new Button();
             panelBotones = new FlowLayoutPanel();
-            breakPoints = new Dictionary<int, int>();
             bntAbrirArchivo = new Button();
+            panelEditores = new FlowLayoutPanel();
+            tabeEditor3D = new TabControl();
+            
+            //break points
+            breakPoints = new Dictionary<int, int>();
+            breakPoints3d = new Dictionary<int, int >();
 
         }
 
         public void crear()
         {
-            btnAnalizar.Text = "Analizar";
-            btnCrearPestaña.Text = "Add";
+            btnAnalizar.Text = "Traducir3D";
+            btnCrearPestaña.Text = "Add\nPestaña";
             bntAbrirArchivo.Text = "Abrir";
-            
-            this.SetBounds(0,0,1000,720);
-            this.panelBotones.FlowDirection = FlowDirection.BottomUp;
-            this.panelBotones.SetBounds(0,0,500,50);
-            this.tabEditor.SetBounds(0,0,500,400);
-            this.panel.SetBounds(0,0,1000,700);
 
-            this.btnAnalizar.Click += new EventHandler(analizar_click);
-            this.btnCrearPestaña.Click += new EventHandler(btnCrearPestaña_click);
+
+            WindowState = FormWindowState.Maximized;
+            panelBotones.FlowDirection = FlowDirection.BottomUp;
+            panelEditores.FlowDirection = FlowDirection.LeftToRight;
             
+            //paneles
+            panelEditores.SetBounds(0,0,1500,400);
+            panelBotones.SetBounds(0,0,500,50);
+            panel.SetBounds(0,0,2000,700);
+
+            
+            //editores
+            tabEditor.SetBounds(0,0,650,400);
+            tabeEditor3D.SetBounds(0,0,650,400);
+   
+            
+            btnAnalizar.Click +=  analizar_click;
+            btnCrearPestaña.Click += btnCrearPestaña_click;
+            bntAbrirArchivo.Click += btnAbirirArchivo_click;
           
             //panel dos para botnes-------------------------------------------
-            this.panelBotones.Controls.Add(btnAnalizar);
-            this.panelBotones.Controls.Add(btnCrearPestaña);
-            this.panelBotones.Controls.Add(bntAbrirArchivo);
-            //----------------------------------------------------------------
+            panelBotones.Controls.Add(btnAnalizar);
+            panelBotones.Controls.Add(btnCrearPestaña);
+            panelBotones.Controls.Add(bntAbrirArchivo);
             
-            this.panel.Controls.Add(panelBotones);
-            this.panel.Controls.Add(tabEditor);
-            this.Controls.Add(panel);
+            //editor del 3d----------------------------------------------------
+         
+            editor3DCrear();
             
+            
+            //paneles----------------------------------------------------------
+            panelEditores.Controls.Add(tabEditor);
+            panelEditores.Controls.Add(tabeEditor3D);
+            
+            
+            panel.Controls.Add(panelBotones);
+            panel.Controls.Add(panelEditores);
+            Controls.Add(panel);
+            
+        }
+
+        public void editor3DCrear()
+        {
+            //definir propiedades del texbox
+            FastColoredTextBox texTraducidBox= new FastColoredTextBox();
+            texTraducidBox.MouseDoubleClick += pintarBrekPointSalida3D;
+            texTraducidBox.BookmarkColor = Color.Gold;
+            texTraducidBox.IndentBackColor = Color.Black;
+            texTraducidBox.LineNumberColor= Color.White;
+            
+            //----------------------
+            texTraducidBox.SetBounds(0, 5, 630, 360);
+            string title = "3D";
+            TabPage myTabPage = new TabPage(title);
+            myTabPage.Controls.Add(texTraducidBox);
+            myTabPage.BorderStyle = BorderStyle.Fixed3D;
+            tabeEditor3D.TabPages.Add(myTabPage); 
+            
+
         }
 
         public void agregaPestaña()
@@ -81,18 +130,19 @@ namespace Sec
             AutocompleteMenu auto = new AutocompleteMenu(fastColor);
             auto.Items.SetAutocompleteItems(palabrasReservadas());
       
-            fastColor.SetBounds(0, 5, 480, 360);
+            fastColor.SetBounds(0, 5, 630, 360);
             fastColor.MouseDoubleClick += pintarBrekPoint;
             fastColor.BookmarkColor=Color.Red;
             fastColor.LineNumberColor= Color.White;
             fastColor.IndentBackColor = Color.Black;
-            fastColor.Language = Language.PHP;
+            fastColor.Language = Language.VB;
             
             string title = "New File " + (tabEditor.TabCount + 1).ToString();
             TabPage myTabPage = new TabPage(title);
             myTabPage.Controls.Add(fastColor);
-            tabEditor.TabPages.Add(myTabPage); 
-            
+            tabEditor.TabPages.Add(myTabPage);
+            myTabPage.BorderStyle = BorderStyle.Fixed3D;
+
         }
 
         List<String> palabrasReservadas()
@@ -116,7 +166,6 @@ namespace Sec
             pr.Add("import");
             pr.Add("return");
             
-
 
             return pr;
         }
@@ -142,93 +191,23 @@ namespace Sec
 
         }
 
-    
-
-        #region todo a pata
-
-        
-
-       
-        public void udpateEnumeracion()
+        void pintarBrekPointSalida3D(object sender, MouseEventArgs e)
         {
-            var entrada = tabEditor.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is RichTextBox);
-
-            var etiquietaLinea = tabEditor.SelectedTab.Controls.Cast<Control>().First(x => x is Label);
-            etiquietaLinea.Font = new Font("Arial", 12); //12
-            etiquietaLinea.SetBounds(0,7,25,355);
-            entrada.Font = new Font("Arial", 9); //9
-            Point pos = new Point(0, 0);
-            int firstIndex = ((RichTextBox)entrada).GetCharIndexFromPosition(pos);
-            int firstLine = ((RichTextBox)entrada).GetLineFromCharIndex(firstIndex);
- 
-            pos.X = ClientRectangle.Width;
-            pos.Y = ClientRectangle.Height;
-            int lastIndex = ((RichTextBox)entrada).GetCharIndexFromPosition(pos);
-            int lastLine = ((RichTextBox)entrada).GetLineFromCharIndex(lastIndex);
-
-           
-            pos = ((RichTextBox)entrada).GetPositionFromCharIndex(lastIndex);
-
-            //finally, renumber label
-            etiquietaLinea.Text = "";
-            for (int i = firstLine; i < lastLine + 1; i++)
+            Range selec = ((FastColoredTextBox) sender).Selection;
+            int numeroLinea = selec.Start.iLine;
+            
+            if (e.Button == MouseButtons.Right && !breakPoints3d.ContainsKey(numeroLinea)) {
+                
+                ((FastColoredTextBox) sender).BookmarkLine(selec.Start.iLine);
+                breakPoints3d.Add(numeroLinea,numeroLinea);
+            }else if (e.Button == MouseButtons.Right && breakPoints3d.ContainsKey(numeroLinea))
             {
-                etiquietaLinea.Text += i + 1 + "\n";
+                ((FastColoredTextBox) sender).UnbookmarkLine(selec.Start.iLine);
+                breakPoints3d.Remove(numeroLinea);
+                
             }
 
-
-
         }
-
-        private void richTextBox1_VScroll(object sender, EventArgs e)
-        {
-            
-            var entrada = tabEditor.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is RichTextBox);
-            var etiquietaLinea = tabEditor.SelectedTab.Controls.Cast<Control>().First(x => x is Label);
-
-
-            int d =((RichTextBox) entrada).GetPositionFromCharIndex(0).Y % 
-                    ((RichTextBox) entrada).Font.Height + 1;
-            etiquietaLinea.Location = new Point(0, d);
-            udpateEnumeracion();
-
-        }
-        
-        void pintarBreakPoint(object sender, EventArgs e)
-        {
-        
-            var entrada = tabEditor.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is RichTextBox);
-          
-            int firstcharindex = ((RichTextBox) entrada).GetFirstCharIndexOfCurrentLine();
-
-            int currentline = ((RichTextBox) entrada).GetLineFromCharIndex(firstcharindex);
-            int pos = ((RichTextBox) entrada).GetCharIndexFromPosition(Cursor.Position);
-            Console.WriteLine(pos);
-            Console.WriteLine(currentline);
-            
-                
-                
-            
-
-        }
-        
-        public int obTamLinea(String text, int linea)
-        {
-            String []t2 = text.Split('\n');
-            return t2[linea].Length-1;
-        }
-        
-        
-        private void textChange(object sender, EventArgs e)
-        {
-            
-            
-            udpateEnumeracion();
-
-
-        }
-
-        #endregion
 
 
         private void analizar_click(object sender, EventArgs e)
@@ -241,9 +220,31 @@ namespace Sec
 
         }
 
-       
-        
-     
+        void btnAbirirArchivo_click(object sender, EventArgs e)
+        {
+            OpenFileDialog abrir = new OpenFileDialog();
+            abrir.Title = "Abrir archivos de texto";
+            abrir.Filter = "Archivo de Texto Plano  (*.txt)|*.txt|Todos los archivos (*.*)|*.*";
+            abrir.ShowDialog();
+            if (abrir.FileName.Length == 0)
+                return;
+
+            System.IO.StreamReader sr = new System.IO.StreamReader(abrir.FileName, System.Text.Encoding.UTF8);
+            String contenido = sr.ReadToEnd();
+            sr.Close();
+            
+            var entrada = tabEditor.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is FastColoredTextBox);
+            TabPage myTabPage = tabEditor.SelectedTab;
+
+            entrada.Text = contenido;
+            myTabPage.Text = abrir.FileName;
+
+
+        }
+
+
+
+
 
         private void btnCrearPestaña_click(object sender, EventArgs e)
         {
