@@ -37,6 +37,23 @@ namespace Sec.Analizadores
     
     public class TUtils
     {
+        
+        private static Dictionary<string, ZEntorno> _bancoTiposArray = new Dictionary<string, ZEntorno>();
+
+        public static ZEntorno obtenerTipoDesdeBancoArray(ZEntorno tipo)
+        {
+            if (_bancoTiposArray.ContainsKey(tipo.Nombre))
+            {
+                return _bancoTiposArray[tipo.Nombre];
+            }
+            
+            var tipoArray = new ZArray(tipo.Nombre + "[]", tipo);
+            tipoArray.declararPropiedad("length", ZTipos.tipoInt);
+
+            _bancoTiposArray[tipo.Nombre] = tipoArray;
+            return tipoArray;
+        }
+        
 
         public static string generarDeclaracionesTemporales()
         {
@@ -132,7 +149,8 @@ namespace Sec.Analizadores
             
             if (zFuncion.NombresParametro.Count != codigosArgumento.Count)
             {
-                throw new SemanticException($"Funcion toma {zFuncion.NombresParametro.Count} parametros no {codigosArgumento.Count}");
+                var nombresParametros = string.Join(", ", zFuncion.NombresParametro);
+                throw new SemanticException($"Funcion '{id}' toma {zFuncion.NombresParametro.Count} parametros ({nombresParametros}) no {codigosArgumento.Count}");
             }
             
             // TODO validacion de tipos?
@@ -272,7 +290,7 @@ namespace Sec.Analizadores
             }
             else
             {
-                throw new SemanticException($"lado izquierdo no es una referencia");
+                throw new SemanticException($"lado izquierdo no es una referencia, es {codigoDestino.tipo.Nombre}");
             }
             
         }
@@ -311,8 +329,6 @@ namespace Sec.Analizadores
 
                 var (propiedad, direccionRelativa) = temporal.obtenerPropiedadConDireccionRelativa(id);
                 
-//                Console.WriteLine($" {id} en {direccionRelativa} ");
-//                Console.WriteLine($" espacioUsado: {espacioUsado} ");
 
                 var codigo = new Codigo();
                 codigo.apuntador = TUtils.generarTemporal();
@@ -354,22 +370,11 @@ namespace Sec.Analizadores
             
             
             var arbol = parser.Parse(entrada);
-
-            if (arbol == null)
-            {
-                Console.WriteLine("arbol es nulo");
-                return null;
-            }
-
+            
 
             var raiz = arbol.Root;
             
-            if (raiz == null)
-            {
-                Console.WriteLine("raiz es nulo");
-                return null;
-            }
-            
+
             if (raiz == null || arbol.ParserMessages.Count > 0 || arbol.HasErrors())
             {
                 //---------------------> Hay Errores      

@@ -68,7 +68,14 @@ namespace Sec.Analizadores
                     ._accion(v => new TNodoDeclaracionVar(v[0], v[1]))
                 ;
             
-            tipo.Rule = produccion(id)._accion(v => new TNodoBusquedaTipo(v[0]))
+            
+            var tipoUnitario = new AutoNonTerminal();
+
+            tipo.Rule = produccion(tipo + "[]")._accion(v => new TNodoTipoCompuesto(v[0]))
+                        | tipoUnitario
+                ;
+            
+            tipoUnitario.Rule = produccion(id)._accion(v => new TNodoBusquedaTipo(v[0]))
                         | produccion("void")._accion(v => new TNodoBusquedaTipo("void"))
                         | produccion("int")._accion(v => new TNodoBusquedaTipo("int"))
                         | produccion("double")._accion(v => new TNodoBusquedaTipo("double"))
@@ -125,8 +132,12 @@ namespace Sec.Analizadores
                         | produccion(expr + "-" + expr)._accion(v => new TNodoResta(v[0], v[2]))
                         | produccion(expr + "." + id)._accion(v => new TNodoAccessoPunto(v[0], v[2]))
                         | produccion(expr + "==" + expr)._accion(v => new TNodoIgualIgual(v[0], v[2]))
+                        | produccion(expr + "&&" + expr)._accion(v => new TNodoAnd(v[0], v[2]))
+                        | produccion(expr + ">" + expr)._accion(v => new TNodoMayor(v[0], v[2]))
+                        | produccion(expr + "[" + expr + "]")._accion(v => new TNodoAccessoArray(v[0], v[2]))
                         | produccion("#" + expr + "#")._accion(v => new TNodoReservarMemoria(v[1]))
-                        | produccion("(" + id + ")" + expr)._accion(v => new TNodoCasteo(v[1], v[3]))
+//                        | produccion("(" + id + ")" + expr)._accion(v => new TNodoCasteo(v[1], v[3]))
+                        | produccion("(" + tipo + ")" + expr)._accion(v => new TNodoCasteo2(v[1], v[3]))
                         | produccion("(" + expr + ")")._accion(v => v[1])
                         | produccion("@" + tipo)._accion(v => new TNodoObtenerEspacio(v[1]))
                         | produccion(@double)._accion(v => new TNodoCrearDouble(v[0]))
@@ -140,11 +151,16 @@ namespace Sec.Analizadores
 
             this.ConfigList<NodoAst>(false, argumentos, expr, ",");
 
+
+            RegisterOperators(4, "&&");
+            RegisterOperators(8, "==", "!=");
             
-            RegisterOperators(5, "+", "-");
-            RegisterOperators(2, "==", "!=");
-//            RegisterOperators(2,  "(");
-            RegisterOperators(13, ".");
+            RegisterOperators(9, "<", ">", "<=", ">=");
+            RegisterOperators(11, "+", "-");
+
+            RegisterOperators(16, ".", "[", "]");
+            
+
 
             LanguageFlags |= LanguageFlags.CreateAst;
             Root = inicio;

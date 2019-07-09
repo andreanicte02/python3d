@@ -229,7 +229,8 @@ namespace Sec.Analizadores
         {
             var codigo = new CodigoT();
 
-            var cMetodo = PNodoBuscarId.buscarId(_id);
+            var cMetodo = PUtils.desenvolver(PNodoBuscarId.buscarId(_id));
+            codigo.agregar(cMetodo);
 
             var temp = PUtils.generarTemporal();
             codigo.agregar($"General[] {temp} = new General[{_nodosArgumento.Count}];");
@@ -237,6 +238,7 @@ namespace Sec.Analizadores
             for (int i = 0; i < _nodosArgumento.Count; i++)
             {
                 var cArg = PUtils.desenvolver(_nodosArgumento[i].GenerarCodigo(entorno));
+                codigo.agregar(cArg);
                 codigo.agregar($"{temp}[{i}] = {cArg.apuntador};");
             }
 

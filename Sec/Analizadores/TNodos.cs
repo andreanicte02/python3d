@@ -81,6 +81,30 @@ namespace Sec.Analizadores
             return codigo;
         }
     }
+    
+    
+//    public static Dictio
+
+    
+    public class TNodoTipoCompuesto : TNodo
+    {
+        private readonly NodoAst _nodoTipo;
+
+        public TNodoTipoCompuesto(NodoAst nodoTipo)
+        {
+            _nodoTipo = nodoTipo;
+        }
+        
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            var codigoTipo = _nodoTipo.GenerarCodigo(entorno);
+            
+            
+            var codigo = new Codigo();
+            codigo.tipo = TUtils.obtenerTipoDesdeBancoArray(codigoTipo.tipo);
+            return codigo;
+        }
+    }
 
     public class TNodoBusquedaTipo : TNodo
     {
@@ -147,7 +171,9 @@ namespace Sec.Analizadores
         private readonly List<NodoAst> _sentencias;
         public ZEntorno Entorno { get; }
 
-        public List<string> NombresParametro => Entorno.NombresPropiedad.Where(s => s != RETURN).ToList();
+//        public List<string> NombresParametro => Entorno.NombresPropiedad.Where(s => s != RETURN).ToList();
+        public List<string> NombresParametro { get; }
+
 
         public ZFuncion(ZEntorno entornoPadre, ZEntorno tipoRetorno, string id, List<NodoAst> nodosParametro, List<NodoAst> sentencias)
         {
@@ -161,6 +187,7 @@ namespace Sec.Analizadores
             {
                 nodoParametro.GenerarCodigo(Entorno);
             }
+            NombresParametro = Entorno.NombresPropiedad.Where(s => s != RETURN).ToList();
             
             Id = id;
             _sentencias = sentencias;
@@ -356,6 +383,36 @@ namespace Sec.Analizadores
             return codigo;
         }
     }
+    
+    public class TNodoCasteo2 : TNodo
+    {
+        private readonly NodoAst _nodoTipo;
+        private readonly NodoAst _e;
+
+        public TNodoCasteo2(NodoAst nodoTipo, NodoAst e)
+        {
+            _nodoTipo = nodoTipo;
+            _e = e;
+        }
+
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            var codigoTipo = _nodoTipo.GenerarCodigo(entorno);
+//            var tipo = entorno.obtenerTipoDeclarado(_idTipo);
+            
+            var c = TUtils.desenvolver(_e.GenerarCodigo(entorno));
+            
+            var codigo = new Codigo();
+            codigo.tipo = codigoTipo.tipo;
+            
+            codigo.agregar(c);
+            codigo.apuntador = c.apuntador;
+            codigo.extra = $"(({codigo.tipo.Nombre}) {c.extra}";
+
+            return codigo;
+        }
+    }
+    
     public class TNodoCasteo : TNodo
     {
 //        private readonly NodoAst _nodoTipo;
@@ -421,6 +478,112 @@ namespace Sec.Analizadores
 
             GestorTemp.usarTemp(c1.apuntador);
             
+            return codigo;
+        }
+    }
+    
+    public class TNodoMayor: TNodo{
+        private readonly NodoAst _e1;
+        private readonly NodoAst _e2;
+
+        public TNodoMayor(NodoAst e1, NodoAst e2)
+        {
+            _e1 = e1;
+            _e2 = e2;
+        }
+        
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            var c1 = TUtils.desenvolver(_e1.GenerarCodigo(entorno));
+            var c2 = TUtils.desenvolver(_e2.GenerarCodigo(entorno));
+            
+            var codigo = new Codigo();
+
+
+            if (!TUtils.esNumerico(c1.tipo) || !TUtils.esNumerico(c2.tipo))
+            {
+                throw new SemanticException("< solo puede ser comparado con numerico");
+            }
+
+
+            var labelFin = TUtils.generarLabel();
+            
+            codigo.tipo = ZTipos.tipoInt;
+            codigo.extra = $"{c1.extra} > {c2.extra}";
+            codigo.apuntador = TUtils.generarTemporal();
+            GestorTemp.agregarTemp(codigo.apuntador);
+            GestorTemp.usarTemp(c1.apuntador);
+            GestorTemp.usarTemp(c2.apuntador);
+            
+            codigo.agregar(c1);
+            codigo.agregar(c2);
+            codigo.agregar($"{codigo.apuntador} = 1;");
+            codigo.comentar($"...");
+
+            codigo.agregar($"if ({c1.apuntador} > {c2.apuntador}) goto {labelFin};");
+            codigo.comentar($"{c1.extra} > {c2.extra}");
+            
+            codigo.agregar($"{codigo.apuntador} = 0;");
+            codigo.comentar("...");
+            
+            codigo.agregar($"{labelFin}:");
+            codigo.comentar("..");
+
+            return codigo;
+        }
+    }
+
+    public class TNodoAnd : TNodo
+    {
+        private readonly NodoAst _e1;
+        private readonly NodoAst _e2;
+
+        public TNodoAnd(NodoAst e1, NodoAst e2)
+        {
+            _e1 = e1;
+            _e2 = e2;
+        }
+        
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            var c1 = TUtils.desenvolver(_e1.GenerarCodigo(entorno));
+            var c2 = TUtils.desenvolver(_e2.GenerarCodigo(entorno));
+            
+            var codigo = new Codigo();
+
+
+            if (!TUtils.esNumerico(c1.tipo) || !TUtils.esNumerico(c2.tipo))
+            {
+                throw new SemanticException("&& solo puede ser comparado con numerico");
+            }
+
+
+            var labelFin = TUtils.generarLabel();
+            
+            codigo.tipo = ZTipos.tipoInt;
+            codigo.extra = $"{c1.extra} && {c2.extra}";
+            codigo.apuntador = TUtils.generarTemporal();
+            GestorTemp.agregarTemp(codigo.apuntador);
+            GestorTemp.usarTemp(c1.apuntador);
+            GestorTemp.usarTemp(c2.apuntador);
+            
+            codigo.agregar(c1);
+            codigo.agregar(c2);
+            codigo.agregar($"{codigo.apuntador} = 0;");
+            codigo.comentar($"...");
+
+            codigo.agregar($"if ({c1.apuntador} == 0) goto {labelFin};");
+            codigo.comentar($"{c1.extra} is false");
+            
+            codigo.agregar($"if ({c2.apuntador} == 0) goto {labelFin};");
+            codigo.comentar($"{c2.extra} is false");
+            
+            codigo.agregar($"{codigo.apuntador} = 1;");
+            codigo.comentar("...");
+            
+            codigo.agregar($"{labelFin}:");
+            codigo.comentar("..");
+
             return codigo;
         }
     }
@@ -521,6 +684,55 @@ namespace Sec.Analizadores
 
         }
     }
+
+    public class TNodoAccessoArray : TNodo
+    {
+        private readonly NodoAst _e1;
+        private readonly NodoAst _e2;
+        
+        public TNodoAccessoArray(NodoAst e1, NodoAst e2)
+        {
+            _e1 = e1;
+            _e2 = e2;
+        }
+        
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            var ca = TUtils.desenvolver(_e1.GenerarCodigo(entorno));
+            var ci = TUtils.desenvolver(_e2.GenerarCodigo(entorno));
+
+            if (!(ca.tipo is ZArray))
+            {
+                throw new SemanticException("Operador [] solo valido con arrays, no valido para " + ca.tipo.Nombre);
+            }
+
+            if (!TUtils.esNumerico(ci.tipo))
+            {
+                throw new SemanticException("Debe de ser un indice entero, no valido para " + ci.tipo.Nombre);
+            }
+            
+            var codigo = new Codigo();
+            codigo.tipo = new ZReferencia((ca.tipo as ZArray).TipoContenido);
+            codigo.extra = $"{ca.extra}[{ci.extra}]";
+
+
+            var temp = TUtils.generarTemporal();
+            codigo.agregar($"{temp} = {ca.apuntador} + 1;");
+            GestorTemp.usarTemp(ca.apuntador);
+
+            codigo.apuntador = TUtils.generarTemporal();
+            GestorTemp.agregarTemp(codigo.apuntador);
+            codigo.agregar($"{codigo.apuntador} = {temp} + {ci.apuntador};");
+            GestorTemp.usarTemp(ci.apuntador);
+            
+            codigo.comentar($"&{ca.extra}[{ci.extra}]");
+            codigo.textoValor = $"heap[{codigo.apuntador}]";
+
+            return codigo;
+
+        }
+    }
+    
     public class TNodoSuma : TNodo
     {
         private readonly NodoAst _e1;

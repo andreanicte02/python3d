@@ -119,6 +119,15 @@ namespace Sec.Analizadores
         }
     }
 
+    public class ZArray : ZEntorno
+    {
+        public ZEntorno TipoContenido { get;  }
+
+        public ZArray(string nombre, ZEntorno tipoContenido): base(null, nombre)
+        {
+            TipoContenido = tipoContenido;
+        }
+    }
     public class ZStruct : ZEntorno
     {
         private readonly List<NodoAst> _declaraciones;
