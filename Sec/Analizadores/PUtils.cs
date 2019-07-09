@@ -68,13 +68,18 @@ namespace Sec.Analizadores
             return codigo;
         }
         
-        public static CodigoT generarBloqueFuncion(string id, List<NodoPythonAst> sentencias, string sangria)
+        public static CodigoT generarBloqueFuncion(string id, List<string> parametros, List<NodoPythonAst> sentencias, string sangria)
         {
 //            var entorno = new PEntorno();
 
             var codigo = new CodigoT();
-            codigo.agregar($"void {id}()" + "{");
+            codigo.agregar($"General {id}(General[] argumentos)" + "{");
             codigo.agregar($"{sangria}General ambito = crearAmbito();");
+
+            for (var i = 0 ; i < parametros.Count; i++)
+            {
+                codigo.agregar($"{sangria}registrar(ambito, \"{parametros[i]}\", argumentos[{i}]);");
+            }
             
             
             var codigoFuncionesAnidadas = new CodigoT();

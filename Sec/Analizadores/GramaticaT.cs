@@ -135,6 +135,7 @@ namespace Sec.Analizadores
                         | produccion(expr + "&&" + expr)._accion(v => new TNodoAnd(v[0], v[2]))
                         | produccion(expr + ">" + expr)._accion(v => new TNodoMayor(v[0], v[2]))
                         | produccion(expr + "[" + expr + "]")._accion(v => new TNodoAccessoArray(v[0], v[2]))
+                        | produccion( "new" + tipo + "[" + expr + "]")._accion(v => new TNodoCrearArray(v[1], v[3]))
                         | produccion("#" + expr + "#")._accion(v => new TNodoReservarMemoria(v[1]))
 //                        | produccion("(" + id + ")" + expr)._accion(v => new TNodoCasteo(v[1], v[3]))
                         | produccion("(" + tipo + ")" + expr)._accion(v => new TNodoCasteo2(v[1], v[3]))

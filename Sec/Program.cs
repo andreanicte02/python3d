@@ -14,8 +14,8 @@ namespace Sec
             Console.WriteLine("holi");
             
 
-//            pruebaPython();
-            pruebaT();
+            pruebaPython();
+//            pruebaT();
 
         }
 
@@ -25,7 +25,7 @@ namespace Sec
             var entrada = @"
 hola = 2
 
-def hola():
+def hola(a, b):
     a = 3
 
 otro = hola
@@ -63,7 +63,7 @@ otro(1, 2)
 
             var sentencias = (List<NodoPythonAst>) raiz.AstNode;
 
-            var codigo = PUtils.generarBloqueFuncion("python_main", sentencias, "\t");
+            var codigo = PUtils.generarBloqueFuncion("python_main", new List<string>(),  sentencias, "\t");
             
             Console.WriteLine(codigo.texto);
             
@@ -75,7 +75,7 @@ otro(1, 2)
         public static void pruebaT()
         {
             var entrada = @"
-                public int 
+
 
                 int[] generar(){
 	                int[] n = (int[]) #21#;
@@ -91,6 +91,10 @@ otro(1, 2)
                 void main(){
 	                int[] numeros = generar();
 	                printlnNumber(numeros[0]);
+                    int[] n2 = new int[3];
+                    n2[0] = 1993;
+                    printlnNumber(n2[0]);
+                    printlnNumber(n2.length);
                 }
 
 

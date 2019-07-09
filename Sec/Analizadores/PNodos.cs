@@ -92,17 +92,19 @@ namespace Sec.Analizadores
     public class PFuncion
     {
         private readonly string _id;
+        private readonly List<string> _parametros;
         private readonly List<NodoPythonAst> _sentencias;
 
-        public PFuncion(string id, List<NodoPythonAst> sentencias)
+        public PFuncion(string id, List<string> parametros, List<NodoPythonAst> sentencias)
         {
             _id = id;
+            _parametros = parametros;
             _sentencias = sentencias;
         }
 
         public CodigoT GenerarCodigoFuncion()
         {
-            return PUtils.generarBloqueFuncion(_id, _sentencias, "\t");
+            return PUtils.generarBloqueFuncion(_id, _parametros, _sentencias, "\t");
         }
     }
     
@@ -297,17 +299,19 @@ namespace Sec.Analizadores
     public class PNodoCrearMetodo : PNodo
     {
         private readonly string _id;
+        private readonly List<string> _parametros;
         private readonly List<NodoPythonAst> _sentencias;
 
-        public PNodoCrearMetodo(string id, List<NodoPythonAst> sentencias)
+        public PNodoCrearMetodo(string id, List<string> parametros, List<NodoPythonAst> sentencias)
         {
             _id = id;
+            _parametros = parametros;
             _sentencias = sentencias;
         }
         
         public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
         {
-            var pFuncion = new PFuncion(_id, _sentencias);
+            var pFuncion = new PFuncion(_id, _parametros, _sentencias);
             entorno.agregarFuncionPython(pFuncion);
             
             var codigo = new CodigoT();

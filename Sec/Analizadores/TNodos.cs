@@ -443,6 +443,55 @@ namespace Sec.Analizadores
             return codigo;
         }
     }
+
+
+    public class TNodoCrearArray : TNodo
+    {
+        private readonly NodoAst _nodoTipo;
+        private readonly NodoAst _nodoValor;
+
+        public TNodoCrearArray(NodoAst nodoTipo, NodoAst nodoValor)
+        {
+            _nodoTipo = nodoTipo;
+            _nodoValor = nodoValor;
+        }
+        
+        
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            var tipo = _nodoTipo.GenerarCodigo(entorno).tipo;
+            var codigoValor = TUtils.desenvolver(_nodoValor.GenerarCodigo(entorno));
+            
+            if (codigoValor.tipo != ZTipos.tipoInt)
+            {
+                throw new SemanticException($"Solo se puede reservar una cantidad entera de memoria");
+            }
+            
+            var codigo = new Codigo();
+            codigo.tipo = TUtils.obtenerTipoDesdeBancoArray(tipo);
+            
+            codigo.apuntador = TUtils.generarTemporal();
+            GestorTemp.agregarTemp(codigo.apuntador);
+            
+            codigo.agregar(codigoValor);
+            codigo.agregar($"{codigo.apuntador} = H;");
+            codigo.comentar($"captura de direccion");
+
+            var temp = TUtils.generarTemporal();
+            codigo.agregar($"{temp} = {codigoValor.apuntador} + 1;");
+            codigo.comentar("array.legth espacio");
+            codigo.agregar($"H = H + {temp}; ");
+            codigo.comentar($"({codigoValor.extra}) bloques reservados");
+            
+            codigo.agregar($"{codigo.apuntador} = {codigoValor.apuntador};");
+
+            codigo.extra = $"[new {tipo.Nombre}({codigoValor.extra}) ]";
+
+            GestorTemp.usarTemp(codigoValor.apuntador);
+            
+            return codigo;
+        }
+    }
     
     public class TNodoReservarMemoria : TNodo
     {

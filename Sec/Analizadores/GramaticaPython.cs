@@ -300,11 +300,11 @@ namespace Sec.Analizadores
             //crear metodo
 
             crearMetodo.Rule = produccion(def + id + apar + parametros + cpar + dosp + Eos + bloqueLocal)
-                    ._accion(v => new PNodoCrearMetodo(v[1], v[6]))
+                    ._accion(v => new PNodoCrearMetodo(v[1], v[3], v[6]))
                 ;
             
             var parametro = new AutoNonTerminal();
-            parametro.Rule = produccion(id)._accion(v => "asdf");
+            parametro.Rule = produccion(id)._accion(v => v[0]);
 
             this.ConfigList<string>(false, parametros, parametro, ",");
             
