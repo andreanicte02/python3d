@@ -35,8 +35,8 @@ namespace Sec.Analizadores
             return new NonTerminal("") {Rule = _};
         }
         
-        
-        public static void ConfigList<T>(this Grammar gramar, bool atLeastOne, AutoNonTerminal startList , AutoNonTerminal element, string separator = null)
+//        BnfExpression
+        public static void ConfigList<T>(this Grammar gramar, bool atLeastOne, AutoNonTerminal startList , NonTerminal element, string separator = null)
         {
             // List<T>
             var elements = new AutoNonTerminal();

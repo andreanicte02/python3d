@@ -1,19 +1,36 @@
+using System.Collections.Generic;
+using Irony.Ast;
 using Irony.Parsing;
+using static Sec.Analizadores.IronyUtils;
 
 namespace Sec.Analizadores
 {
     public class GramaticaPython: Grammar
     {
-   
+//        public override void BuildAst(LanguageData language, ParseTree parseTree)
+//        {
+//            if (!LanguageFlags.IsSet(LanguageFlags.CreateAst))
+//                return;
+//            var astContext = new AstContext(language);
+//            var astBuilder = new AstBuilder(astContext);
+//            astBuilder.BuildAst(parseTree);
+//        }
+
         public override void CreateTokenFilters(LanguageData language, TokenFilterList filters)
         {
             var outlineFilter = new CodeOutlineFilter(language.GrammarData, OutlineOptions.ProduceIndents |  OutlineOptions.CheckBraces, ToTerm(@"\"));
             filters.Add(outlineFilter);
+
         }
+        
+//        public override
         
            public GramaticaPython():  base(caseSensitive: true)
         {
+            LanguageFlags |= LanguageFlags.CreateAst;
             
+            
+//            AstContext
 
             CommentTerminal COMENTARIO_SIMPLE = new CommentTerminal("comentario_simple", "//", "\n", "\r\n");
             CommentTerminal COMENTARIO_MULT = new CommentTerminal("comentario_mult", "/*", "*/");
@@ -154,100 +171,118 @@ namespace Sec.Analizadores
 
 
             //-------------------------------------------------------------NO TERMINALES
-            var INICIO = new NonTerminal("INICIO");
+            var INICIO = new AutoNonTerminal("INICIO");
            
-            var sentencia = new NonTerminal("sentencia");
-            var sentencias = new NonTerminal("sentencias");
-            var listaSentencia = new  NonTerminal("listaSentencia");
+            var sentencia = new AutoNonTerminal("sentencia");
+            var sentencias = new AutoNonTerminal("sentencias");
+            var listaSentencia = new  AutoNonTerminal("listaSentencia");
             
-            var asignar = new  NonTerminal("asignar");
-            var exp = new  NonTerminal("exp");
-            var crearClase = new  NonTerminal("crearClase");
+            var asignar = new  AutoNonTerminal("asignar");
+            var exp = new  AutoNonTerminal("exp");
+            var crearClase = new  AutoNonTerminal("crearClase");
             
             //pdoruccion de sentencias de clase
-            var sentenciaClase = new  NonTerminal("sentenciaClase");
-            var sentenciasClases = new  NonTerminal("sentenciasClases");
-            var bloqueClase = new  NonTerminal("bloqueClase");
+            var sentenciaClase = new  AutoNonTerminal("sentenciaClase");
+            var sentenciasClases = new  AutoNonTerminal("sentenciasClases");
+            var bloqueClase = new  AutoNonTerminal("bloqueClase");
             
             //prouccion de sentencias locales
-            var sentenciaLocal = new NonTerminal("sentenciaLocal");
-            var bloqueLocal = new NonTerminal("bloqueLocal");
-            var sentenciasLocales = new NonTerminal("sentenciasLocal");
+            var sentenciaLocal = new AutoNonTerminal("sentenciaLocal");
+            var bloqueLocal = new AutoNonTerminal("bloqueLocal");
+            var sentenciasLocales = new AutoNonTerminal("sentenciasLocal");
 
             
-            var crearMetodo = new  NonTerminal("crearMetodo");
-            var sentenciaPrint = new  NonTerminal("sentenciaPrint");
-            var exps        = new NonTerminal("listaExp");
-            var listaId         = new NonTerminal("listaId");
-            var parametros      = new NonTerminal("parametros");
-            var listaExp     = new NonTerminal("parametrosExp");
-            var sentenciaAlcance = new NonTerminal("sentenciaAlcance");
-            var sentenciaWhile      = new NonTerminal("sentenciaWhile");
-            var sentenciaIf         = new NonTerminal("sentenciaIf");
-            var sentenciaElif       = new NonTerminal("sentenciaElif");
-            var sentenciaReturn       = new NonTerminal("sentenciaReturn");
-            var invocacionPunto       = new NonTerminal("invocacionPunto");
-            var invocacion       = new NonTerminal("invocacion");    
-            var sentenciaFor       = new NonTerminal("sentenciaFor");
-            var sentenciaImport  = new NonTerminal("sentenciaImport");
+            var crearMetodo = new  AutoNonTerminal("crearMetodo");
+            var sentenciaPrint = new  AutoNonTerminal("sentenciaPrint");
+            var exps        = new AutoNonTerminal("listaExp");
+            var listaId         = new AutoNonTerminal("listaId");
+            var parametros      = new AutoNonTerminal("parametros");
+            var listaExp     = new AutoNonTerminal("parametrosExp");
+            var sentenciaAlcance = new AutoNonTerminal("sentenciaAlcance");
+            var sentenciaWhile      = new AutoNonTerminal("sentenciaWhile");
+            var sentenciaIf         = new AutoNonTerminal("sentenciaIf");
+            var sentenciaElif       = new AutoNonTerminal("sentenciaElif");
+            var sentenciaReturn       = new AutoNonTerminal("sentenciaReturn");
+            var invocacionPunto       = new AutoNonTerminal("invocacionPunto");
+            var invocacion       = new AutoNonTerminal("invocacion");    
+            var sentenciaFor       = new AutoNonTerminal("sentenciaFor");
+            var sentenciaImport  = new AutoNonTerminal("sentenciaImport");
 
             
             
             //arrayInit produccion de tuplas, arreglos, diccionarios conjunto
             var arrayInit  = new NonTerminal("arrayInit");
             
-            var cuerpoArray  = new NonTerminal("cuerpoArray");
-            var arrayElemento  = new NonTerminal("arrayElemento");
-            var arrayElementos  = new NonTerminal("arrayElementos");
+            var cuerpoArray  = new AutoNonTerminal("cuerpoArray");
+            var arrayElemento  = new AutoNonTerminal("arrayElemento");
+            var arrayElementos  = new AutoNonTerminal("arrayElementos");
             
           
 
             var sentenciaDel  = new NonTerminal("sentenciaDel");
             
             //sentencia para esignar exp = linitAisgnar
-            var initAsignar  = new NonTerminal("initAsignar");
-            var lInitAsignar =  new NonTerminal("lInitAsignar");
+            var initAsignar  = new AutoNonTerminal("initAsignar");
+            var lInitAsignar =  new AutoNonTerminal("lInitAsignar");
             
             
             //sentencias de diccionario
-            var cuerpoDiccionario = new NonTerminal("cuerpoDiccionario");
-            var elementosDiccionario = new NonTerminal("elementosDiccionario");
-            var elementoDiccionario = new NonTerminal("elementoDiccionario");
+            var cuerpoDiccionario = new AutoNonTerminal("cuerpoDiccionario");
+            var elementosDiccionario = new AutoNonTerminal("elementosDiccionario");
+            var elementoDiccionario = new AutoNonTerminal("elementoDiccionario");
             
             
-            var sentenciaOpTernario = new NonTerminal("sentenciaOpTernario");
+            var sentenciaOpTernario = new AutoNonTerminal("sentenciaOpTernario");
 
-            var sentenciaLambda = new NonTerminal("sentenciaLambda");
+            var sentenciaLambda = new AutoNonTerminal("sentenciaLambda");
 
 
 
 
             //---------------------> ER
            
-            RegexBasedTerminal numero = new RegexBasedTerminal("numero", "[0-9]+");
-            RegexBasedTerminal @decimal = new RegexBasedTerminal("decimal", "[0-9]+[.][0-9]+");
-            RegexBasedTerminal id = new RegexBasedTerminal("id", "[A-Za-z]([A-Za-z|_|0-9]+)?");
+//            RegexBasedTerminal numero = new RegexBasedTerminal("numero", "[0-9]+");
+//            RegexBasedTerminal @decimal = new RegexBasedTerminal("decimal", "[0-9]+[.][0-9]+");
+//            RegexBasedTerminal id = new RegexBasedTerminal("id", "[A-Za-z]([A-Za-z|_|0-9]+)?");
             StringLiteral cadena = new StringLiteral("cadena", "\"", StringOptions.AllowsAllEscapes);
+            
+            var numero = new NumberLiteral("Entero", NumberOptions.IntOnly | NumberOptions.NoDotAfterInt);
+            numero._accion((v, n) => n.Token.Value);
+            var @decimal = new NumberLiteral("Decimal");
+            @decimal._accion((v, n) => n.Token.Value);
+
+            var id = new IdentifierTerminal("Identificador");
+            id._accion((v, n) => n.Token.Value);
+
+            cadena._accion((v, n) => n.Token.Value);
 
             
             //----------------------------------------------------------------------------------
 
             this.Root = INICIO;
+            
 
             INICIO.Rule = listaSentencia;
+//            INICIO.Rule = asignar + Eos;
+            
+            
+            
+            this.ConfigList<NodoPythonAst>(true, listaSentencia, sentencia);
+            
 
-            listaSentencia.Rule = Empty
-                                  | sentencias;
+            sentencia.Rule = sentenciaLocal
+//                asignar + Eos
+//                             | crearMetodo
+//                             | crearClase
+//                             | sentenciaImport + Eos
+//                             | sentenciasLocales
+                ;
 
-            sentencias.Rule = sentencias + sentencia
-                              | sentencia;
-
-            sentencia.Rule = asignar + Eos
-                             | crearClase
-                             | sentenciaImport + Eos
-                             | sentenciasLocales;
-
-            crearClase.Rule = @class + id + dosp +Eos+ bloqueClase;
+//            crearClase.Rule = @class + id + dosp +Eos+ bloqueClase;
+            
+            crearClase.Rule = produccion(@class + id + dosp +Eos+ bloqueLocal)
+                    ._accion(v => new PNodoCrearClase(v[1], v[3]))
+                ;
 
             bloqueClase.Rule = Indent + sentenciasClases + Dedent
                                | Empty;
@@ -264,28 +299,44 @@ namespace Sec.Analizadores
                            
             //crear metodo
 
-            crearMetodo.Rule = def + id + apar + parametros + cpar + dosp  + Eos+ bloqueLocal ;
+            crearMetodo.Rule = produccion(def + id + apar + parametros + cpar + dosp + Eos + bloqueLocal)
+                    ._accion(v => new PNodoCrearMetodo(v[1], v[6]))
+                ;
+            
+            var parametro = new AutoNonTerminal();
+            parametro.Rule = produccion(id)._accion(v => "asdf");
+
+            this.ConfigList<string>(false, parametros, parametro, ",");
+            
+
+
+
             
             //bloque con las sentencias locales
-            bloqueLocal.Rule = Indent + sentenciasLocales + Dedent
-                               | Empty;
+            bloqueLocal.Rule = produccion(Indent + sentenciasLocales + Dedent)._accion(v => v[0])
+                               | produccion(Empty)._accion(v => new List<NodoPythonAst>())
+                ;
             
             
-            sentenciasLocales.Rule = sentenciasLocales + sentenciaLocal
-                                   | sentenciaLocal;
+            this.ConfigList<NodoPythonAst>(true, sentenciasLocales, sentenciaLocal);
+
 
             sentenciaLocal.Rule = asignar + Eos
-                                  | sentenciaPrint + Eos
-                                  | sentenciaAlcance + Eos
-                                  | sentenciaWhile
-                                  | sentenciaIf
-                                  | sentenciaReturn + Eos
-                                  | sentenciaFor
-                                  | sentenciaDel + Eos
-                                  | exp + Eos //llamadas a metodos objetos
-                                  | pass + Eos
-                                  | @continue + Eos
-                                  | @break + Eos;
+                                  | crearMetodo
+                                  | crearClase
+                                  | exp + Eos
+//                                  | sentenciaPrint + Eos
+//                                  | sentenciaAlcance + Eos
+//                                  | sentenciaWhile
+//                                  | sentenciaIf
+//                                  | sentenciaReturn + Eos
+//                                  | sentenciaFor
+//                                  | sentenciaDel + Eos
+//                                  | exp + Eos //llamadas a metodos objetos
+//                                  | pass + Eos
+//                                  | @continue + Eos
+//                                  | @break + Eos
+                ;
 
 
 
@@ -294,14 +345,21 @@ namespace Sec.Analizadores
 
             sentenciaPrint.Rule = print + apar + listaExp + cpar;
 
-            asignar.Rule = exps + igual + lInitAsignar
-                           | exps + masIgual + lInitAsignar
-                           | exps + menosIgual + lInitAsignar
-                           | exps + porIgual + lInitAsignar
-                           | exps + divIgual + lInitAsignar
-                           | exps + modIgual + lInitAsignar
-                           | exps + potIgual + lInitAsignar
-                           | exps + dobleDivIgual + lInitAsignar;
+            asignar.Rule = produccion(exps + igual + exps)._accion(v => new PNodoAsignacion(v[0], v[2]))
+//            produccion(exps + igual + lInitAsignar)
+//                           | exps + masIgual + lInitAsignar
+//                           | exps + menosIgual + lInitAsignar
+//                           | exps + porIgual + lInitAsignar
+//                           | exps + divIgual + lInitAsignar
+//                           | exps + modIgual + lInitAsignar
+//                           | exps + potIgual + lInitAsignar
+//                           | exps + dobleDivIgual + lInitAsignar
+                ;
+            
+            this.ConfigList<NodoPythonAst>(true, exps, exp, ",");
+            
+//            exps.Rule = exps + coma + exp
+//                        | exp;
 
 
             lInitAsignar.Rule = lInitAsignar + coma + initAsignar //lista de posibles asignaciones
@@ -317,18 +375,15 @@ namespace Sec.Analizadores
                                     | nonlocal + exps;
             
 
-            listaExp.Rule = exps 
-                            | Empty;
+            
+            this.ConfigList<NodoPythonAst>(false, listaExp, exp, ",");
+//            listaExp.Rule = exps 
+//                            | Empty;
 
-            exps.Rule = exps + coma + exp
-                            | exp;
+            
 
 
-            parametros.Rule = listaId
-                              | Empty;
 
-            listaId.Rule = listaId + coma + id
-                           | id;
 
             sentenciaWhile.Rule = @while + exp + dosp  + Eos+ bloqueLocal ;
             
@@ -350,7 +405,15 @@ namespace Sec.Analizadores
                 | @for + exp + dosp + Eos + bloqueLocal + @else+dosp + Eos + bloqueLocal; // hay un for con else :(
                     //me faltaria el for para el que se usa parr recorre los diccionarios    
 
-            exp.Rule = exp + mas + exp
+
+                    
+            exp.Rule = produccion(id)._accion(v => new PNodoBuscarId(v[0]))
+                | produccion(numero)._accion(v => new PNodoCrearEntero(v[0]))
+                | invocacion
+                ;
+                    
+            var asdf = new AutoNonTerminal();
+            asdf.Rule = exp + mas + exp
                        | exp + menos + exp
                        | exp + por + exp
                        | exp + div + exp
@@ -382,8 +445,8 @@ namespace Sec.Analizadores
 
                        | self //es como el this
 
-                       | id
-                       | numero
+                       | produccion(id)._accion(v => new PNodoBuscarId(v[0]))
+                       | produccion(numero)._accion(v => new PNodoCrearEntero(v[0])) 
                        | @decimal
                        | cadena
                        | @true
@@ -433,7 +496,8 @@ namespace Sec.Analizadores
             //nose si agregar la funcion range, enumerate, dic, rservate, sorted
 
 
-            invocacion.Rule = id + apar +listaExp + cpar; 
+            invocacion.Rule = produccion(id + apar +listaExp + cpar)._accion(v => new PNodoInvocar(v[0], v[2]))
+                ; 
 
 
                        

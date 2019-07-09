@@ -49,6 +49,7 @@
     <Compile Include="Analizadores\Gramatica3D.cs" />
     <Compile Include="Analizadores\GramaticaT.cs" />
     <Compile Include="Analizadores\IronyExtensions.cs" />
+    <Compile Include="Analizadores\PNodos.cs" />
     <Compile Include="Analizadores\PUtils.cs" />
     <Compile Include="Analizadores\TNodos.cs" />
     <Compile Include="Analizadores\TStruct.cs" />

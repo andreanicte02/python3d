@@ -72,6 +72,7 @@ namespace Sec.Analizadores
             {
                 GestorTemp.limpiar();
                 var codigoSentencia = sentencia.GenerarCodigo(entorno);
+                codigo.agregar("//--------------------");
                 codigo.agregar(codigoSentencia);
             }
 
@@ -350,13 +351,30 @@ namespace Sec.Analizadores
             var ga = new GramaticaT();
             var parser = new Parser(ga);
             
+            
+            
             var arbol = parser.Parse(entrada);
 
+            if (arbol == null)
+            {
+                Console.WriteLine("arbol es nulo");
+                return null;
+            }
+
+
             var raiz = arbol.Root;
+            
+            if (raiz == null)
+            {
+                Console.WriteLine("raiz es nulo");
+                return null;
+            }
             
             if (raiz == null || arbol.ParserMessages.Count > 0 || arbol.HasErrors())
             {
                 //---------------------> Hay Errores      
+                
+                
 
                 foreach (var item in arbol.ParserMessages)
                 {
@@ -367,6 +385,8 @@ namespace Sec.Analizadores
 
                 return null;
             }
+            
+            Console.WriteLine("No hay errores sintacticos");
 
             return generarCodigo3D((List<NodoAst>) raiz.AstNode);
 
