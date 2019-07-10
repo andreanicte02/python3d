@@ -156,6 +156,36 @@ namespace Sec.Analizadores
             return term;
         }
 
+        
+        public static T _accionT<T>(this T term, int pos, DefinitionDelegate definitionDelegate) where T : BnfTerm
+        {
+            term.AstConfig.NodeCreator = (c, n) =>
+            {
+                var values = n.ChildNodes.Select(child => (dynamic) child.AstNode).ToArray();
+                n.AstNode = definitionDelegate(values);
+                
+                     
+                if (n.AstNode is TNodo node)
+                {
+                    try
+                    {
+                        node.location = n.ChildNodes[pos].Span.Location;
+                        
+                    }
+                    catch (SystemException e)
+                    {
+                        node.location = new SourceLocation(-1,-1,-1);
+                        Console.WriteLine(e); 
+                    }
+                }
+                
+                
+            };
+            return term;
+        }
+        
+        
+        
      
     }
 }

@@ -8,6 +8,7 @@
 // falta especificar los demas tipos
 
 
+
 struct Exception {
     int[] mensaje;
     int[] archivo;
@@ -37,10 +38,11 @@ Exception crearException(int[] mensaje, int[] archivo, int linea, int columna){
     e.mensaje = mensaje;
     e.archivo = archivo;
     e.linea = linea;
-    e.columna = columna;
+    e.columna = columna;ve
+    return e;
 }
 
-General crearEntorno(){
+General creearAmbito(){
     General g = new General;
     g.tipo  = 2;
     return g;
@@ -52,7 +54,7 @@ General crearIntGeneral(int valor){
     return g;
 }
 
-General registrar(General ambito, int[] llave, General valor){
+void registrar(General ambito, int[] llave, General valor){
     Entrada destino = buscarEntrada(ambito, llave);    
     if (destino == null){
         destino = crearEntrada(llave);
@@ -92,16 +94,16 @@ Entrada buscarIdlocal(General ambito, int[] llave){
 
 //---------------------------------------- OPERACIONES BINARIAS ----------------------------------------
 
-/*
+
 General masGeneral(General g1, General g2, int[] archivo, int fila, int columna){
     
     if (g1.tipo == 3 && g2.tipo == 3) {
         return crearIntGeneral(g1.valorInt + g2.valorInt);
     }
+     throw crearException("tipos no compatibles", "asd.py", 12, 23);
     
     
 }
-*/
 
 
 

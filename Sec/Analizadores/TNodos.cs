@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Irony.Parsing;
 
 namespace Sec.Analizadores
 {
@@ -8,14 +9,17 @@ namespace Sec.Analizadores
     public interface NodoAst
     {
         Codigo GenerarCodigo(ZEntorno entorno);
+        
     }
 
     public abstract class TNodo: NodoAst
     {
+        public SourceLocation location;
         public Codigo GenerarCodigo(ZEntorno entorno)
         {
             return IntentarGenerarCodigo(entorno);
         }
+        
         
         //
 
