@@ -144,7 +144,7 @@ namespace Sec.Analizadores
                         node.location = n.ChildNodes[pos].Span.Location;
                         
                     }
-                    catch (Exception e)
+                    catch (SystemException e)
                     {
                         node.location = new SourceLocation(-1,-1,-1);
                         Console.WriteLine(e); 

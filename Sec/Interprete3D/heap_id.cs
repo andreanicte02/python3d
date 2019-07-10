@@ -27,7 +27,7 @@ namespace Sec.Interprete3D.Relacionales
                 e.heap[Convert.ToInt32(pos)] = val;
 
             }
-            catch (Exception exception)
+            catch (SystemException exception)
             {
                 Console.WriteLine("se lleno el heap alv :(");
                 throw  new SemanticError3d("se lleno el heap");

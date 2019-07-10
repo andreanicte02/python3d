@@ -26,7 +26,7 @@ namespace Sec.Interprete3D
                 e.stack[Convert.ToInt32(pos)] = val;
             
             }
-            catch (Exception exception)
+            catch (SystemException exception)
             {
                 Console.WriteLine("se lleno el stack alv :(");
                 throw new SemanticError3d("se lleno el stack");
