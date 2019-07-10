@@ -43,7 +43,7 @@ namespace Sec.Interprete3D
             for (int x = 0; x < sentencias.Count; x++)
             {
 
-                if (Zide.inDebug3d)
+                if (Zide.inDebug3d==1 || Zide.inDebug3d ==3)
                 {
                     utilidadesParaDegg.enciclar(sentencias[x],e);
                 }

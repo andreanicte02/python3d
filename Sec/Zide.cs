@@ -51,7 +51,7 @@ namespace Sec
         private Button btnEjecutar3D;
         private Button btnAbrir3d;
         private Button btnDebug3d;
-        private Button btnDetenerDebug;
+        
         
 
 
@@ -60,7 +60,8 @@ namespace Sec
         /// </summary>
         //-----------------------------------------
         public  static Timer timer3d;
-        public  static bool inDebug3d;
+        public  static int inDebug3d;
+        
         public static FastColoredTextBox texTraducidBox;
         
         //-----------------------------------------
@@ -107,9 +108,9 @@ namespace Sec
             btnDebug3d = new Button();
             
             //timer
-            btnDetenerDebug = new Button();
+           
             texTraducidBox= new FastColoredTextBox();
-            instanciarTimer3d();
+            //instanciarTimer3d();
             
 
         }
@@ -120,7 +121,7 @@ namespace Sec
             timer3d.Interval = 50000;
             timer3d.Enabled = false;
             timer3d.Tick += debug3d;
-            inDebug3d = false;
+            
         }
 
         public void crear()
@@ -132,8 +133,7 @@ namespace Sec
             btnEjecutar3D.Text = "Ejecutar3D";
             btnAbrir3d.Text = "Abrir3d";
             btnDebug3d.Text = "Deb3d";
-            btnDetenerDebug.Text = "DetDebug3d";
-
+            
 
             WindowState = FormWindowState.Maximized;
             panel.FlowDirection = FlowDirection.TopDown;
@@ -161,7 +161,6 @@ namespace Sec
             panelBotones.Controls.Add(btnEjecutar3D);
             panelBotones.Controls.Add(btnAbrir3d);
             panelBotones.Controls.Add(btnDebug3d);
-            panelBotones.Controls.Add(btnDetenerDebug);
             
             //acciones de bontos --------------------------------
             btnAnalizar.Click +=  analizar_click;
@@ -171,7 +170,6 @@ namespace Sec
             btnEjecutar3D.Click += btnEjecutar3d_Click;
             btnAbrir3d.Click += btnAbrir3d_Click;
             btnDebug3d.Click += btnDebug3d_click;
-            btnDetenerDebug.Click += btnDetener_Click3d;
             
   
             
@@ -441,6 +439,7 @@ namespace Sec
         
         private void btnEjecutar3d_Click(object sender, EventArgs e)
         {
+            inDebug3d = 0;
             console.Text = "";
             TabPage actual = tabeEditor3D.SelectedTab;
             var entrada = tabeEditor3D.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is FastColoredTextBox);
@@ -453,9 +452,10 @@ namespace Sec
         private void btnDebug3d_click(object sender, EventArgs e)
         {
 
+            //debugear
             btnEjecutar3D.Enabled = false;
             timer3d.Enabled = true;
-            inDebug3d = true;
+            inDebug3d = 1;
             console.Text = "";
             var entrada = tabeEditor3D.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is FastColoredTextBox);
             Analizador3D analizar = new Analizador3D();
@@ -467,22 +467,18 @@ namespace Sec
         {
 
 
-            consoleErrores.Text = consoleErrores.Text;
-
-            btnDetenerDebug.Enabled = true;
+            
 
 
         } 
         
-        private void btnDetener_Click3d(object sender, EventArgs e)
-        {
+    
 
-
-            inDebug3d = false;
-
-
-        }
-
+        //0 sin debug
+        //1 en debug
+        //1 salto break a break;
+        //2 linea a linea;
+        //3 no ejecutar nada
 
 
 

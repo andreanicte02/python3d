@@ -56,8 +56,12 @@ public class reporteDebug3d: Form
     private Panel panelTabla;
     private entorno3d entorno;
     private readonly int linea;
-    private Label entrada;
+    private Label labelLinea;
     private String lineaTexto;
+    private FlowLayoutPanel botones;
+    private Button btnSigLinea;
+    private Button btnterminar;
+    private Button btnTerminarEjercutar;
     
     
     
@@ -67,9 +71,9 @@ public class reporteDebug3d: Form
         entorno = e;
         AutoScroll = true;
         this.linea = linea;
-        entrada = new Label();
+        labelLinea = new Label();
         this.lineaTexto = texto;
-        SetBounds(-150,-150,600,600);
+        SetBounds(-150,-150,550,500);
         inicializar();
         llenarTablaEntornos();
         llenarSalida();
@@ -80,8 +84,9 @@ public class reporteDebug3d: Form
 
     void llenarSalida()
     {
-        entrada.Text = lineaTexto;
-        entrada.BackColor = Color.OldLace;
+        labelLinea.Text = lineaTexto;
+        labelLinea.Text += "\n\nlinea: " + linea;
+        labelLinea.BackColor = Color.OldLace;
     }
 
     public void inicializar()
@@ -89,13 +94,24 @@ public class reporteDebug3d: Form
         panelComponentes = new FlowLayoutPanel();
         panelGeneral = new FlowLayoutPanel();
         panelTabla = new Panel();
-        panelGeneral.FlowDirection = FlowDirection.LeftToRight;
+        panelGeneral.FlowDirection = FlowDirection.RightToLeft;
+        botones = new FlowLayoutPanel();
+        botones.FlowDirection = FlowDirection.RightToLeft;
+        botones.SetBounds(0,0,400,50);
         
         
         btnBuscarPoint = new Button();
+        btnSigLinea = new Button();
+        btnterminar = new Button();
+        btnTerminarEjercutar = new Button();
+
+
+        btnBuscarPoint.Text = "SigBreakPoint";
+        btnSigLinea.Text = "SigLinea";
+        btnterminar.Text = "Ejecuar";
+        btnTerminarEjercutar.Text = "Terminar Ejecucion";
         
         
-        btnBuscarPoint.Text = "Buscar";
         btnBuscarPoint.Click += btnDetener_Click3d;
         
         
@@ -117,10 +133,16 @@ public class reporteDebug3d: Form
         panelTabla.Controls.Add(tablaMetodos);
 
         
-        entrada.SetBounds(0,0,200,20);
-        panelGeneral.Controls.Add(btnBuscarPoint);
+        labelLinea.SetBounds(0,0,500,200);
+
+        botones.Controls.Add(btnBuscarPoint);
+        botones.Controls.Add(btnSigLinea);
+        botones.Controls.Add(btnterminar);
+        botones.Controls.Add(btnTerminarEjercutar);
+        
+        panelGeneral.Controls.Add(botones);
         panelGeneral.Controls.Add(panelTabla);
-        panelGeneral.Controls.Add(entrada);
+        panelGeneral.Controls.Add(labelLinea);
         
         panelGeneral.SetBounds(0,0,500,500);
         Controls.Add(panelGeneral);
