@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Irony.Parsing;
+using Sec.Interprete3D;
 
 namespace Sec.Analizadores
 {
@@ -123,5 +125,20 @@ namespace Sec.Analizadores
             };
             return term;
         }
+        
+        public static T _acciond3D<T>(this T term, int pos,DefinitionDelegate definitionDelegate) where T : BnfTerm
+        {
+           
+            term.AstConfig.NodeCreator = (c, n) =>
+            {
+                var values = n.ChildNodes.Select(child => (dynamic) child.AstNode).ToArray();
+                n.AstNode = definitionDelegate(values);
+             
+
+            };
+            return term;
+        }
+
+     
     }
 }

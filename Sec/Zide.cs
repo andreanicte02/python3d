@@ -46,6 +46,7 @@ namespace Sec
 
         private Button btnGuardar;
         private Button btnEjecutar3D;
+        private Button btnAbrir3d;
 
         
         public Zide():base()
@@ -85,6 +86,8 @@ namespace Sec
             //mas botones
             btnGuardar = new Button();
             btnEjecutar3D = new Button();
+            btnAbrir3d = new Button();
+            
             
 
         }
@@ -96,6 +99,7 @@ namespace Sec
             bntAbrirArchivo.Text = "Abrir";
             btnGuardar.Text = "Guardar";
             btnEjecutar3D.Text = "Ejecutar3D";
+            btnAbrir3d.Text = "Abrir3d";
 
 
             WindowState = FormWindowState.Maximized;
@@ -122,13 +126,15 @@ namespace Sec
             bntAbrirArchivo.Click += btnAbirirArchivo_click;
             btnGuardar.Click += btnGuardarArchivo_click;
             btnEjecutar3D.Click += btnEjecutar3d_Click;
-          
+            btnAbrir3d.Click += btnAbrir3d_Click;
+            
             //panel dos para botnes-------------------------------------------
             panelBotones.Controls.Add(btnAnalizar);
             panelBotones.Controls.Add(btnCrearPestaña);
             panelBotones.Controls.Add(bntAbrirArchivo);
             panelBotones.Controls.Add(btnGuardar);
             panelBotones.Controls.Add(btnEjecutar3D);
+            panelBotones.Controls.Add(btnAbrir3d);
             
             //editor del 3d----------------------------------------------------
          
@@ -379,9 +385,31 @@ namespace Sec
             
            
         }
-        
 
-    
+        void btnAbrir3d_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog abrir = new OpenFileDialog();
+            abrir.Title = "Abrir archivos de texto";
+            abrir.Filter = "Archivo de Texto Plano  (*.txt)|*.txt|Todos los archivos (*.*)|*.*";
+            abrir.ShowDialog();
+            if (abrir.FileName.Length == 0)
+                return;
+
+            System.IO.StreamReader sr = new System.IO.StreamReader(abrir.FileName, System.Text.Encoding.UTF8);
+            String contenido = sr.ReadToEnd();
+            sr.Close();
+            
+            var entrada = tabeEditor3D.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is FastColoredTextBox);
+            TabPage myTabPage = tabeEditor3D.SelectedTab;
+
+            entrada.Text = contenido;
+            myTabPage.Text = abrir.FileName;
+
+
+        }
+
+
+
 
 
     }

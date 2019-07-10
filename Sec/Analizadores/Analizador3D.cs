@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using Irony.Parsing;
 using Sec.Interprete3D;
-using Sec.Interprete3D.Entorno;
+using Sec.Interprete3D.intefaces;
+
 
 namespace Sec.Analizadores
 {
@@ -40,14 +41,24 @@ namespace Sec.Analizadores
                 }
             }
 
-            Utilidades.lInstrucciones = new List<Instruccion3d>();
-            var instrucciones = (List<Instruccion3d>) arbol.Root.AstNode;
-            Utilidades.lInstrucciones = instrucciones;
+            utilidades.sentenciasGlobales = new List<nodo3d>();
+             
+             
+             var instrucciones = (List<nodo3d>) arbol.Root.AstNode;
+             utilidades.sentenciasGlobales = instrucciones;
             
-            entorno3d entornoGlobal = new entorno3d(null);
-            Utilidades.recogerEtiquetas(entornoGlobal,instrucciones);
-            Utilidades.ejecutarInstrucciones(entornoGlobal, instrucciones);
+             entorno3d e = new entorno3d();
+             
+             utilidades.recogerEtiquetas(e,utilidades.sentenciasGlobales, false,"");
+             
+             
+             Console.WriteLine("se analizo el archivo");
 
+             utilidades.ejecutarSentencias(e, utilidades.sentenciasGlobales);
+             
+             Console.WriteLine("reciguebdi etuqyetas");
+            
+             
         }
 
     }

@@ -1,12 +1,12 @@
 
-using System;
-using System.Collections.Generic;
 using Irony.Parsing;
 using Sec.Interprete3D;
-using Sec.Interprete3D.Instruccion;
-using Sec.Interprete3D.Instruccion.Imprimir;
-using Sec.Interprete3D.Instruccion.Label;
-using Sec.Interprete3D.Instruccion.Metodos;
+using Sec.Interprete3D.Aritmeticas;
+using Sec.Interprete3D.Declaraciones;
+using Sec.Interprete3D.intefaces;
+using Sec.Interprete3D.Primitivos;
+using Sec.Interprete3D.Print;
+using Sec.Interprete3D.Relacionales;
 using static Sec.Analizadores.IronyUtils;
 
 namespace Sec.Analizadores
@@ -74,6 +74,7 @@ namespace Sec.Analizadores
             var menos = ToTerm("-");
             var por = ToTerm("*");
             var div = ToTerm("/");
+            var mod = ToTerm("%");
             var mayor = ToTerm(">");
             var menor = ToTerm("<");
             var mayorIgual = ToTerm(">=");
@@ -124,18 +125,8 @@ namespace Sec.Analizadores
             
             //---------------------> ER
            
-            RegexBasedTerminal numero = new RegexBasedTerminal("numero", "[0-9]+");
-            numero._accion((values, node) => node.Token.Text);
-
-            /*var numero = new NumberLiteral("Entero", NumberOptions.IntOnly | NumberOptions.NoDotAfterInt);
-            numero._accion((v, n) => n.Token.Value);
-            
             var decimall = new NumberLiteral("Decimal");
-            decimall._accion((v, n) => n.Token.Value);*/
-
-
-            RegexBasedTerminal decimall = new RegexBasedTerminal("decimal", "[0-9]+[.][0-9]+");
-            decimall._accion((values, node) => node.Token.Text);
+            decimall._accion((v, n) => n.Token.Value);
             
             RegexBasedTerminal id = new RegexBasedTerminal("id", "[A-Za-z]([A-Za-z|_|0-9]+)?");
             id._accion((values, node) => node.Token.Text);
@@ -145,116 +136,116 @@ namespace Sec.Analizadores
             //----------------------------------------------------------------------------------
             
 
-            INICIO.Rule = produccion(sentencias)._accion(values=> values[0]);
+            INICIO.Rule = produccion(sentencias)._acciond3D(0,values=> values[0]);
 
      
             
-            this.ConfigList<Instruccion3d>(false,sentencias,sentencia);
+            this.ConfigList<nodo3d>(false,sentencias,sentencia);
 
 
-            sentencia.Rule = produccion(sentenciaMetodo)._accion(values => values[0])
-                             | produccion(methodDeclaration)._accion(values => values[0])
-                             | produccion(varDeclaration)._accion(values => values[0]);
+            sentencia.Rule = produccion(sentenciaMetodo)._acciond3D(0,values => values[0])
+                             | produccion(methodDeclaration)._acciond3D(0,values => values[0])
+                             | produccion(varDeclaration)._acciond3D(0,values => values[0]);
 
             
 
             //la accion que se registra solo a no termianles
             //asignacion debe tener obligatoriamente metodo nodecreathor
-            assigment.Rule = produccion(id + igual + op + pcoma)._accion(values =>
+            assigment.Rule = produccion(id + igual + op + pcoma)._acciond3D(1,values =>
                              {
-                                 Console.WriteLine($"Reconoci una asignacion para {values[0]} ");
-                                 return new NodoAsignar(values[0], values[2]);
+                                 //Console.WriteLine($"Reconoci una asignacion para {values[0]} ");
+                                 return new asignar(values[0], values[2]);
                              })
-                             | produccion(stack + acor + literal + ccor + igual + literal + pcoma)._accion(values=> new NodoStackId(values[2],values[5]))
-                             | produccion(heap + acor + literal + ccor + igual + literal + pcoma)._accion(values => new NodoAsignarHeapId(values[2],values[5]))
-                             | produccion(id + igual + heap + acor + literal + ccor + pcoma)._accion(values=> new NodoAsignarIdHeap(values[0], values[4]))
-                             | produccion(id + igual + stack + acor + literal + ccor + pcoma)._accion(values=> new NodoAsingarIdStack(values[0],values[4]))
+                             | produccion(stack + acor + literal + ccor + igual + literal + pcoma)._acciond3D(0,values=> new stack_id(values[2],values[5]))
+                             | produccion(heap + acor + literal + ccor + igual + literal + pcoma)._acciond3D(0,values => new heap_id(values[2],values[5]))
+                             | produccion(id + igual + heap + acor + literal + ccor + pcoma)._acciond3D(1,values=> new id_heap(values[0], values[4]))
+                             | produccion(id + igual + stack + acor + literal + ccor + pcoma)._acciond3D(1,values=> new id_stack(values[0],values[4]))
                 ;
                 
 
                             
                 
             
-            destiniOfJump.Rule = produccion(id + dosp)._accion(values => new NodoLabel(values[0]));
+            destiniOfJump.Rule = produccion(id + dosp)._acciond3D(1,values => new nodoLabel(values[0]));
             
-            inconditionalJump.Rule = produccion(goTo + id + pcoma)._accion(values => new NodoJumpLabel(values[1]));
+            inconditionalJump.Rule = produccion(goTo + id + pcoma)._acciond3D(0,values => new goTo(values[1]));
 
-            conditionalJump.Rule = produccion(iff + apar + relationalOperation + cpar + goTo+id+pcoma)._accion(values=> new NodoIf(values[2], new NodoJumpLabel(values[5])));
+            conditionalJump.Rule = produccion(iff + apar + relationalOperation + cpar + goTo+id+pcoma)._acciond3D(0,values=> new nodoIf(values[2], new goTo(values[5])));
 
-            conditionalJumpIfFalse.Rule = produccion(ifFalse + apar + relationalOperation + cpar + goTo + id + pcoma)._accion(values => new NodoIfFalse(values[2],new NodoJumpLabel(values [5])));
+            //onditionalJumpIfFalse.Rule = produccion(ifFalse + apar + relationalOperation + cpar + goTo + id + pcoma)._acciond3D(0,values => new NodoIfFalse(values[2],new NodoJumpLabel(values [5])));
 
-            methodInvocation.Rule = produccion(call + id + pcoma)._accion(values=> new NodoCallMetodo(values[1]));
+            methodInvocation.Rule = produccion(call + id + pcoma)._acciond3D(0,values=> new nodoCallMetodo(values[1]));
 
-            varDeclaration.Rule = produccion(varr + stack + acor + ccor + pcoma)._accion(values=> new NodoDeclararStack())
-                                  | produccion(varr + heap + acor + ccor + pcoma)._accion(values => new NodoDeclararHeap())
-                                  | produccion( varr + idList + pcoma)._accion(values => new NodoDeclararVars(values[1]))
-                                  | produccion(varr + id + igual + literal + pcoma)._accion(values => new NodoSoloDeclarar(values[1],values[3]));
+            varDeclaration.Rule = 
+                                   produccion( varr + idList + pcoma)._acciond3D(0,values => new DeclararListaId(values[1]))
+                                  | produccion(varr + id + igual + literal + pcoma)._acciond3D(0,values => new DeclararVariable(values[1],values[3]));
                 
 
             
             
-            printStatement.Rule = produccion(print + apar +comilla + pc + comilla + coma +literal+ cpar + pcoma)._accion(values => new NodoPrintC(values[6]))
-                                  |produccion(print + apar +comilla + pf + comilla + coma +literal+ cpar + pcoma)._accion(values => new NodoPrintF(values[6]))
-                                  |produccion(print + apar +comilla + pe + comilla + coma +literal+ cpar + pcoma)._accion(values => new NodoPrintI(values[6]))
+            printStatement.Rule = produccion(print + apar +comilla + pc + comilla + coma +literal+ cpar + pcoma)._acciond3D(0,values => new printC(values[6]))
+                                  |produccion(print + apar +comilla + pf + comilla + coma +literal+ cpar + pcoma)._acciond3D(0,values => new printF(values[6]))
+                                  |produccion(print + apar +comilla + pe + comilla + coma +literal+ cpar + pcoma)._acciond3D(0,values => new printI(values[6]))
 
                 ;
 
             cleanScope.Rule = clean + apar + literal + coma + literal + cpar + pcoma;
 
 
-            methodDeclaration.Rule = produccion(proc + id + begin + sentenciasMetodo+ end)._accion(values => new NodoDeclararMetodo(values[1],values[3]) );
+            methodDeclaration.Rule = produccion(proc + id + begin + sentenciasMetodo+ end)._acciond3D(0,values => new DeclararMetodo(values[1],values[3]) );
 
 
             
-            this.ConfigList<Instruccion3d>(false,sentenciasMetodo,sentenciaMetodo);
+            this.ConfigList<nodo3d>(false,sentenciasMetodo,sentenciaMetodo);
             
 
             inputStatement.Rule = input + apar + literal +cpar + pcoma;
 
             sentenciaMetodo.Rule = 
-                                    produccion(printStatement)._accion(values => values[0])
-                                   | produccion(methodInvocation)._accion(values => values[0])
-                                   | produccion(assigment)._accion(values=> values[0])
-                                   | produccion(destiniOfJump)._accion(values => values [0])
-                                   | produccion(inconditionalJump)._accion(values => values [0])
-                                   | produccion(conditionalJump)._accion(values => values [0])
-                                   | produccion(conditionalJumpIfFalse)._accion(values => values[0])
+                                    produccion(printStatement)._acciond3D(0,values => values[0])
+                                   | produccion(methodInvocation)._acciond3D(0,values => values[0])
+                                   | produccion(assigment)._acciond3D(0,values=> values[0])
+                                   | produccion(destiniOfJump)._acciond3D(0,values => values [0])
+                                   | produccion(inconditionalJump)._acciond3D(0,values => values [0])
+                                   | produccion(conditionalJump)._acciond3D(0,values => values [0])
+                                   //| produccion(conditionalJumpIfFalse)._acciond3D(0,values => values[0])
                                    | cleanScope 
                                    | inputStatement
                                     ;
 
             
 
-            this.ConfigList<Instruccion3d>(true,idList,idStatment,",");
+            this.ConfigList<NodoID>(true,idList,idStatment,",");
      
             
-            idStatment.Rule = produccion(id)._accion(values=> new NodoDeclararVar(values[0]));
+            idStatment.Rule = produccion(id)._acciond3D(0,values=> new NodoID(values[0]));
             
 
 
 
-            relationalOperation.Rule = produccion(literal + mayor + literal)._accion(values => new NodoMayor(values[0], values[2]))
-                      | produccion(literal + menor + literal)._accion(values => new NodoMenor(values[0], values[2]))
-                      | produccion(literal + mayorIgual + literal)._accion(values => new NodoMayorIgual(values[0], values[2]))
-                      | produccion(literal + menorIgual + literal)._accion(values => new NodoMenorIgual(values[0], values[2]))
-                      | produccion(literal + igualIgual + literal)._accion(values => new NodoIgualQue(values[0], values[2]))
-                      | produccion(literal + diferente + literal)._accion(values => new NodoDifernteQue(values[0], values[2]))
+            relationalOperation.Rule = produccion(literal + mayor + literal)._acciond3D(1,values => new mayor(values[0], values[2]))
+                      | produccion(literal + menor + literal)._acciond3D(1,values => new menor(values[0], values[2]))
+                      | produccion(literal + mayorIgual + literal)._acciond3D(1,values => new mayorIgual(values[0], values[2]))
+                      | produccion(literal + menorIgual + literal)._acciond3D(1,values => new menorIgual(values[0], values[2]))
+                      | produccion(literal + igualIgual + literal)._acciond3D(1,values => new igualIgual(values[0], values[2]))
+                      | produccion(literal + diferente + literal)._acciond3D(1,values => new diferente(values[0], values[2]))
                 ;
 
 
-            op.Rule =  produccion(literal + mas + literal)._accion(values=> new NodoSuma(values[0], values[2]))
-                      | produccion(literal + menos + literal)._accion(values=> new NodoResta(values[0], values[2]))
-                      | produccion(literal + por + literal)._accion(values=> new NodoMultiplicacion(values[0], values[2]))
-                      | produccion(literal + div + literal)._accion(values=> new NodoDivision(values[0], values[2]))
-                      | produccion(literal)._accion(values => values[0]) //se sube el dato
+            op.Rule =  produccion(literal + mas + literal)._acciond3D(1,values=> new suma(values[0], values[2]))
+                      | produccion(literal + menos + literal)._acciond3D(1,values=> new resta(values[0], values[2]))
+                      | produccion(literal + por + literal)._acciond3D(1,values=> new mult(values[0], values[2]))
+                      | produccion(literal + div + literal)._acciond3D(1,values=> new div(values[0], values[2]))
+                      | produccion(literal + mod + literal)._acciond3D(1,values => new modu(values[0], values[2]))
+                      | produccion(literal)._acciond3D(1,values => values[0]) //se sube el dato
                 ;
 
 
             
 
-            literal.Rule = produccion(numero)._accion(values => new NodoCrearNumero( int.Parse(values[0])))
-                            | produccion(id)._accion(values => new NodoBuscarId(values[0]))
-                            | produccion(decimall)._accion(values => new NodoCrearDecimal(double.Parse(values[0])))
+            literal.Rule = produccion(decimall)._acciond3D(0,values => new NodoNum( values[0]))
+                            | produccion(id)._acciond3D(0,values => new NodoBuscarId(values[0]))
+                            | produccion(decimall)._acciond3D(0,values => new NodoNum(values[0]))
                 ;
             
             
@@ -264,7 +255,7 @@ namespace Sec.Analizadores
             //----------------------------------------------------------------------------------
 
 
-      
+            
 
 
         }

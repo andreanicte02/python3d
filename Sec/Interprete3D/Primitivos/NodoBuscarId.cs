@@ -1,33 +1,27 @@
 using System;
-using Sec.Interprete3D.Entorno;
+using Sec.Interprete3D.intefaces;
 
-namespace Sec.Interprete3D.Instruccion
+namespace Sec.Interprete3D.Primitivos
 {
-    public class NodoBuscarId: Instruccion3d
+    public class NodoBuscarId:nodo3d
     {
         private String id;
+
         public NodoBuscarId(String id)
         {
             this.id = id;
-
         }
 
-        public override object ejecutarSin(entorno3d e)
+        public override object ejecutar(entorno3d e)
         {
 
-            return buscarId(e, id);
+            //obtengo solo el valor
+            return e.obtenerVar(id).valor;
         }
 
-        public override object recogerEtiquetas(entorno3d e)
+        public override object recoger(entorno3d e,  bool inMetodo, String nameMetod)
         {
-            
             return null;
-        }
-
-        public static Simbolo3d buscarId(entorno3d e, String id)
-        {
-
-           return e.getSimbolo(id);
         }
     }
 }
