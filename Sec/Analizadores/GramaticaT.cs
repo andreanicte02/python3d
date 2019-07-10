@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Irony.Parsing;
 using static Sec.Analizadores.IronyUtils;
 
@@ -8,6 +9,12 @@ namespace Sec.Analizadores
     {
         public GramaticaT() : base(true)
         {
+            CommentTerminal COMENTARIO_SIMPLE = new CommentTerminal("comentario_simple", "//", "\n", "\r\n");
+            CommentTerminal COMENTARIO_MULT = new CommentTerminal("comentario_mult", "/*", "*/");
+            NonGrammarTerminals.Add(COMENTARIO_SIMPLE);
+            NonGrammarTerminals.Add(COMENTARIO_MULT);
+            
+            
             var inicio = new AutoNonTerminal();
             
             var sentencias = new AutoNonTerminal();
@@ -34,6 +41,7 @@ namespace Sec.Analizadores
 
             var declaracion = new AutoNonTerminal();
             var asignacion = new AutoNonTerminal();
+            var sentenciaIf = new AutoNonTerminal();
             var retorno = new AutoNonTerminal();
             
             var expr = new AutoNonTerminal();
@@ -43,6 +51,8 @@ namespace Sec.Analizadores
             @int._accion((v, n) => n.Token.Value);
             var @double = new NumberLiteral("Decimal");
             @double._accion((v, n) => n.Token.Value);
+            var @string = new StringLiteral("String", "\"");
+            @string._accion((v, n) => n.Token.Value);
 
             var id = new IdentifierTerminal("Identificador");
             id._accion((v, n) => n.Token.Value);
@@ -56,15 +66,24 @@ namespace Sec.Analizadores
             sentencia.Rule = produccion(declaracionStruct)._accion(values => values[0])
                              | produccion(declaracionFuncion)._accion(values => values[0])
                 ;
-            
+
             declaracionStruct.Rule = produccion("struct" + id + "{" + declaracionesPropiedad + "}")
-                    ._accion(v => new TNodoDeclaracionStruct(v[1], v[3]))
+                                         ._accion(v => new TNodoDeclaracionStruct(v[1], v[3]))
+//                                     | produccion(ToTerm("struct") + "$" + "{" + declaracionesPropiedad + "}")
+//                                         ._accion(v => new TNodoDeclaracionStruct(v[1], v[3]))
                 ;
             declaracionPropiedad.Rule = produccion(tipo + id + ";")
                     ._accion(v => new TNodoDeclaracionVar(v[0], v[1]))
                 ;
             
-            tipo.Rule = produccion(id)._accion(v => new TNodoBusquedaTipo(v[0]))
+            
+            var tipoUnitario = new AutoNonTerminal();
+
+            tipo.Rule = produccion(tipo + "[]")._accion(v => new TNodoTipoCompuesto(v[0]))
+                        | tipoUnitario
+                ;
+            
+            tipoUnitario.Rule = produccion(id)._accion(v => new TNodoBusquedaTipo(v[0]))
                         | produccion("void")._accion(v => new TNodoBusquedaTipo("void"))
                         | produccion("int")._accion(v => new TNodoBusquedaTipo("int"))
                         | produccion("double")._accion(v => new TNodoBusquedaTipo("double"))
@@ -86,6 +105,11 @@ namespace Sec.Analizadores
             sentenciaFuncion.Rule = produccion(asignacion + ";")._accion(v => v[0])
                                     | produccion(declaracion + ";")._accion(v => v[0])
                                     | produccion(retorno + ";")._accion(v => v[0])
+                                    | invocacion + ";"
+                                    | sentenciaIf
+                                    | produccion(ToTerm("!") + "print" + "(" + id + "," + expr + ")" + ";")._accion(v => new TNodoPrintSimple(v[3], v[5]))
+                                    | produccion("throw" + expr + ";" )._accion(v => new TNodoThrow(v[1]))
+                                    | produccion(ToTerm("while") + "(" + expr + ")" +"{"+ sentenciasFuncion + "}")._accion(v => new TNodoWhile(v[2], v[5]))
                 ;
 
             declaracion.Rule = produccion(tipo + id + "=" + expr)
@@ -93,33 +117,67 @@ namespace Sec.Analizadores
                                | produccion(tipo + id)._accion(v => new TNodoDeclaracionVar(v[0], v[1]))
                 ;
 
+
+            sentenciaIf.Rule = produccion(ToTerm("if") + "(" + expr + ")" + "{" + sentenciasFuncion + "}" + "else" +
+                                          "{" + sentenciasFuncion + "}")
+                                   ._accion(v => new TNodoIf(v[2], v[5], v[9]))
+                               | produccion(ToTerm("if") + "(" + expr + ")" + "{" + sentenciasFuncion + "}")
+                                   ._accion(v => new TNodoIf(v[2], v[5], new List<NodoAst>()))
+                               | produccion(ToTerm("if") + "(" + expr + ")" + "{" + sentenciasFuncion + "}" + "else" +
+                                            sentenciaIf)
+                                   ._accion(v => new TNodoIf(v[2], v[5], new List<NodoAst>() {v[8]}))
+
+                ;
+            
             asignacion.Rule = produccion(expr + "=" + expr)
                     ._accion(v => new TNodoAsignacion(v[0], v[2]))
                 ;
             retorno.Rule = produccion("return" + expr)._accion(v => new TNodoReturn(v[1]))
                 | produccion("return")._accion(v => new TNodoReturn() )
                 ;
-            
+
 
             expr.Rule = produccion(expr + "+" + expr)._accion(v => new TNodoSuma(v[0], v[2]))
+                        | produccion(expr + "-" + expr)._accion(v => new TNodoResta(v[0], v[2]))
+                        | produccion(expr + "." + id)._accion(v => new TNodoAccessoPunto(v[0], v[2]))
+                        | produccion(expr + "==" + expr)._accion(v => new TNodoIgualIgual(v[0], v[2]))
+                        | produccion(expr + "!=" + expr)._accion(v => new TNodoNoIgual(v[0], v[2]))
+                        | produccion(expr + "&&" + expr)._accion(v => new TNodoAnd(v[0], v[2]))
+                        | produccion(expr + ">" + expr)._accion(v => new TNodoMayor(v[0], v[2]))
+                        | produccion(expr + "<" + expr)._accion(v => new TNodoMenor(v[0], v[2]))
+                        | produccion(expr + ">=" + expr)._accion(v => new TNodoMayorIgual(v[0], v[2]))
+                        | produccion(expr + "<=" + expr)._accion(v => new TNodoMenorIgual(v[0], v[2]))
+                        | produccion(expr + "[" + expr + "]")._accion(v => new TNodoAccessoArray(v[0], v[2]))
+                        | produccion("new" + tipo + "[" + expr + "]")._accion(v => new TNodoCrearArray(v[1], v[3]))
+                        | produccion("new" + tipo)._accion(v => new TNodoCrearInstancia(v[1]))
+                        | produccion(@string)._accion(v => new TNodoCrearString(v[0]))
                         | produccion("#" + expr + "#")._accion(v => new TNodoReservarMemoria(v[1]))
-                        | produccion("(" + id + ")" + expr)._accion(v => new TNodoCasteo(v[1], v[3]))
+//                        | produccion("(" + id + ")" + expr)._accion(v => new TNodoCasteo(v[1], v[3]))
+                        | produccion("(" + tipo + ")" + expr)._accion(v => new TNodoCasteo2(v[1], v[3]))
                         | produccion("(" + expr + ")")._accion(v => v[1])
+                        | produccion("@" + tipo)._accion(v => new TNodoObtenerEspacio(v[1]))
                         | produccion(@double)._accion(v => new TNodoCrearDouble(v[0]))
                         | produccion(@int)._accion(v => new TNodoCrearInt(v[0]))
                         | produccion(id)._accion(v => new TNodoBuscarPropiedad(v[0]))
+                        | produccion("null")._accion(v => new TNodoCrearNull())
                         | invocacion
                 ;
-            
-            invocacion.Rule = produccion(id + "(" + argumentos  + ")")
+
+            invocacion.Rule = produccion(id + "(" + argumentos  + ")")._accion( v => new TNodoInvocar(v[0], v[2]))
             ;
 
             this.ConfigList<NodoAst>(false, argumentos, expr, ",");
 
+
+            RegisterOperators(4, "&&");
+            RegisterOperators(8, "==", "!=");
             
-            RegisterOperators(1, "+", "-");
-//            RegisterOperators(2,  "(");
-            RegisterOperators(3, ".");
+            RegisterOperators(9, "<", ">", "<=", ">=");
+            RegisterOperators(11, "+", "-");
+
+            RegisterOperators(16, ".", "[", "]");
+            
+
 
             LanguageFlags |= LanguageFlags.CreateAst;
             Root = inicio;

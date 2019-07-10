@@ -51,6 +51,8 @@
     <Compile Include="Analizadores\AanalizadorAltoNivel.cs" />
     <Compile Include="Analizadores\GramaticaT.cs" />
     <Compile Include="Analizadores\IronyExtensions.cs" />
+    <Compile Include="Analizadores\PNodos.cs" />
+    <Compile Include="Analizadores\PUtils.cs" />
     <Compile Include="Analizadores\TNodos.cs" />
     <Compile Include="Analizadores\TStruct.cs" />
     <Compile Include="Analizadores\GramaticaPython.cs" />
@@ -100,6 +102,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="api.c" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
