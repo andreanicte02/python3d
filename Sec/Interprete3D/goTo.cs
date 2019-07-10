@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Windows.Forms;
 using Sec.Interprete3D.intefaces;
 
 namespace Sec.Interprete3D.Relacionales
@@ -18,18 +19,13 @@ namespace Sec.Interprete3D.Relacionales
             
             //----buscar indice
 
-            if (!e.vars.ContainsKey(label))
-            {
-             
-                throw  new SemanticError3d(" no se encuentra el label -> " + label);
-                
-            }
+            variables lab = e.obtenerVar(label);
+            
 
-            if (e.vars[label].inMetodo)
+            if (lab.inMetodo)
             {
                 Console.WriteLine("goto -> "+ label);
-                variables v = e.vars[label];
-                return utilidades.buscarindice(label, e.metos[v.NombreMetodo].instrucciones, v.NombreMetodo);
+                return utilidades.buscarindice(label, e.obtenerMetodo(lab.NombreMetodo).instrucciones, lab.NombreMetodo);
             }
             else
             {

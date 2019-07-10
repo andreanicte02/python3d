@@ -12,8 +12,8 @@ namespace Sec.Interprete3D
 
         public entorno3d()
         {
-            stack = new double[86000];
-            heap = new double[86000];
+            stack = new double[860000];
+            heap = new double[860000];
         }
 
         public void registrarVar(String id ,variables var)

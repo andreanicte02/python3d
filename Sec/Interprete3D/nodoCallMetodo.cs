@@ -14,15 +14,10 @@ namespace Sec.Interprete3D
 
         public override object ejecutar(entorno3d e)
         {
-
-            if (!e.metos.ContainsKey(id))
-            {
-                throw  new SemanticError3d("error el metodo no existe->" + id);
-            }
             
             //Console.WriteLine("metodo-> "+ id);
 
-            utilidades.ejecutarSentencias(e, e.metos[id].instrucciones);
+            utilidades.ejecutarSentencias(e, e.obtenerMetodo(id).instrucciones);
             
             return null;
 

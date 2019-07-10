@@ -21,7 +21,7 @@ namespace Sec.Interprete3D.Relacionales
 
             if (con)
             {
-                Console.Write("nodo if-->");
+                //Console.Write("nodo if-->");
                 return go.ejecutar(e);
                 
             }

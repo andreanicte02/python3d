@@ -15,6 +15,7 @@ namespace Sec.Interprete3D
 
         public override object ejecutar(entorno3d e)
         {
+            //se supone que la verificaion la hago en obtener var
             variables v = e.obtenerVar(id);
             double va = (double) valor.ejecutar(e);
 

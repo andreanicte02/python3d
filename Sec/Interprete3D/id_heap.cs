@@ -16,10 +16,8 @@ namespace Sec.Interprete3D.Relacionales
         }
         public override object ejecutar(entorno3d e)
         {
-            if (!e.vars.ContainsKey(id))
-            {
-                throw  new SemanticError3d("error el id no existe +> "+ id);
-            }
+        
+            //se supone que las verificaciones las hago en obtenervar
 
             double p =(double) posicio.ejecutar(e);
             variables v = e.obtenerVar(id);
