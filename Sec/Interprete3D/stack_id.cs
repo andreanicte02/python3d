@@ -16,11 +16,21 @@ namespace Sec.Interprete3D
 
         public override object ejecutar(entorno3d e)
         {
-
+            
             double pos = (double)posicion.ejecutar(e);
             double val = (double) valor.ejecutar(e);
 
-            e.stack[Convert.ToInt32(pos)] = val;
+            try
+            {
+                
+                e.stack[Convert.ToInt32(pos)] = val;
+            
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine("se lleno el stack alv :(");
+                throw new SemanticError3d("se lleno el stack");
+            }
             
             return null;
         }

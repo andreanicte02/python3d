@@ -23,6 +23,7 @@ namespace Sec.Interprete3D
         public static Object ejecutarSentencias(entorno3d e, List<nodo3d> sentencias)
         {
 
+            Console.WriteLine("probando");
             for (int x = 0; x < sentencias.Count; x++)
             {
                 var posibleSalto = sentencias[x].ejecutar(e);
@@ -46,7 +47,7 @@ namespace Sec.Interprete3D
                 {
                     if (l.id.Equals(id))
                     {
-                        return new index(x-1);
+                        return new index(x);
                     }
                 }
             }

@@ -21,8 +21,17 @@ namespace Sec.Interprete3D.Relacionales
             double pos = (double)posicion.ejecutar(e);
             double val = (double) valor.ejecutar(e);
 
-            e.heap[Convert.ToInt32(pos)] = val;
-            
+
+            try
+            {
+                e.heap[Convert.ToInt32(pos)] = val;
+
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine("se lleno el heap alv :(");
+                throw  new SemanticError3d("se lleno el heap");
+            }
             return null;
           
         }

@@ -19,6 +19,8 @@ namespace Sec.Interprete3D
             {
                 throw  new SemanticError3d("error el metodo no existe->" + id);
             }
+            
+            //Console.WriteLine("metodo-> "+ id);
 
             utilidades.ejecutarSentencias(e, e.metos[id].instrucciones);
             

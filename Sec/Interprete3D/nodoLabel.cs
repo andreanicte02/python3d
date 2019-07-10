@@ -15,7 +15,7 @@ namespace Sec.Interprete3D
         public override object ejecutar(entorno3d e)
         {
 
-            Console.WriteLine("solo label->" +id +"<-");
+            //Console.WriteLine(">" +id +"<");
             return id;
         }
 
