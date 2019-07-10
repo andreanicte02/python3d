@@ -14,8 +14,8 @@ namespace Sec
             Console.WriteLine("holi");
             
 
-            pruebaPython();
-//            pruebaT();
+//            pruebaPython();
+            pruebaT();
 
         }
 
@@ -77,24 +77,25 @@ otro(1, 2)
             var entrada = @"
 
 
-                int[] generar(){
-	                int[] n = (int[]) #21#;
-	                n[0] = 1993;
-	                return n;
-                }
-
-                void printlnNumber(int i){
+                void printlnInt(int i){
                     !print(e, i);
                     !print(c, 10);
                 }
 
+                void printlnString(int[] cadena){
+                    int i = 0;
+                    while (i < cadena.length){
+                        !print(c, cadena[i]);
+                        i = i + 1;
+                    }
+                    !print(c, 10);
+                }
+
                 void main(){
-	                int[] numeros = generar();
-	                printlnNumber(numeros[0]);
-                    int[] n2 = new int[3];
-                    n2[0] = 1993;
-                    printlnNumber(n2[0]);
-                    printlnNumber(n2.length);
+
+                    int[] cadena = " + "\"hola\"" + @";
+                    printlnString(cadena);
+
                 }
 
 

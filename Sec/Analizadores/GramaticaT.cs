@@ -45,6 +45,8 @@ namespace Sec.Analizadores
             @int._accion((v, n) => n.Token.Value);
             var @double = new NumberLiteral("Decimal");
             @double._accion((v, n) => n.Token.Value);
+            var @string = new StringLiteral("String", "\"");
+            @string._accion((v, n) => n.Token.Value);
 
             var id = new IdentifierTerminal("Identificador");
             id._accion((v, n) => n.Token.Value);
@@ -101,6 +103,7 @@ namespace Sec.Analizadores
                                     | sentenciaIf
                                     | produccion(ToTerm("!") + "print" + "(" + id + "," + expr + ")" + ";")._accion(v => new TNodoPrintSimple(v[3], v[5]))
                                     | produccion("throw" + expr + ";" )._accion(v => new TNodoThrow(v[1]))
+                                    | produccion(ToTerm("while") + "(" + expr + ")" +"{"+ sentenciasFuncion + "}")._accion(v => new TNodoWhile(v[2], v[5]))
                 ;
 
             declaracion.Rule = produccion(tipo + id + "=" + expr)
@@ -134,8 +137,12 @@ namespace Sec.Analizadores
                         | produccion(expr + "==" + expr)._accion(v => new TNodoIgualIgual(v[0], v[2]))
                         | produccion(expr + "&&" + expr)._accion(v => new TNodoAnd(v[0], v[2]))
                         | produccion(expr + ">" + expr)._accion(v => new TNodoMayor(v[0], v[2]))
+                        | produccion(expr + "<" + expr)._accion(v => new TNodoMenor(v[0], v[2]))
+                        | produccion(expr + ">=" + expr)._accion(v => new TNodoMayorIgual(v[0], v[2]))
+                        | produccion(expr + "<=" + expr)._accion(v => new TNodoMenorIgual(v[0], v[2]))
                         | produccion(expr + "[" + expr + "]")._accion(v => new TNodoAccessoArray(v[0], v[2]))
-                        | produccion( "new" + tipo + "[" + expr + "]")._accion(v => new TNodoCrearArray(v[1], v[3]))
+                        | produccion("new" + tipo + "[" + expr + "]")._accion(v => new TNodoCrearArray(v[1], v[3]))
+                        | produccion(@string)._accion(v => new TNodoCrearString(v[0]))
                         | produccion("#" + expr + "#")._accion(v => new TNodoReservarMemoria(v[1]))
 //                        | produccion("(" + id + ")" + expr)._accion(v => new TNodoCasteo(v[1], v[3]))
                         | produccion("(" + tipo + ")" + expr)._accion(v => new TNodoCasteo2(v[1], v[3]))
@@ -146,7 +153,7 @@ namespace Sec.Analizadores
                         | produccion(id)._accion(v => new TNodoBuscarPropiedad(v[0]))
                         | invocacion
                 ;
-            
+
             invocacion.Rule = produccion(id + "(" + argumentos  + ")")._accion( v => new TNodoInvocar(v[0], v[2]))
             ;
 

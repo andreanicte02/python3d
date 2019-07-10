@@ -444,6 +444,33 @@ namespace Sec.Analizadores
         }
     }
 
+    public class TNodoCrearString : TNodo
+    {
+        private readonly string _valor;
+
+        public TNodoCrearString(string valor)
+        {
+            _valor = valor;
+        }
+        
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            var c =
+                TNodoCrearArray.crearArray(entorno, ZTipos.tipoInt, TNodoCrearInt.crearCodigoInt(_valor.Length));
+            
+            var temp = TUtils.generarTemporal();
+            
+            for (var i = 0; i < _valor.Length; i++)
+            {
+                c.agregar($"{temp} = {c.apuntador} + {1 + i};");
+                var charCode = (int) _valor[i];
+                c.agregar($"heap[{temp}] = {charCode};");
+            }
+
+            return c;
+        }
+    }
+        
 
     public class TNodoCrearArray : TNodo
     {
@@ -455,12 +482,11 @@ namespace Sec.Analizadores
             _nodoTipo = nodoTipo;
             _nodoValor = nodoValor;
         }
-        
-        
-        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+
+        public static Codigo crearArray(ZEntorno entorno, ZEntorno tipo, Codigo codigoValor)
         {
-            var tipo = _nodoTipo.GenerarCodigo(entorno).tipo;
-            var codigoValor = TUtils.desenvolver(_nodoValor.GenerarCodigo(entorno));
+//            var tipo = _nodoTipo.GenerarCodigo(entorno).tipo;
+//            var codigoValor = TUtils.desenvolver(_nodoValor.GenerarCodigo(entorno));
             
             if (codigoValor.tipo != ZTipos.tipoInt)
             {
@@ -483,13 +509,51 @@ namespace Sec.Analizadores
             codigo.agregar($"H = H + {temp}; ");
             codigo.comentar($"({codigoValor.extra}) bloques reservados");
             
-            codigo.agregar($"{codigo.apuntador} = {codigoValor.apuntador};");
+            codigo.agregar($"heap[{codigo.apuntador}] = {codigoValor.apuntador};");
 
             codigo.extra = $"[new {tipo.Nombre}({codigoValor.extra}) ]";
 
             GestorTemp.usarTemp(codigoValor.apuntador);
             
             return codigo;
+        }
+        
+        
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            var tipo = _nodoTipo.GenerarCodigo(entorno).tipo;
+            var codigoValor = TUtils.desenvolver(_nodoValor.GenerarCodigo(entorno));
+
+            return crearArray(entorno, tipo, codigoValor);
+
+//            if (codigoValor.tipo != ZTipos.tipoInt)
+//            {
+//                throw new SemanticException($"Solo se puede reservar una cantidad entera de memoria");
+//            }
+//            
+//            var codigo = new Codigo();
+//            codigo.tipo = TUtils.obtenerTipoDesdeBancoArray(tipo);
+//            
+//            codigo.apuntador = TUtils.generarTemporal();
+//            GestorTemp.agregarTemp(codigo.apuntador);
+//            
+//            codigo.agregar(codigoValor);
+//            codigo.agregar($"{codigo.apuntador} = H;");
+//            codigo.comentar($"captura de direccion");
+//
+//            var temp = TUtils.generarTemporal();
+//            codigo.agregar($"{temp} = {codigoValor.apuntador} + 1;");
+//            codigo.comentar("array.legth espacio");
+//            codigo.agregar($"H = H + {temp}; ");
+//            codigo.comentar($"({codigoValor.extra}) bloques reservados");
+//            
+//            codigo.agregar($"{codigo.apuntador} = {codigoValor.apuntador};");
+//
+//            codigo.extra = $"[new {tipo.Nombre}({codigoValor.extra}) ]";
+//
+//            GestorTemp.usarTemp(codigoValor.apuntador);
+//            
+//            return codigo;
         }
     }
     
@@ -530,15 +594,51 @@ namespace Sec.Analizadores
             return codigo;
         }
     }
+
+
+    public class TNodoMenor : TNodoRelacional
+    {
+        public TNodoMenor(NodoAst e1, NodoAst e2) : base(e1, e2, "<")
+        {
+        }
+    }
     
-    public class TNodoMayor: TNodo{
+    public class TNodoMenorIgual : TNodoRelacional
+    {
+        public TNodoMenorIgual(NodoAst e1, NodoAst e2) : base(e1, e2, "<=")
+        {
+        }
+    }
+
+
+    public class TNodoMayor : TNodoRelacional
+    {
+        public TNodoMayor(NodoAst e1, NodoAst e2) : base(e1, e2, ">")
+        {
+        }
+    }
+    
+    public class TNodoMayorIgual : TNodoRelacional
+    {
+        public TNodoMayorIgual(NodoAst e1, NodoAst e2) : base(e1, e2, ">=")
+        {
+        }
+    }
+
+
+
+//    TNodoMayor
+    
+    public class TNodoRelacional: TNodo{
         private readonly NodoAst _e1;
         private readonly NodoAst _e2;
+        private readonly string _simbolo;
 
-        public TNodoMayor(NodoAst e1, NodoAst e2)
+        public TNodoRelacional(NodoAst e1, NodoAst e2, string simbolo)
         {
             _e1 = e1;
             _e2 = e2;
+            _simbolo = simbolo;
         }
         
         public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
@@ -551,14 +651,14 @@ namespace Sec.Analizadores
 
             if (!TUtils.esNumerico(c1.tipo) || !TUtils.esNumerico(c2.tipo))
             {
-                throw new SemanticException("< solo puede ser comparado con numerico");
+                throw new SemanticException($"{_simbolo} solo puede ser comparado con numerico");
             }
 
 
             var labelFin = TUtils.generarLabel();
             
             codigo.tipo = ZTipos.tipoInt;
-            codigo.extra = $"{c1.extra} > {c2.extra}";
+            codigo.extra = $"{c1.extra} {_simbolo} {c2.extra}";
             codigo.apuntador = TUtils.generarTemporal();
             GestorTemp.agregarTemp(codigo.apuntador);
             GestorTemp.usarTemp(c1.apuntador);
@@ -569,8 +669,8 @@ namespace Sec.Analizadores
             codigo.agregar($"{codigo.apuntador} = 1;");
             codigo.comentar($"...");
 
-            codigo.agregar($"if ({c1.apuntador} > {c2.apuntador}) goto {labelFin};");
-            codigo.comentar($"{c1.extra} > {c2.extra}");
+            codigo.agregar($"if ({c1.apuntador} {_simbolo} {c2.apuntador}) goto {labelFin};");
+            codigo.comentar($"{c1.extra} {_simbolo} {c2.extra}");
             
             codigo.agregar($"{codigo.apuntador} = 0;");
             codigo.comentar("...");
@@ -581,6 +681,11 @@ namespace Sec.Analizadores
             return codigo;
         }
     }
+    
+    
+    
+    
+    
 
     public class TNodoAnd : TNodo
     {
@@ -764,14 +869,21 @@ namespace Sec.Analizadores
             codigo.tipo = new ZReferencia((ca.tipo as ZArray).TipoContenido);
             codigo.extra = $"{ca.extra}[{ci.extra}]";
 
+            
+            codigo.agregar(ca);
 
             var temp = TUtils.generarTemporal();
             codigo.agregar($"{temp} = {ca.apuntador} + 1;");
+            codigo.comentar("bloque length");
+            
             GestorTemp.usarTemp(ca.apuntador);
 
+            codigo.agregar(ci);
+            
             codigo.apuntador = TUtils.generarTemporal();
-            GestorTemp.agregarTemp(codigo.apuntador);
             codigo.agregar($"{codigo.apuntador} = {temp} + {ci.apuntador};");
+            
+            GestorTemp.agregarTemp(codigo.apuntador);
             GestorTemp.usarTemp(ci.apuntador);
             
             codigo.comentar($"&{ca.extra}[{ci.extra}]");
@@ -901,6 +1013,54 @@ namespace Sec.Analizadores
             codigo.agregar(codigoValor);
             codigo.agregar($"print(\"%{_id}\", {codigoValor.apuntador});");
             
+            return codigo;
+        }
+    }
+
+    public class TNodoWhile : TNodo
+    {
+        
+        private readonly NodoAst _nodoValor;
+        private readonly List<NodoAst> _nodosTrue;
+
+        public TNodoWhile(NodoAst nodoValor, List<NodoAst> nodosTrue)
+        {
+            _nodoValor = nodoValor;
+            _nodosTrue = nodosTrue;
+        }
+        
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            var codigoValor = TUtils.desenvolver(_nodoValor.GenerarCodigo(entorno));
+
+            if (codigoValor.tipo != ZTipos.tipoInt)
+            {
+                throw new SemanticException("Argumento de if debe de ser numerico");
+            }
+
+            var etiquetaInicio = TUtils.generarLabel();
+            var etiquetaFin = TUtils.generarLabel();
+
+            
+            var entornoTrue = new ZEntorno(entorno);
+
+            var codigo = new Codigo();
+            
+            codigo.agregar($"{etiquetaInicio}:");
+            codigo.agregar(codigoValor);
+
+            codigo.agregar($"if ({codigoValor.apuntador} == 0) goto {etiquetaFin};");
+            codigo.comentar($"while ({codigoValor.extra})" + "{");
+            
+            codigo.agregar(TUtils.generarCodigoBloque(_nodosTrue, entornoTrue));
+            
+            codigo.agregar($"goto {etiquetaInicio};");
+            codigo.comentar("}");
+
+            codigo.agregar($"{etiquetaFin}:");
+
+            entorno.TieneReturn = false; // la entrada al bucle es condicional
+
             return codigo;
         }
     }
