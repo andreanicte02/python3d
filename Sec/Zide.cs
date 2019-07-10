@@ -72,7 +72,7 @@ namespace Sec
             instanciar();   
             crear();
             agregaPestaña();
-            
+            inDebug3d = 0;
             analizarAltoNivel = new AanalizadorAltoNivel();
             
 
@@ -115,14 +115,7 @@ namespace Sec
 
         }
 
-        public void instanciarTimer3d()
-        {
-            timer3d = new Timer();
-            timer3d.Interval = 50000;
-            timer3d.Enabled = false;
-            timer3d.Tick += debug3d;
-            
-        }
+       
 
         public void crear()
         {
@@ -452,9 +445,7 @@ namespace Sec
         private void btnDebug3d_click(object sender, EventArgs e)
         {
 
-            //debugear
-            btnEjecutar3D.Enabled = false;
-            timer3d.Enabled = true;
+        
             inDebug3d = 1;
             console.Text = "";
             var entrada = tabeEditor3D.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is FastColoredTextBox);
@@ -462,15 +453,6 @@ namespace Sec
             analizar.ejecutarAnalizador(entrada.Text);
             
         }
-
-        private void debug3d(object Sender, EventArgs e)
-        {
-
-
-            
-
-
-        } 
         
     
 
