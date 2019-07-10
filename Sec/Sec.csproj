@@ -49,14 +49,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analizadores\AanalizadorAltoNivel.cs" />
-    <Compile Include="Analizadores\Analizador3D.cs" />
-    <Compile Include="Analizadores\Gramatica3D.cs" />
     <Compile Include="Analizadores\GramaticaT.cs" />
     <Compile Include="Analizadores\IronyExtensions.cs" />
     <Compile Include="Analizadores\TNodos.cs" />
     <Compile Include="Analizadores\TStruct.cs" />
     <Compile Include="Analizadores\GramaticaPython.cs" />
     <Compile Include="Analizadores\TUtils.cs" />
+    <Compile Include="Interprete3D\3D\Analizador3D.cs" />
+    <Compile Include="Interprete3D\3D\Gramatica3D.cs" />
     <Compile Include="Interprete3D\Aritmeticas\div.cs" />
     <Compile Include="Interprete3D\Aritmeticas\modu.cs" />
     <Compile Include="Interprete3D\Aritmeticas\mult.cs" />
@@ -92,6 +92,7 @@
     <Compile Include="Interprete3D\SemanticError3d.cs" />
     <Compile Include="Interprete3D\stack_id.cs" />
     <Compile Include="Interprete3D\utilidades.cs" />
+    <Compile Include="Interprete3D\utilidadesParaDegg.cs" />
     <Compile Include="Interprete3D\variables.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

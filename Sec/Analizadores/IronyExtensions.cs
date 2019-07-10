@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Irony.Parsing;
 using Sec.Interprete3D;
+using Sec.Interprete3D.intefaces;
 
 namespace Sec.Analizadores
 {
@@ -126,6 +127,8 @@ namespace Sec.Analizadores
             return term;
         }
         
+        
+        
         public static T _acciond3D<T>(this T term, int pos,DefinitionDelegate definitionDelegate) where T : BnfTerm
         {
            
@@ -133,6 +136,20 @@ namespace Sec.Analizadores
             {
                 var values = n.ChildNodes.Select(child => (dynamic) child.AstNode).ToArray();
                 n.AstNode = definitionDelegate(values);
+                
+                if (n.AstNode is nodo3d node)
+                {
+                    try
+                    {
+                        node.location = n.ChildNodes[pos].Span.Location;
+                        
+                    }
+                    catch (Exception e)
+                    {
+                        node.location = new SourceLocation(-1,-1,-1);
+                        Console.WriteLine(e); 
+                    }
+                }
              
 
             };

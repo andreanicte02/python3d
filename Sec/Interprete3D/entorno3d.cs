@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Text;
 
 namespace Sec.Interprete3D
 {
@@ -59,7 +61,41 @@ namespace Sec.Interprete3D
 
         }
 
+        public DataTable mostrarVariablesGlobales()
+        {
+            DataTable tabla= new DataTable();
+            tabla.Columns.Add("variable");
+            tabla.Columns.Add("valor");
+            tabla.Columns.Add("metodo");
+           
 
+            
+            foreach(KeyValuePair<string, variables> entry in vars)
+            {
+                
+                tabla.Rows.Add(entry.Key, entry.Value.valor, entry.Value.NombreMetodo);
+                
+            }
+            
+           
+            return tabla;
+        }
+
+
+        public DataTable mostrarMetodos()
+        {
+            DataTable tabla= new DataTable();
+            tabla.Columns.Add("Metodo");
+            foreach(KeyValuePair<string, metodos> entry in metos)
+            {
+                
+                tabla.Rows.Add(entry.Key);
+                
+            }
+            
+           
+            return tabla;
+        }
 
     }
 }

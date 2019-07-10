@@ -114,7 +114,6 @@ namespace Sec.Analizadores
            
             var sentencia = new AutoNonTerminal("sentencia");
             var sentencias = new AutoNonTerminal("sentencias");
-            var listaSentencia = new  AutoNonTerminal("listaSentencia");
             
             
             var inputStatement = new  AutoNonTerminal("inputStatement");

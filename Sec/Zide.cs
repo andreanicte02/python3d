@@ -40,14 +40,31 @@ namespace Sec
         
         //breakpoints listas
         Dictionary<int, int> breakPoints;
-        Dictionary<int,int> breakPoints3d;
+        public static Dictionary<int,int> breakPoints3d;
         
         //botn guardasr -----
 
         private Button btnGuardar;
+        
+        
+        //botones 3d----------
         private Button btnEjecutar3D;
         private Button btnAbrir3d;
+        private Button btnDebug3d;
+        private Button btnDetenerDebug;
+        
 
+
+        /// <summary>
+        /// Debugger del 3d
+        /// </summary>
+        //-----------------------------------------
+        public  static Timer timer3d;
+        public  static bool inDebug3d;
+        public static FastColoredTextBox texTraducidBox;
+        
+        //-----------------------------------------
+        
         
         public Zide():base()
         {
@@ -87,9 +104,23 @@ namespace Sec
             btnGuardar = new Button();
             btnEjecutar3D = new Button();
             btnAbrir3d = new Button();
+            btnDebug3d = new Button();
             
+            //timer
+            btnDetenerDebug = new Button();
+            texTraducidBox= new FastColoredTextBox();
+            instanciarTimer3d();
             
 
+        }
+
+        public void instanciarTimer3d()
+        {
+            timer3d = new Timer();
+            timer3d.Interval = 50000;
+            timer3d.Enabled = false;
+            timer3d.Tick += debug3d;
+            inDebug3d = false;
         }
 
         public void crear()
@@ -100,6 +131,8 @@ namespace Sec
             btnGuardar.Text = "Guardar";
             btnEjecutar3D.Text = "Ejecutar3D";
             btnAbrir3d.Text = "Abrir3d";
+            btnDebug3d.Text = "Deb3d";
+            btnDetenerDebug.Text = "DetDebug3d";
 
 
             WindowState = FormWindowState.Maximized;
@@ -110,7 +143,7 @@ namespace Sec
             
             //paneles
             panelEditores.SetBounds(0,0,1500,400);
-            panelBotones.SetBounds(0,0,500,50);
+            panelBotones.SetBounds(0,0,1000,50);
             panelSalidas.SetBounds(0,0,1360,280);
             
             panel.SetBounds(0,0,2000,900);
@@ -120,14 +153,6 @@ namespace Sec
             tabEditor.SetBounds(0,0,650,400);
             tabeEditor3D.SetBounds(0,0,650,400);
    
-            
-            btnAnalizar.Click +=  analizar_click;
-            btnCrearPestaña.Click += btnCrearPestaña_click;
-            bntAbrirArchivo.Click += btnAbirirArchivo_click;
-            btnGuardar.Click += btnGuardarArchivo_click;
-            btnEjecutar3D.Click += btnEjecutar3d_Click;
-            btnAbrir3d.Click += btnAbrir3d_Click;
-            
             //panel dos para botnes-------------------------------------------
             panelBotones.Controls.Add(btnAnalizar);
             panelBotones.Controls.Add(btnCrearPestaña);
@@ -135,6 +160,20 @@ namespace Sec
             panelBotones.Controls.Add(btnGuardar);
             panelBotones.Controls.Add(btnEjecutar3D);
             panelBotones.Controls.Add(btnAbrir3d);
+            panelBotones.Controls.Add(btnDebug3d);
+            panelBotones.Controls.Add(btnDetenerDebug);
+            
+            //acciones de bontos --------------------------------
+            btnAnalizar.Click +=  analizar_click;
+            btnCrearPestaña.Click += btnCrearPestaña_click;
+            bntAbrirArchivo.Click += btnAbirirArchivo_click;
+            btnGuardar.Click += btnGuardarArchivo_click;
+            btnEjecutar3D.Click += btnEjecutar3d_Click;
+            btnAbrir3d.Click += btnAbrir3d_Click;
+            btnDebug3d.Click += btnDebug3d_click;
+            btnDetenerDebug.Click += btnDetener_Click3d;
+            
+  
             
             //editor del 3d----------------------------------------------------
          
@@ -190,11 +229,12 @@ namespace Sec
         public void editor3DCrear()
         {
             //definir propiedades del texbox
-            FastColoredTextBox texTraducidBox= new FastColoredTextBox();
+           
             texTraducidBox.MouseDoubleClick += pintarBrekPointSalida3D;
             texTraducidBox.BookmarkColor = Color.Gold;
             texTraducidBox.IndentBackColor = Color.Black;
             texTraducidBox.LineNumberColor= Color.White;
+            texTraducidBox.CurrentLineColor = Color.Gray;
             
             //----------------------
             texTraducidBox.SetBounds(0, 5, 630, 360);
@@ -221,6 +261,7 @@ namespace Sec
             fastColor.LineNumberColor= Color.White;
             fastColor.IndentBackColor = Color.Black;
             fastColor.Language = Language.VB;
+            fastColor.CurrentLineColor = Color.Gray;
             
             string title = "New File:";
             TabPage myTabPage = new TabPage(title);
@@ -375,16 +416,6 @@ namespace Sec
             return text;
         }
         
-        private void btnEjecutar3d_Click(object sender, EventArgs e)
-        {
-            console.Text = "";
-            TabPage actual = tabeEditor3D.SelectedTab;
-            var entrada = tabeEditor3D.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is FastColoredTextBox);
-            Analizador3D analizar = new Analizador3D();
-            analizar.ejecutarAnalizador(entrada.Text);
-            
-           
-        }
 
         void btnAbrir3d_Click(object sender, EventArgs e)
         {
@@ -407,6 +438,55 @@ namespace Sec
 
 
         }
+        
+        private void btnEjecutar3d_Click(object sender, EventArgs e)
+        {
+            console.Text = "";
+            TabPage actual = tabeEditor3D.SelectedTab;
+            var entrada = tabeEditor3D.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is FastColoredTextBox);
+            Analizador3D analizar = new Analizador3D();
+            analizar.ejecutarAnalizador(entrada.Text);
+            
+           
+        }
+        
+        private void btnDebug3d_click(object sender, EventArgs e)
+        {
+
+            btnEjecutar3D.Enabled = false;
+            timer3d.Enabled = true;
+            inDebug3d = true;
+            console.Text = "";
+            var entrada = tabeEditor3D.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is FastColoredTextBox);
+            Analizador3D analizar = new Analizador3D();
+            analizar.ejecutarAnalizador(entrada.Text);
+            
+        }
+
+        private void debug3d(object Sender, EventArgs e)
+        {
+
+
+            consoleErrores.Text = consoleErrores.Text;
+
+            btnDetenerDebug.Enabled = true;
+
+
+        } 
+        
+        private void btnDetener_Click3d(object sender, EventArgs e)
+        {
+
+
+            inDebug3d = false;
+
+
+        }
+
+
+
+
+
 
 
 

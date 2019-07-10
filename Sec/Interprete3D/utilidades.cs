@@ -38,10 +38,16 @@ namespace Sec.Interprete3D
         /// <returns> solo puede retornar un posible salto </returns>
         public static Object ejecutarSentencias(entorno3d e, List<nodo3d> sentencias)
         {
-
-            Console.WriteLine("probando");
+          
+            //Console.WriteLine("probando");
             for (int x = 0; x < sentencias.Count; x++)
             {
+
+                if (Zide.inDebug3d)
+                {
+                    utilidadesParaDegg.enciclar(sentencias[x],e);
+                }
+
                 var posibleSalto = sentencias[x].ejecutar(e);
 
                 if (posibleSalto is index i)

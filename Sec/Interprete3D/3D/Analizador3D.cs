@@ -17,17 +17,16 @@ namespace Sec.Analizadores
         
         public void ejecutarAnalizador(String entrada)
         {
+            //llamada a los cosos de irony
             Gramatica3D ga = new Gramatica3D();
             Parser parser = new Parser(ga);
-
             ParseTree arbol = parser.Parse(entrada);
-
             ParseTreeNode raiz = arbol.Root;
-
             
+            //verificar si el arbol no sta nulo
             if (raiz == null || arbol.ParserMessages.Count > 0 || arbol.HasErrors())
             {
-
+                
                 if (raiz == null || arbol.ParserMessages.Count > 0 || arbol.HasErrors())
                 {
                     //---------------------> Hay Errores      
