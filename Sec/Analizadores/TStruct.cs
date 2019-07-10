@@ -25,6 +25,7 @@ namespace Sec.Analizadores
 
     public class ZTipos
     {
+        public static readonly ZEntorno tipoNull = new ZEntorno(null, "null");
         public static readonly ZEntorno tipoInt = new ZEntorno(null, "int");
         public static readonly ZEntorno tipoDouble = new ZEntorno(null, "double");
         public static readonly ZEntorno tipoVoid = new ZEntorno(null, "void");

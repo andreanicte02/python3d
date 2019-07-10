@@ -215,6 +215,74 @@ namespace Sec.Analizadores
         }
     }
 
+    public class PNodoIf : PNodo
+    {
+        private readonly NodoPythonAst _argumento;
+        private readonly List<NodoPythonAst> _nodosTrue;
+        private readonly List<NodoPythonAst> _nodosFalse;
+
+        public PNodoIf(NodoPythonAst argumento, List<NodoPythonAst> nodosTrue, List<NodoPythonAst> nodosFalse = null)
+        {
+            _argumento = argumento;
+            _nodosTrue = nodosTrue;
+            _nodosFalse = nodosFalse ?? new List<NodoPythonAst>() ;
+        }
+        
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var codigo = new CodigoT();
+
+            var codigoArgumento = PUtils.desenvolver(_argumento.GenerarCodigo(entorno));
+            
+            codigo.agregar($"if (esVerdaderoGeneral({codigoArgumento.apuntador}))" + "{");
+            var codigoTrue = PUtils.generarBloque(_nodosTrue, "\t", entorno);
+            codigo.agregar(codigoTrue);
+            codigo.agregar("}");
+            codigo.agregar("else {");
+            var codigoFalse = PUtils.generarBloque(_nodosFalse, "\t", entorno);
+            codigo.agregar(codigoFalse);
+            codigo.agregar("}");
+
+            return codigo;
+        }
+    }
+
+    public class PNodoPrint : PNodo
+    {
+        private readonly List<NodoPythonAst> _nodosArgumento;
+
+        public PNodoPrint(List<NodoPythonAst> nodosArgumento)
+        {
+//            _id = id;
+            _nodosArgumento = nodosArgumento;
+        }
+        
+        
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var codigo = new CodigoT();
+
+//            var cMetodo = PUtils.desenvolver(PNodoBuscarId.buscarId(_id));
+//            codigo.agregar(cMetodo);
+
+            var temp = PUtils.generarTemporal();
+            codigo.agregar($"General[] {temp} = new General[{_nodosArgumento.Count}];");
+            
+            for (int i = 0; i < _nodosArgumento.Count; i++)
+            {
+                var cArg = PUtils.desenvolver(_nodosArgumento[i].GenerarCodigo(entorno));
+                codigo.agregar(cArg);
+                codigo.agregar($"{temp}[{i}] = {cArg.apuntador};");
+            }
+
+//            codigo.apuntador = PUtils.generarTemporal();
+            codigo.agregar($"printGenerales({temp});");
+
+            return codigo;
+            
+        }
+    }
+
     public class PNodoInvocar : PNodo
     {
         private readonly string _id;
@@ -245,7 +313,7 @@ namespace Sec.Analizadores
             }
 
             codigo.apuntador = PUtils.generarTemporal();
-            codigo.agregar($"{codigo.apuntador} = invocar({cMetodo.apuntador}, {temp});");
+            codigo.agregar($"General {codigo.apuntador} = invocar({cMetodo.apuntador}, {temp});");
 
             return codigo;
             
@@ -265,7 +333,7 @@ namespace Sec.Analizadores
         {
             var codigo = new CodigoT();
             codigo.apuntador = PUtils.generarTemporal();
-            codigo.agregar($"General {codigo.apuntador} = crearGeneralEntero({_valor});");
+            codigo.agregar($"General {codigo.apuntador} = crearIntGeneral({_valor});");
 
             return codigo;
         }
@@ -321,7 +389,39 @@ namespace Sec.Analizadores
             return codigo;
         }
     }
+
+
+
     
+
+
+    public class PNodoOperacionBinaria : PNodo
+    {
+        private readonly NodoPythonAst _e1;
+        private readonly NodoPythonAst _e2;
+        private readonly string _nombreFuncion;
+
+        public PNodoOperacionBinaria(NodoPythonAst e1, NodoPythonAst e2, string nombreFuncion)
+        {
+            _e1 = e1;
+            _e2 = e2;
+            _nombreFuncion = nombreFuncion;
+        }
+        
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var c1 = PUtils.desenvolver(_e1.GenerarCodigo(entorno));
+            var c2 = PUtils.desenvolver(_e2.GenerarCodigo(entorno));
+            
+            var codigo = new CodigoT();
+            codigo.agregar(c1);
+            codigo.agregar(c2);
+            codigo.apuntador = PUtils.generarTemporal();
+            codigo.agregar($"General {codigo.apuntador} = {_nombreFuncion}({c1.apuntador}, {c2.apuntador});");
+            return codigo;
+
+        }
+    }
    
 
 

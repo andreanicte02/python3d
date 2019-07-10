@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Irony.Parsing;
 
@@ -48,7 +49,7 @@ namespace Sec.Analizadores
             }
             
             var tipoArray = new ZArray(tipo.Nombre + "[]", tipo);
-            tipoArray.declararPropiedad("length", ZTipos.tipoInt);
+            tipoArray.declararPropiedad("length",  new ZReferencia(ZTipos.tipoInt));
 
             _bancoTiposArray[tipo.Nombre] = tipoArray;
             return tipoArray;
@@ -262,13 +263,13 @@ namespace Sec.Analizadores
             return codigo;
         }
 
-        public static Codigo asignar(Codigo codigoDestino, Codigo codigoValor)
+        public static Codigo asignar(Codigo codigoDestino, Codigo codigoValor, bool noTomarEncuentaValidaciones = false)
         {
             codigoValor = desenvolver(codigoValor);
 
             if (codigoDestino.tipo is ZReferencia zReferencia)
             {
-                if (zReferencia.tipo == codigoValor.tipo)
+                if (zReferencia.tipo == codigoValor.tipo || codigoValor.tipo == ZTipos.tipoNull || noTomarEncuentaValidaciones)
                 {
                     var codigo = new Codigo();
                     
@@ -285,7 +286,7 @@ namespace Sec.Analizadores
                 }
                 else
                 {
-                    throw new SemanticException($"No se puede guardar de tipo {codigoValor.tipo.Nombre} en variable de tipo {zReferencia.tipo.Nombre} ");
+                    throw new SemanticException($"No se puede guardar tipo {codigoValor.tipo.Nombre} en variable de tipo {zReferencia.tipo.Nombre}: {codigoDestino.extra} , {codigoValor.extra} ");
                 }
             }
             else
@@ -449,6 +450,29 @@ namespace Sec.Analizadores
 
             return codigoFinal.texto;
 
+        }
+        
+        
+        
+        //***************
+        
+        public static void pruebaT()
+        {
+            // :v
+            
+            
+            string entrada2 = File.ReadAllText(@"./../../api.c");
+            
+            try
+            {
+                var codigo3d = TUtils.generarCodigo3D(entrada2);
+                Console.WriteLine(codigo3d);
+            }
+            catch (SemanticException semanticException)
+            {
+                Console.WriteLine("Error semantico en T:");
+                Console.WriteLine(semanticException.Message);
+            }
         }
         
     }

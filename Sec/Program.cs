@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
 using Irony.Parsing;
 using Sec.Analizadores;
@@ -14,8 +15,8 @@ namespace Sec
             Console.WriteLine("holi");
             
 
-//            pruebaPython();
-            pruebaT();
+            pruebaPython();
+//            pruebaT();
 
         }
 
@@ -23,14 +24,10 @@ namespace Sec
         {
             
             var entrada = @"
-hola = 2
 
-def hola(a, b):
-    a = 3
-
-otro = hola
-
-otro(1, 2)
+a = 3
+b = a + 3
+print(b)
 
 ";
 
@@ -72,45 +69,7 @@ otro(1, 2)
         
         
 
-        public static void pruebaT()
-        {
-            var entrada = @"
-
-
-                void printlnInt(int i){
-                    !print(e, i);
-                    !print(c, 10);
-                }
-
-                void printlnString(int[] cadena){
-                    int i = 0;
-                    while (i < cadena.length){
-                        !print(c, cadena[i]);
-                        i = i + 1;
-                    }
-                    !print(c, 10);
-                }
-
-                void main(){
-
-                    int[] cadena = " + "\"hola\"" + @";
-                    printlnString(cadena);
-
-                }
-
-
-";
-            try
-            {
-                var codigo3d = TUtils.generarCodigo3D(entrada);
-                Console.WriteLine(codigo3d);
-            }
-            catch (SemanticException semanticException)
-            {
-                Console.WriteLine("Error semantico en T:");
-                Console.WriteLine(semanticException.Message);
-            }
-        }
+        
 
         
         

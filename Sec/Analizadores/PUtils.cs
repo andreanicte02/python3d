@@ -48,29 +48,38 @@ namespace Sec.Analizadores
         public static CodigoT generarBloqueClase(string id, List<NodoPythonAst> sentencias, string sangria)
         {
 
-
+            var entorno = new PEntorno();
+            
             var codigo = new CodigoT();
             codigo.agregar($"General {id}()" + "{");
             codigo.agregar($"{sangria}General ambito = crearAmbito();");
             
             
             var codigoFuncionesAnidadas = new CodigoT();
-            var codigoBloque = generarBloque(sentencias, sangria, codigoFuncionesAnidadas);
+            var codigoBloque = generarBloque(sentencias, sangria, entorno);
             
             codigo.agregar(codigoBloque);
             codigo.agregar($"{sangria}return ambito;");
             codigo.agregar("}");
             
             
+            foreach (var pFuncion in entorno.obtenerPFunciones())
+            {
+                codigo.agregar(pFuncion.GenerarCodigoFuncion());
+            }
+            foreach (var pClase in entorno.obtenerPClasese())
+            {
+                codigo.agregar(pClase.GenerarCodigoClase());
+            }
             
-            codigo.agregar(codigoFuncionesAnidadas);
+//            codigo.agregar(codigoFuncionesAnidadas);
 
             return codigo;
         }
         
         public static CodigoT generarBloqueFuncion(string id, List<string> parametros, List<NodoPythonAst> sentencias, string sangria)
         {
-//            var entorno = new PEntorno();
+            var entorno = new PEntorno();
 
             var codigo = new CodigoT();
             codigo.agregar($"General {id}(General[] argumentos)" + "{");
@@ -82,24 +91,27 @@ namespace Sec.Analizadores
             }
             
             
-            var codigoFuncionesAnidadas = new CodigoT();
-            var codigoBloque = generarBloque(sentencias, sangria, codigoFuncionesAnidadas);
+//            var codigoFuncionesAnidadas = new CodigoT();
+            var codigoBloque = generarBloque(sentencias, sangria, entorno);
             
             codigo.agregar(codigoBloque);
             codigo.agregar("}");
             
-            // se generan los metodos
-//            foreach (var pFuncion in entorno.obtenerPFunciones())
-//            {
-//                codigo.agregar(pFuncion.GenerarCodigoFuncion());
-//            }
+
+            foreach (var pFuncion in entorno.obtenerPFunciones())
+            {
+                codigo.agregar(pFuncion.GenerarCodigoFuncion());
+            }
+            foreach (var pClase in entorno.obtenerPClasese())
+            {
+                codigo.agregar(pClase.GenerarCodigoClase());
+            }
             
-            codigo.agregar(codigoFuncionesAnidadas);
 
             return codigo;
         }
         
-        public static CodigoT generarBloque(List<NodoPythonAst> sentencias, string sangria, CodigoT codigoFuncionesAnidadas)
+        public static CodigoT generarBloque(List<NodoPythonAst> sentencias, string sangria, PEntorno anterior)
         {
             var entorno = new PEntorno();
 
@@ -112,18 +124,14 @@ namespace Sec.Analizadores
                 c.prefix = sangria;
                 codigo.agregar(c);
             }
-
             
-            // se generan los metodos
             foreach (var pFuncion in entorno.obtenerPFunciones())
             {
-                codigoFuncionesAnidadas.agregar(pFuncion.GenerarCodigoFuncion());
+                anterior.agregarFuncionPython(pFuncion);
             }
-            
-            // se generan los metodos
             foreach (var pClase in entorno.obtenerPClasese())
             {
-                codigoFuncionesAnidadas.agregar(pClase.GenerarCodigoClase());
+                anterior.agregarClasePython(pClase);
             }
             
             return codigo;

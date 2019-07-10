@@ -9,6 +9,12 @@ namespace Sec.Analizadores
     {
         public GramaticaT() : base(true)
         {
+            CommentTerminal COMENTARIO_SIMPLE = new CommentTerminal("comentario_simple", "//", "\n", "\r\n");
+            CommentTerminal COMENTARIO_MULT = new CommentTerminal("comentario_mult", "/*", "*/");
+            NonGrammarTerminals.Add(COMENTARIO_SIMPLE);
+            NonGrammarTerminals.Add(COMENTARIO_MULT);
+            
+            
             var inicio = new AutoNonTerminal();
             
             var sentencias = new AutoNonTerminal();
@@ -135,6 +141,7 @@ namespace Sec.Analizadores
                         | produccion(expr + "-" + expr)._accion(v => new TNodoResta(v[0], v[2]))
                         | produccion(expr + "." + id)._accion(v => new TNodoAccessoPunto(v[0], v[2]))
                         | produccion(expr + "==" + expr)._accion(v => new TNodoIgualIgual(v[0], v[2]))
+                        | produccion(expr + "!=" + expr)._accion(v => new TNodoNoIgual(v[0], v[2]))
                         | produccion(expr + "&&" + expr)._accion(v => new TNodoAnd(v[0], v[2]))
                         | produccion(expr + ">" + expr)._accion(v => new TNodoMayor(v[0], v[2]))
                         | produccion(expr + "<" + expr)._accion(v => new TNodoMenor(v[0], v[2]))
@@ -142,6 +149,7 @@ namespace Sec.Analizadores
                         | produccion(expr + "<=" + expr)._accion(v => new TNodoMenorIgual(v[0], v[2]))
                         | produccion(expr + "[" + expr + "]")._accion(v => new TNodoAccessoArray(v[0], v[2]))
                         | produccion("new" + tipo + "[" + expr + "]")._accion(v => new TNodoCrearArray(v[1], v[3]))
+                        | produccion("new" + tipo)._accion(v => new TNodoCrearInstancia(v[1]))
                         | produccion(@string)._accion(v => new TNodoCrearString(v[0]))
                         | produccion("#" + expr + "#")._accion(v => new TNodoReservarMemoria(v[1]))
 //                        | produccion("(" + id + ")" + expr)._accion(v => new TNodoCasteo(v[1], v[3]))
@@ -151,6 +159,7 @@ namespace Sec.Analizadores
                         | produccion(@double)._accion(v => new TNodoCrearDouble(v[0]))
                         | produccion(@int)._accion(v => new TNodoCrearInt(v[0]))
                         | produccion(id)._accion(v => new TNodoBuscarPropiedad(v[0]))
+                        | produccion("null")._accion(v => new TNodoCrearNull())
                         | invocacion
                 ;
 

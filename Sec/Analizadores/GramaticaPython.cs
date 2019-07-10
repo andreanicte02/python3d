@@ -325,10 +325,10 @@ namespace Sec.Analizadores
                                   | crearMetodo
                                   | crearClase
                                   | exp + Eos
-//                                  | sentenciaPrint + Eos
+                                  | sentenciaPrint + Eos
 //                                  | sentenciaAlcance + Eos
 //                                  | sentenciaWhile
-//                                  | sentenciaIf
+                                  | sentenciaIf
 //                                  | sentenciaReturn + Eos
 //                                  | sentenciaFor
 //                                  | sentenciaDel + Eos
@@ -343,7 +343,8 @@ namespace Sec.Analizadores
 
 
 
-            sentenciaPrint.Rule = print + apar + listaExp + cpar;
+            sentenciaPrint.Rule = produccion(print + apar + listaExp + cpar)._accion(v => new PNodoPrint(v[2]))
+                ;
 
             asignar.Rule = produccion(exps + igual + exps)._accion(v => new PNodoAsignacion(v[0], v[2]))
 //            produccion(exps + igual + lInitAsignar)
@@ -388,13 +389,15 @@ namespace Sec.Analizadores
             sentenciaWhile.Rule = @while + exp + dosp  + Eos+ bloqueLocal ;
             
 
-            sentenciaIf.Rule = @if + exp + dosp + Eos + bloqueLocal
-                               | @if + exp + dosp + Eos + bloqueLocal + @else + dosp + Eos + bloqueLocal
-                               | @if + exp + dosp + Eos + bloqueLocal + elif +sentenciaElif;
+            sentenciaIf.Rule =  produccion(@if + exp + dosp + Eos + bloqueLocal)._accion(v => new PNodoIf(v[1], v[3]))
+                               | produccion(@if + exp + dosp + Eos + bloqueLocal + @else + dosp + Eos + bloqueLocal)._accion(v => new PNodoIf(v[1], v[3], v[6]))
+                               | produccion(@if + exp + dosp + Eos + bloqueLocal + elif +sentenciaElif)._accion(v => new PNodoIf(v[1], v[3], new List<NodoPythonAst>() { v[5] } ))
+                ;
             
-            sentenciaElif.Rule =  exp + dosp + Eos + bloqueLocal
-                                 | exp + dosp + Eos + bloqueLocal + @else + dosp + Eos + bloqueLocal
-                                 | exp + dosp + Eos + bloqueLocal + elif +sentenciaElif;
+            sentenciaElif.Rule =  produccion(exp + dosp + Eos + bloqueLocal)._accion(v => new PNodoIf(v[0], v[2]))
+                                 | produccion(exp + dosp + Eos + bloqueLocal + @else + dosp + Eos + bloqueLocal)._accion(v => new PNodoIf(v[0], v[2], v[5]))
+                                 | produccion(exp + dosp + Eos + bloqueLocal + elif +sentenciaElif)._accion(v => new PNodoIf(v[0], v[2], new List<NodoPythonAst>() { v[4] } ))
+                ;
 
 
 
@@ -410,43 +413,49 @@ namespace Sec.Analizadores
             exp.Rule = produccion(id)._accion(v => new PNodoBuscarId(v[0]))
                 | produccion(numero)._accion(v => new PNodoCrearEntero(v[0]))
                 | invocacion
+                
+                | produccion(exp + igualIgual + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "igualIgualGeneral") )
+                | produccion(exp + diferenteQue + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "diferenteQueGeneral") )
+                
+                | produccion(exp + mayor + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "mayorGeneral") )
+                | produccion(exp + menor + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "menorGeneral") )
+                | produccion(exp + mayorIgualQue + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "mayorIgualQueGeneral") )
+                | produccion(exp + menorIgualQue + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "menorIgualQueGeneral") )
+                
+                | produccion(exp + mas + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "masGeneral") )
+                | produccion(exp + menos + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "menosGeneral") )
+                | produccion(exp + por + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "porGeneral") )
+                | produccion(exp + div + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "divGeneral") )
+                | produccion(exp + divDoble + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "divDobleGeneral") )
+
+//                | exp + or + exp
+//                | exp + and + exp
+//                
+//                | exp + isNot + exp
+//                | exp +@in +exp
+//                | exp + @is + exp 
+//                | exp + notIn + exp
+//
+//                | exp + andBinario + exp
+//                | exp + orBinario + exp
+//                | exp + xorBinario + exp
                 ;
                     
             var asdf = new AutoNonTerminal();
-            asdf.Rule = exp + mas + exp
-                       | exp + menos + exp
-                       | exp + por + exp
-                       | exp + div + exp
-                       | exp + divDoble + exp
-
-
-                       | exp + igualIgual + exp
-                       | exp + diferenteQue + exp
+            asdf.Rule = produccion(id)._accion(v => new PNodoBuscarId(v[0]))
+                        | produccion(numero)._accion(v => new PNodoCrearEntero(v[0])) 
+                        
 
 
 
 
-                       | exp + mayor + exp
-                       | exp + menor + exp
-                       | exp + mayorIgualQue + exp
-                       | exp + menorIgualQue + exp
-
-                       | exp + or + exp
-                       | exp + and + exp
                        | not + exp
-                       | exp + isNot + exp
 
-                       | exp + notIn + exp
-
-                       | exp + andBinario + exp
-                       | exp + orBinario + exp
-                       | exp + xorBinario + exp
 
 
                        | self //es como el this
 
-                       | produccion(id)._accion(v => new PNodoBuscarId(v[0]))
-                       | produccion(numero)._accion(v => new PNodoCrearEntero(v[0])) 
+                       
                        | @decimal
                        | cadena
                        | @true
@@ -487,8 +496,7 @@ namespace Sec.Analizadores
                        | input + apar + cpar
                        
                        
-                       | exp +@in +exp
-                       | exp + @is + exp 
+
                        
                 ;
             
