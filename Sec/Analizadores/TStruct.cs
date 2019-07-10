@@ -3,11 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using Irony.Parsing;
 
 namespace Sec.Analizadores
 {
     public class SemanticException : ApplicationException
     {
+        public SourceLocation Location { get; set; }
+        
         public SemanticException(string message) : base(message)
         {
             

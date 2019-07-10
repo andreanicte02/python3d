@@ -472,6 +472,7 @@ namespace Sec.Analizadores
             {
                 Console.WriteLine("Error semantico en T:");
                 Console.WriteLine(semanticException.Message);
+                Console.WriteLine(semanticException.Location);
             }
         }
         

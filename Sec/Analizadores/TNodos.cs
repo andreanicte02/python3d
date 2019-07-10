@@ -17,7 +17,15 @@ namespace Sec.Analizadores
         public SourceLocation location;
         public Codigo GenerarCodigo(ZEntorno entorno)
         {
-            return IntentarGenerarCodigo(entorno);
+            try
+            {
+                return IntentarGenerarCodigo(entorno);
+            }
+            catch (SemanticException e)
+            {
+                e.Location = this.location;
+                throw;
+            }
         }
         
         
