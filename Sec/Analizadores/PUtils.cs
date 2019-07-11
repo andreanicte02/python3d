@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using Irony.Parsing;
 
 namespace Sec.Analizadores
 {
@@ -176,6 +178,40 @@ namespace Sec.Analizadores
         */
         
         
+        public static string pruebaP()
+        {
+            // :v
+            
+            
+            string entrada = File.ReadAllText(@"./../../prueba.py");
+            
+            var ga = new GramaticaPython();
+            var parser = new Parser(ga);
+                
+            var arbol = parser.Parse(entrada);
+
+            var raiz = arbol.Root;
+                
+            if (raiz == null || arbol.ParserMessages.Count > 0 || arbol.HasErrors())
+            {
+                foreach (var item in arbol.ParserMessages)
+                {
+                    Console.WriteLine("Error->"+item.Message+" Line:"+item.Location.Line + " Column: " + item.Location.Column);
+                }
+
+                return "";
+            }
+                
+            Console.WriteLine("compilo todo bien");
+            
+            var sentencias = (List<NodoPythonAst>) raiz.AstNode;
+
+            var codigo = generarBloqueFuncion("python_main", new List<string>(),  sentencias, "\t");
+
+            return codigo.texto;
+        }
+        
+        
         
     }
 
@@ -186,6 +222,8 @@ namespace Sec.Analizadores
         public static int tipoDouble = 2;
 
     }
+    
+    
     
     
     

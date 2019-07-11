@@ -456,7 +456,7 @@ namespace Sec.Analizadores
         
         //***************
         
-        public static void pruebaT()
+        public static void pruebaT(string extra = "")
         {
             // :v
             
@@ -465,7 +465,7 @@ namespace Sec.Analizadores
             
             try
             {
-                var codigo3d = TUtils.generarCodigo3D(entrada2);
+                var codigo3d = TUtils.generarCodigo3D(entrada2 + "\n" + "\n" + extra);
                 Console.WriteLine(codigo3d);
             }
             catch (SemanticException semanticException)

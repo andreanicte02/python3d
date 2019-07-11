@@ -245,6 +245,39 @@ namespace Sec.Analizadores
         }
     }
 
+
+    public class TNodoBreak : TNodo
+    {
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            if (string.IsNullOrEmpty(entorno.labelLoopEnd)) {
+                throw new SemanticException($"sentencia 'break' no esta dentro ningun bucle");
+            }
+
+            var code = new Codigo();
+            code.agregar($"goto {entorno.labelLoopEnd};");
+            code.comentar($"break --> {entorno.labelLoopEnd}");
+
+            return code;
+        }
+    }
+
+    public class TNodoContinue : TNodo
+    {
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            if (string.IsNullOrEmpty(entorno.labelLoopBegin)) {
+                throw new SemanticException($"sentencia 'continue' no esta dentro ningun bucle");
+            }
+
+            var code = new Codigo();
+            code.agregar($"goto {entorno.labelLoopBegin};");
+            code.comentar($"continue --> {entorno.labelLoopBegin}");
+
+            return code;
+        }
+    }
+    
     public class TNodoReturn : TNodo
     {
         private readonly NodoAst _e1;
@@ -1472,6 +1505,8 @@ public class TNodoMenosUnario : TNodo
 
             
             var entornoTrue = new ZEntorno(entorno);
+            entornoTrue.labelLoopBegin = etiquetaInicio;
+            entornoTrue.labelLoopEnd = etiquetaFin;
 
             var codigo = new Codigo();
             

@@ -156,6 +156,8 @@ namespace Sec.Analizadores
         public bool TieneReturn { get; set; }
         
         public string labelFin { get; set; }
+        public string labelLoopBegin { get; set; }
+        public string labelLoopEnd { get; set; }
 
         public ZEntorno entornoPadre { get;  }
         public string Nombre { get; }
@@ -178,6 +180,8 @@ namespace Sec.Analizadores
             if (entornoPadre != null)
             {
                 labelFin = entornoPadre.labelFin;
+                labelLoopBegin = entornoPadre.labelLoopBegin;
+                labelLoopEnd = entornoPadre.labelLoopEnd;
             }
         }
 

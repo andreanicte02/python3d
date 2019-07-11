@@ -113,6 +113,8 @@ namespace Sec.Analizadores
                                     | produccion(ToTerm("!") + "print" + "(" + id + "," + expr + ")" + ";")._accionT(v => new TNodoPrintSimple(v[3], v[5]))
                                     | produccion("throw" + expr + ";" )._accionT(v => new TNodoThrow(v[1]))
                                     | produccion(ToTerm("while") + "(" + expr + ")" +"{"+ sentenciasFuncion + "}")._accionT(v => new TNodoWhile(v[2], v[5]))
+                                    | produccion("break" + ToTerm(";"))._accion(v => new TNodoBreak())
+                                    | produccion("continue" + ToTerm(";"))._accion(v => new TNodoContinue())
                 ;
 
             declaracion.Rule = produccion(tipo + id + "=" + expr)
