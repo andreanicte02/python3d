@@ -409,36 +409,65 @@ namespace Sec.Analizadores
                     //me faltaria el for para el que se usa parr recorre los diccionarios    
 
 
-                    
-            exp.Rule = produccion(id)._accion(v => new PNodoBuscarId(v[0]))
-                | produccion(numero)._accion(v => new PNodoCrearEntero(v[0]))
-                | invocacion
-                
-                | produccion(exp + igualIgual + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "igualIgualGeneral") )
-                | produccion(exp + diferenteQue + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "diferenteQueGeneral") )
-                
-                | produccion(exp + mayor + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "mayorGeneral") )
-                | produccion(exp + menor + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "menorGeneral") )
-                | produccion(exp + mayorIgualQue + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "mayorIgualQueGeneral") )
-                | produccion(exp + menorIgualQue + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "menorIgualQueGeneral") )
-                
-                | produccion(exp + mas + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "masGeneral") )
-                | produccion(exp + menos + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "menosGeneral") )
-                | produccion(exp + por + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "porGeneral") )
-                | produccion(exp + div + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "divGeneral") )
-                | produccion(exp + divDoble + exp)._accion(v => new PNodoOperacionBinaria(v[0], v[2], "divDobleGeneral") )
 
-//                | exp + or + exp
-//                | exp + and + exp
-//                
-//                | exp + isNot + exp
-//                | exp +@in +exp
-//                | exp + @is + exp 
-//                | exp + notIn + exp
-//
-//                | exp + andBinario + exp
-//                | exp + orBinario + exp
-//                | exp + xorBinario + exp
+                    exp.Rule = produccion(id)._accion(v => new PNodoBuscarId(v[0]))
+                               | produccion(numero)._accion(v => new PNodoCrearEntero(v[0]))
+                               | invocacion
+
+                               | produccion(exp + igualIgual + exp)._accion(v =>
+                                   new PNodoOperacionBinaria(v[0], v[2], "igualIgualGeneral"))
+                               | produccion(exp + diferenteQue + exp)._accion(v =>
+                                   new PNodoOperacionBinaria(v[0], v[2], "diferenteQueGeneral"))
+
+                               | produccion(exp + mayor + exp)
+                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "mayorGeneral"))
+                               | produccion(exp + menor + exp)
+                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "menorGeneral"))
+                               | produccion(exp + mayorIgualQue + exp)._accion(v =>
+                                   new PNodoOperacionBinaria(v[0], v[2], "mayorIgualQueGeneral"))
+                               | produccion(exp + menorIgualQue + exp)._accion(v =>
+                                   new PNodoOperacionBinaria(v[0], v[2], "menorIgualQueGeneral"))
+
+                               | produccion(exp + mas + exp)
+                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "masGeneral"))
+                               | produccion(exp + menos + exp)
+                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "menosGeneral"))
+                               | produccion(exp + por + exp)
+                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "porGeneral"))
+                               | produccion(exp + div + exp)
+                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "divGeneral"))
+                               | produccion(exp + divDoble + exp)._accion(v =>
+                                   new PNodoOperacionBinaria(v[0], v[2], "divDobleGeneral"))
+
+                               | produccion(exp + or + exp)
+                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "orGeneral"))
+                               | produccion(exp + and + exp)
+                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "andGeneral"))
+
+                               | produccion(exp + isNot + exp)
+                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "isNotGeneral"))
+
+
+
+                               | produccion(exp + @in + exp)
+                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "inGeneral"))
+                               | produccion(exp + @is + exp)
+                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "isGeneral"))
+                               | produccion(exp + notIn + exp)
+                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "notInGeneral"))
+
+
+                               | produccion(exp + andBinario + exp)._accion(v =>
+                                   new PNodoOperacionBinaria(v[0], v[2], "andBinarioGenral"))
+                               | produccion(exp + orBinario + exp)._accion(v =>
+                                   new PNodoOperacionBinaria(v[0], v[2], "orBinarioGeneral"))
+                               | produccion(exp + xorBinario + exp)._accion(v =>
+                                   new PNodoOperacionBinaria(v[0], v[2], "xorBinarioGeneral"))
+
+                               | menos + exp + ReduceHere()
+                               
+                               | mas + exp + ReduceHere()
+                               
                 ;
                     
             var asdf = new AutoNonTerminal();
