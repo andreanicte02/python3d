@@ -48,11 +48,15 @@ namespace Sec.Interprete3D
                     utilidadesParaDegg.enciclar(sentencias[x],e);
                 }
 
-                var posibleSalto = sentencias[x].ejecutar(e);
 
-                if (posibleSalto is index i)
+                if (Zide.inDebug3d != -1)
                 {
-                    x = i.inidce;
+                    var posibleSalto = sentencias[x].ejecutar(e);
+
+                    if (posibleSalto is index i)
+                    {
+                        x = i.inidce;
+                    }
                 }
             }
 

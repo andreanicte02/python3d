@@ -23,8 +23,8 @@ namespace Sec.Analizadores
             NonGrammarTerminals.Add(COMENTARIO_MULT);
 
             //-------------------------------------------------------------------------------------------------palabras resevadas
-            MarkReservedWords("%f");
-            MarkReservedWords("%i");
+            MarkReservedWords("%d");
+            MarkReservedWords("%e");
             MarkReservedWords("%c");
             MarkReservedWords("print");
             MarkReservedWords("if");

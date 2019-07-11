@@ -24,26 +24,54 @@ namespace Sec.Interprete3D
 
 
             SourceLocation loc = ins.location;
-            
-            if (Zide.breakPoints3d.ContainsKey(loc.Line))
-            {
-                
-               
-                String f = Zide.texTraducidBox.GetLineText(loc.Line);
-                Zide.texTraducidBox.GotoNextBookmark(loc.Line);
-                Zide.texTraducidBox.Navigate(loc.Line);
-                Form tablaS = new reporteDebug3d(loc.Line,e,f);
-                DialogResult res = new DialogResult();
-                res = tablaS.ShowDialog();
-                
 
+            if (Zide.inDebug3d == 1)
+            {
+                if (Zide.breakPoints3d.ContainsKey(loc.Line))
+                {
+                    mostrar(loc,e);
+
+                }
+                
+            }else if (Zide.inDebug3d == 3)
+            {
+                mostrar(loc,e);
             }
+            
+        }
+
+
+        public static void mostrar(SourceLocation loc, entorno3d e)
+        {
+            String f = Zide.texTraducidBox.GetLineText(loc.Line);
+            Zide.texTraducidBox.GotoNextBookmark(loc.Line);
+            Zide.texTraducidBox.Navigate(loc.Line);
+            Form tablaS = new reporteDebug3d(loc.Line,e,f);
+            DialogResult res = new DialogResult();
+            res = tablaS.ShowDialog();
+
+            if (res == DialogResult.OK)
+            {
+                Zide.inDebug3d = 1;
+            }else if (res == DialogResult.No)
+            {
+                Zide.inDebug3d =3;
+            }else if (res == DialogResult.Cancel)
+            {
+                Zide.inDebug3d = 0;
+            }else if (res == DialogResult.Abort)
+            {
+                Zide.inDebug3d = -1;
+            }
+
         }
 
 
     }
     
 }
+
+
 
 public class reporteDebug3d: Form
 {
@@ -113,6 +141,9 @@ public class reporteDebug3d: Form
         
         
         btnBuscarPoint.Click += btnDetener_Click3d;
+        btnSigLinea.Click += btnSig_linea;
+        btnterminar.Click += terminarEjeuctar_clic;
+        btnTerminarEjercutar.Click += cancelar_ejec;
         
         
         
@@ -159,13 +190,45 @@ public class reporteDebug3d: Form
 
     private void btnDetener_Click3d(object sender, EventArgs e)
     {
-
         
-
         this.DialogResult = DialogResult.OK;
 
 
     }
+    
+    private void btnSig_linea(object sender, EventArgs e)
+    {
+
+        
+
+        this.DialogResult = DialogResult.No;
+
+
+    }
+    
+    private void terminarEjeuctar_clic(object sender, EventArgs e)
+    {
+
+        
+
+        this.DialogResult = DialogResult.Cancel;
+
+
+    }
+    
+    
+    private void cancelar_ejec(object sender, EventArgs e)
+    {
+
+        
+
+        this.DialogResult = DialogResult.Abort;
+
+
+    }
+
+    
+    
 
 
 

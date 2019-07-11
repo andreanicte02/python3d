@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using Sec.Analizadores;
 
 namespace Sec
 {
@@ -10,6 +11,8 @@ namespace Sec
         {
 
             Console.WriteLine("holi");
+            TUtils.pruebaT();
+            
             Zide f = new Zide();
             Application.EnableVisualStyles();
             Application.Run(f);
