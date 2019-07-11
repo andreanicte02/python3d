@@ -156,6 +156,10 @@ namespace Sec.Analizadores
             return term;
         }
 
+        public static T _accionT<T>(this T term, DefinitionDelegate definitionDelegate) where T : BnfTerm
+        {
+            return term._accionT(0, definitionDelegate);
+        }
         
         public static T _accionT<T>(this T term, int pos, DefinitionDelegate definitionDelegate) where T : BnfTerm
         {
