@@ -72,7 +72,7 @@ General crearStringGeneral(int[] valor){
     return g;
 }
 
-Genera crearBooleanGeneral(int valor){
+General crearBooleanGeneral(int valor){
     General g = new General;
     g.valorInt = valor;
     g.tipo = 6;
@@ -131,24 +131,26 @@ General masGeneral(General g1, General g2, int[] archivo, int fila, int columna)
     
     if (g1.tipo == 5 && g2.tipo == 5) {
     
-        
-        return crearStringGeneral(concatString(g1.valorString, g2.valorString));
-    
+         int[] a = concatString(g1.valorString, g2.valorString);
+         return crearStringGeneral(a);
+         
+     
     } else if(g1.tipo == 5 && g2.tipo == 6){
     
-        return crearStringGeneral(g1.valorString, stringBool(g2.valorInt));
+        
+         return crearStringGeneral(concatString(g1.valorString, stringBool(g2.valorInt)));
     
     } else if(g1.tipo == 6 && g2.tipo == 5){
     
-         return crearStringGeneral(stringBool(g2.valorInt), g2.valorString);
+         return crearStringGeneral(concatString(stringBool(g2.valorInt), g2.valorString));
          
     } else if(g1.tipo == 5 && g2.tipo == 3){
           
-         return crearStringGeneral(g1.valorString, int_str(g2.valor));
+         return crearStringGeneral(concatString(g1.valorString, int_str(g2.valorInt)));
          
     } else if(g1.tipo == 3 && g2.tipo == 5){
               
-         return crearStringGeneral(int_str(g1.valor), g2.valorString);
+        return crearStringGeneral(concatString(int_str(g1.valorInt), g2.valorString));
     } 
     
     
@@ -172,12 +174,12 @@ General masGeneral(General g1, General g2, int[] archivo, int fila, int columna)
     }else if(g1.tipo == 6 && g2.tipo == 6){
     
                     
-        return crearStringGeneral(stringBool(g1.valorInt), stringBool(g2.valorInt));
+       return crearStringGeneral(concatString(stringBool(g1.valorInt), stringBool(g2.valorInt)));
             
     }
     
  
-    throw crearException("tipos no compatibles", "asd.py", 12, 23);
+    throw crearException("tipos no compatibles", archivo, fila, columna);
     
     
 }
@@ -210,30 +212,6 @@ General menosGeneral(General g1, General g2, int[] archivo, int fila, int column
     
 }
 
-
-General menosGeneral(General g1, General g2, int[] archivo, int fila, int columna){
-
-    if (g1.tipo == 3 && g2.tipo == 3) {
-    
-        return crearIntGeneral(g1.valorInt - g2.valorInt);
-    
-    }else if(g1.tipo == 4 && g2.tipo == 4){
-    
-        return crearDoubleGeneral(g1.valorDouble - g2.valorDouble);
-        
-    }else if(g1.tipo == 3 && g2.tipo == 4){
-    
-        return crearDoubleGeneral(g1.valorInt - g2.valorDouble);
-    
-    }else if(g1.tipo == 4 && g2.tipo == 3){
-         
-        return crearDoubleGeneral(g1.valorDouble - g2.valorInt);
-       
-    }
-    
-    throw crearException("tipos no compatibles", "asd.py", 12, 23); 
-    
-}
 
 
 General porGeneral(General g1, General g2, int[] archivo, int fila, int columna){
@@ -256,7 +234,7 @@ General porGeneral(General g1, General g2, int[] archivo, int fila, int columna)
        
     }
     
-    throw crearException("tipos no compatibles *", "asd.py", 12, 23); 
+    throw crearException("tipos no compatibles *",archivo, fila, columna); 
     
 }
 
@@ -342,7 +320,7 @@ General menorGeneral(General g1, General g2, int[] archivo, int fila, int column
     
    
     
-    throw crearException("tipos no compatibles <", "asd.py", 12, 23); 
+    throw crearException("tipos no compatibles <", archivo, fila, columna); 
     
 }
 
@@ -373,7 +351,7 @@ General menorIgualGeneral(General g1, General g2, int[] archivo, int fila, int c
     }
     
     
-    throw crearException("tipos no compatibles <=", "asd.py", 12, 23); 
+    throw crearException("tipos no compatibles <=",archivo, fila, columna); 
     
 }
 
@@ -403,7 +381,7 @@ General mayorIgualGeneral(General g1, General g2, int[] archivo, int fila, int c
     }
     
     
-    throw crearException("tipos no compatibles <=", "asd.py", 12, 23); 
+    throw crearException("tipos no compatibles <=", archivo, fila, columna); 
     
 }
 
@@ -436,7 +414,7 @@ General igualIgualGeneral(General g1, General g2, int[] archivo, int fila, int c
     }
     
     
-    throw crearException("tipos no compatibles ==", "asd.py", 12, 23); 
+    throw crearException("tipos no compatibles ==", archivo, fila, columna); 
     
 }
 
@@ -463,9 +441,10 @@ General diferenteQueGeneral(General g1, General g2, int[] archivo, int fila, int
         
         int i = cadenasIguales(g1.valorString, g2.valorString);
         if(i == 1){
-            return 0;
+        
+           return crearBooleanGeneral(0);
         }
-        return 1;
+        return crearBooleanGeneral(1);
     
     }else if(g1.tipo  == 6 && g2.tipo == 6){
          
@@ -475,10 +454,31 @@ General diferenteQueGeneral(General g1, General g2, int[] archivo, int fila, int
          
     
     
-    throw crearException("tipos no compatibles ==", "asd.py", 12, 23); 
+    throw crearException("tipos no compatibles ==", archivo, fila, columna); 
+    
+}
+//-----------operadores logicos
+
+General andGeneral(General g1, General g2, int[] archivo, int fila, int columna){
+
+    if (g1.tipo == 6 && g2.tipo == 6) {
+    
+        return crearBooleanGeneral(g1.valorInt && g2.valorInt);
+        
+    }
     
 }
 
+
+General orGeneral(General g1, General g2, int[] archivo, int fila, int columna){
+
+    if (g1.tipo == 6 && g2.tipo == 6) {
+    
+        return crearBooleanGeneral(g1.valorInt || g2.valorInt);
+        
+    }
+    
+}
 
 
 
@@ -614,7 +614,8 @@ int[] int_str(int n){
 
         int curr = n %10;
         n = n/10;
-        chars[size - iii-1]= curr + '0'
+        
+        chars[size - iii - 1]= curr + '0';
 
         iii = iii+1;
     }
@@ -630,6 +631,53 @@ int[] int_str(int n){
 
 //---------------------------------------
 
+int[] double_str(double n){
+
+    if(n == 0){
+
+        return "0.00";
+    }
+
+    int parteEntera = (int) n;
+    int parteDecimal = (int) ((n - parteEntera) * 100);
+    
+    if (parteDecimal < 0){
+        parteDecimal = parteDecimal * -1;
+    }
+
+    int [] a = int_str(parteEntera);
+    int [] b = int_str(parteDecimal);
+
+    return concatString(a,b);
+ 
+}
+//-------------------------------------
+double pow (double a ,int b){
+
+    if(b == 0){
+        return 1.0;
+    }
+
+    if(b<0){
+        return 0.0;
+    }
+
+    double result = 1.00;
+    int i = 0;
+    while(i<b){
+
+        result = result *a;
+    }
+    return result;
+
+}
+
+
+double  pow2(double a, double b){
+    return pow(a,(int) b);
+}
+
+//--------------------------------------
 void printlnInt(int i){
     !print(e, i);
     !print(c, 10);
@@ -648,11 +696,56 @@ void printlnString(int[] cadena){
 
 void main(){
 
-    int[] a = "hola ";
+    /*int[] a = "hola ";
     int[] b = "hola";
     int[] c = "sadfasdf";
     
+    int d = 1;
+    double e = 2.5;
+    double f = 2.5;*/
+    
+    
 
-    printlnString(concatString(a, c));
+    int [] a = "hola";
+    General p0 = crearStringGeneral(a);
+    
+    int [] b = "hola2";
+    General p1 = crearStringGeneral(a);
+    
+    General p3 = crearIntGeneral(1);
+    
+    General p4 = crearIntGeneral(3);
+    
+    General p10 = crearDoubleGeneral(4.5);
+    
+    General p6 =  crearDoubleGeneral(3.5);
+        
+    General p7 = crearBooleanGeneral(0);
+    
+    General p8 = crearBooleanGeneral(1);
+        /*
+        
+        
+         
+    General gsuma = masGeneral(p0,p6,a,1,1);
+    General gresta = menosGeneral(gsuma, p4,a,1,1);
+    General gs2 = masGeneral(gsuma, p3,a,1,1);
+    General g0 = porGeneral(gresta, p10 ,a,1,1);
+    General g1 = divGeneral(p6, p4 ,a,1,1);
+    General g2 = divGeneral(p4, p6 ,a,1,1);
+    General g3 = igualIgualGeneral(p7, p8,a,1,1);
+    
+    General g4 = mayorGeneral(p0,p1 ,a,1,1);
+    General g5 = menorGeneral(p7, p8,a,1,1);
+    General g6 = mayorIgualGeneral(p0, p1,a,1,1);
+    General g7 = menorIgualGeneral(p6, p7,a,1,1);
+    General g8 = igualIgualGeneral(p4, p10,a,1,1);
+
+       
+        
+    
+        
+    printlnString(gsuma.valorString);*/
+    
 
 }
