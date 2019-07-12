@@ -356,6 +356,8 @@ namespace Sec
 
             if (!string.IsNullOrEmpty(entrada.Text))
             {
+                textGramaticaT.Text += "\n";
+                textGramaticaT.Text += "\n";
                 textGramaticaT.Text += PUtils.generarCodigoT(entrada.Text);
             }
 
