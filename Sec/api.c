@@ -184,7 +184,6 @@ General masGeneral(General g1, General g2, int[] archivo, int fila, int columna)
     
     
     
-    
     if (g1.tipo == 5 && g2.tipo == 5) {
     
          int[] a = concatString(g1.valorString, g2.valorString);
@@ -207,6 +206,15 @@ General masGeneral(General g1, General g2, int[] archivo, int fila, int columna)
     } else if(g1.tipo == 3 && g2.tipo == 5){
               
         return crearStringGeneral(concatString(int_str(g1.valorInt), g2.valorString));
+        
+    } else if(g1.tipo == 5 &&  g2.tipo == 4){
+        
+        return crearStringGeneral(concatString(g1.valorString, double_str(g2.valorDouble)));
+        
+    } else if(g1.tipo == 4 &&  g2.tipo == 5){
+              
+        return crearStringGeneral(concatString(double_str(g1.valorDouble), g2.valorString)) ;
+              
     } 
     
     
@@ -513,6 +521,37 @@ General diferenteQueGeneral(General g1, General g2, int[] archivo, int fila, int
     throw crearException("tipos no compatibles ==", archivo, fila, columna); 
     
 }
+
+//-----------pow 
+
+General potenciaGeneral(General g1, General g2, int[] archivo, int fila, int columna){
+
+    if (g1.tipo == 3 && g2.tipo == 3) {
+    
+        return crearIntGeneral(pow_int(g1.valorInt, g2.valorInt));
+        
+    } else if(g1.tipo == 4 && g2.tipo == 4){
+        
+        return crearDoubleGeneral(pow2(g1.valorDouble, g2.valorDouble));
+        
+    } else if(g1.tipo ==3 && g2.tipo == 4 ){
+        
+        return crearIntGeneral(pow3(g1.valorInt, g2.valorDouble));
+        
+    } else if(g1.tipo ==4 && g2.tipo == 3 ){
+              
+        return crearDoubleGeneral(pow_double(g1.valorDouble, g2.valorInt));
+              
+    } 
+    
+    throw crearException("tipos no compatibles **", archivo, fila, columna); 
+    
+}
+
+
+
+
+
 //-----------operadores logicos
 
 General andGeneral(General g1, General g2, int[] archivo, int fila, int columna){
@@ -708,7 +747,7 @@ int[] double_str(double n){
  
 }
 //-------------------------------------
-double pow (double a ,int b){
+double pow_double (double a ,int b){
 
     if(b == 0){
         return 1.0;
@@ -728,11 +767,35 @@ double pow (double a ,int b){
 
 }
 
+int pow_int (int a ,int b){
 
-double  pow2(double a, double b){
-    return pow(a,(int) b);
+    if(b == 0){
+        return 1;
+    }
+
+    if(b<0){
+        return 0;
+    }
+
+    int result = 1;
+    int i = 0;
+    while(i<b){
+
+        result = result *a;
+    }
+    return result;
+
 }
 
+
+
+double  pow2(double a, double b){
+    return pow_double(a,(int) b);
+}
+
+int pow3 (int a, double b){
+    return pow_int(a, (int) b);
+}
 //--------------------------------------
 void printDouble(double d){
     !print(d, d);
