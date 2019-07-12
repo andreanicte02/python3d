@@ -27,7 +27,7 @@ struct Entrada {
 
 struct InfoFuncion {
     int id;
-    int parametros;
+    int cantidadParametros;
     General ambitoCapturado;
 }
 
