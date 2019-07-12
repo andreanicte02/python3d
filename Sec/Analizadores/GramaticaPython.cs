@@ -418,6 +418,8 @@ namespace Sec.Analizadores
                                | produccion(@true)._accion(v => new PNodoCrearBooleano(1))
                                | produccion(@false)._accion(v => new PNodoCrearBooleano(0))
                                
+                               | produccion(exp + punto + id)._accion(v => new PNodoAccessoPunto(v[0], v[2]))
+                               
                                | invocacion
 
                                | produccion(exp + igualIgual + exp)._accion(v =>
@@ -497,7 +499,7 @@ namespace Sec.Analizadores
 
                        | invocacionPunto
 
-                       | exp + punto + id
+
                        | @new + id + apar + listaExp + cpar  //alparecer ni se usa
                        
                        

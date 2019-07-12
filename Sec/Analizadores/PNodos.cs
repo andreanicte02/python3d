@@ -270,6 +270,35 @@ namespace Sec.Analizadores
         }
     }
 
+    
+    public class PNodoAccessoPunto : PNodo
+    {
+        private readonly NodoPythonAst _nodoValor;
+        private readonly string _id;
+
+        public PNodoAccessoPunto(NodoPythonAst nodoValor, string id)
+        {
+            _nodoValor = nodoValor;
+            _id = id;
+        }
+        
+        
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var codigo = new CodigoT();
+
+            var c = PUtils.desenvolver(_nodoValor.GenerarCodigo(entorno));
+
+            codigo.apuntador = PUtils.generarTemporal();
+            
+            codigo.agregar(c);
+            codigo.agregar($"General {codigo.apuntador} = buscarPropiedad({c.apuntador},"+ "\"" + _id + "\"" + $", archivo, {this.linea}, {this.columna});");
+
+            return codigo;
+            
+        }
+    }
+    
     public class PNodoPrint : PNodo
     {
         private readonly List<NodoPythonAst> _nodosArgumento;
@@ -285,9 +314,6 @@ namespace Sec.Analizadores
         {
             var codigo = new CodigoT();
 
-//            var cMetodo = PUtils.desenvolver(PNodoBuscarId.buscarId(_id));
-//            codigo.agregar(cMetodo);
-
             var temp = PUtils.generarTemporal();
             codigo.agregar($"General[] {temp} = new General[{_nodosArgumento.Count}];");
             
@@ -297,8 +323,7 @@ namespace Sec.Analizadores
                 codigo.agregar(cArg);
                 codigo.agregar($"{temp}[{i}] = {cArg.apuntador};");
             }
-
-//            codigo.apuntador = PUtils.generarTemporal();
+            
             codigo.agregar($"printGenerales({temp});");
 
             return codigo;
