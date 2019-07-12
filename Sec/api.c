@@ -30,6 +30,7 @@ struct InfoFuncion {
     int id;
     int cantidadParametros;
     General ambitoCapturado;
+    General argumentoSelf;
 }
 
 struct General {
@@ -38,7 +39,7 @@ struct General {
     double valorDouble;
     int tipo;
     
-    General anterior;
+    General anterior; // usado para acceder a los ambitos superiores
     InfoFuncion infoFuncion;    
     Entrada primeraEntrada;
 }
@@ -52,6 +53,14 @@ Exception crearException(int[] mensaje, int[] archivo, int linea, int columna){
     e.linea = linea;
     e.columna = columna;
     return e;
+}
+
+// numeroClase >= 20
+General crearInstanciaGeneral(int numeroClase){
+    General g = new General;
+    g.tipo = numeroClase;
+//    g.valorString = aqui podria llevar el nombre de su tipo
+    return g;
 }
 
 General crearGeneralFuncion(int id, int cantidadParametros, General ambitoCapturado){
@@ -68,6 +77,16 @@ General crearAmbito(General ambitoAnterior){
     General g = new General;
     g.tipo  = 2;
     g.anterior = ambitoAnterior;
+    return g;
+}
+General crearObjetoClase(General ambitoAnterior, int id){
+    General g = new General;
+    g.tipo  = 2;
+    g.anterior = ambitoAnterior;
+    
+    g.infoFuncion = new InfoFuncion;
+    g.infoFuncion.id = id;
+    g.infoFuncion.ambitoCapturado = ambitoAnterior;
     return g;
 }
 General crearVoidGeneral(){
@@ -132,7 +151,11 @@ void registrar(General ambito, int[] llave, General valor){
         destino.siguiente = ambito.primeraEntrada;
         ambito.primeraEntrada = destino;
     }
-    destino.valor = valor; 
+    destino.valor = valor;
+    if (ambito.tipo >= 20 && valor.tipo == 7) {
+        // se registra una funcion en una instancia
+        valor.infoFuncion.argumentoSelf = ambito;
+    }
 }
 Entrada crearEntrada(int[] llave){
     Entrada entrada = new Entrada;

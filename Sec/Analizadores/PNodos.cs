@@ -31,6 +31,7 @@ namespace Sec.Analizadores
         public string registro { get; set; } = "";
 
         public string extra { get; set; }
+        public int extra2 { get; set; }
 
         public void agregar(CodigoT codigoSentencia)
         {
@@ -98,7 +99,7 @@ namespace Sec.Analizadores
 
         public CodigoT GenerarCodigoClase()
         {
-            return PUtils.generarBloqueClase(metodo, metodo_instancia, _id, _sentencias, "\t");
+            return PUtils.generarBloqueClase(metodo, metodo_instancia,  _id, _numeroClase, _sentencias, "\t");
         }
     }
     public class PFuncion
@@ -205,6 +206,7 @@ namespace Sec.Analizadores
                 
                 var c2 = PUtils.desenvolver(_nodosValor[i].GenerarCodigo(entorno));
 
+                codigo.agregar(c1);
                 codigo.agregar(c2);
                 codigo.agregar(string.Format(c1.registro, c2.apuntador));
 //                codigo.agregar($"asignar({c1.apuntador}, {c2.apuntador});");
@@ -294,7 +296,7 @@ namespace Sec.Analizadores
 //            codigo.agregar($"buscarPropiedad({c.apuntador},"+ "\"" + _id + "\"" + $", archivo, {this.linea}, {this.columna});");
             
 
-            codigo.valor = $"buscarPropiedad({c.apuntador},"+ "\"" + _id + "\"" + $", archivo, {this.linea}, {this.columna});";
+            codigo.valor = $"buscarIdEnObjeto({c.apuntador},"+ "\"" + _id + "\"" + $", archivo, {this.linea}, {this.columna});";
             codigo.registro = $"registrar({c.apuntador}, \"" + _id + "\", {0});";
             return codigo;
 
@@ -526,7 +528,7 @@ namespace Sec.Analizadores
             var codigo = new CodigoT();
             codigo.apuntador = PUtils.generarTemporal();
             codigo.agregar($"General {codigo.apuntador} = {pClase.metodo}(ambito);");
-            codigo.agregar($"registrar(ambit, \"{_id}\", {codigo.apuntador});");
+            codigo.agregar($"registrar(ambito, \"{_id}\", {codigo.apuntador});");
             return codigo;
         }
     }
@@ -536,6 +538,8 @@ namespace Sec.Analizadores
         public string Id { get; }
         private readonly List<string> _parametros;
         private readonly List<NodoPythonAst> _sentencias;
+
+        public int CantidadParametros => _parametros.Count;
 
         public PNodoCrearMetodo(string id, List<string> parametros, List<NodoPythonAst> sentencias)
         {
@@ -552,7 +556,7 @@ namespace Sec.Analizadores
             var codigo = new CodigoT();
             codigo.extra = pFuncion.nombre;
             codigo.apuntador = PUtils.generarTemporal();
-            codigo.agregar($"General {codigo.apuntador} = crearGeneralFuncion({pFuncion.numeroFuncion},{_parametros.Count}, ambito); // {Id}");
+            codigo.agregar($"General {codigo.apuntador} = crearGeneralFuncion({pFuncion.numeroFuncion},{_parametros.Count}, ambitoCapturado); // {Id}");
             codigo.agregar($"registrar(ambito, \"{Id}\", {codigo.apuntador});");
             return codigo;
         }
