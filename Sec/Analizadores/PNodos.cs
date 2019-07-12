@@ -395,7 +395,7 @@ namespace Sec.Analizadores
         {
             var codigo = new CodigoT();
             codigo.apuntador = PUtils.generarTemporal();
-            codigo.agregar($"General {codigo.apuntador} = crearStringGeneral({_valor});");
+            codigo.agregar($"General {codigo.apuntador} = crearStringGeneral(\"{_valor}\");");
 
             return codigo;
         }

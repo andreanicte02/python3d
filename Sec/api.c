@@ -823,7 +823,5 @@ void printlnString(int[] cadena){
 //============
 
 void main(){
-
-    
-
+    python_main(null, null);
 }
