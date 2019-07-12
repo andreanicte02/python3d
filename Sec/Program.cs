@@ -13,9 +13,9 @@ namespace Sec
             Console.WriteLine("holi");
             TUtils.pruebaT();
             
-            //Zide f = new Zide();
-            //Application.EnableVisualStyles();
-            //Application.Run(f);
+            Zide f = new Zide();
+            Application.EnableVisualStyles();
+            Application.Run(f);
         }
     }
 }

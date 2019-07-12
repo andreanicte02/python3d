@@ -51,7 +51,7 @@ namespace Sec
         private Button btnEjecutar3D;
         private Button btnAbrir3d;
         private Button btnDebug3d;
-        
+        private Button generar3D;
         
 
 
@@ -63,6 +63,7 @@ namespace Sec
         public  static int inDebug3d;
         
         public static FastColoredTextBox texTraducidBox;
+        public static FastColoredTextBox textGramaticaT;
         
         //-----------------------------------------
         
@@ -106,10 +107,12 @@ namespace Sec
             btnEjecutar3D = new Button();
             btnAbrir3d = new Button();
             btnDebug3d = new Button();
+            generar3D = new Button();
             
             //timer
            
             texTraducidBox= new FastColoredTextBox();
+            textGramaticaT = new FastColoredTextBox();
             //instanciarTimer3d();
             
 
@@ -119,13 +122,14 @@ namespace Sec
 
         public void crear()
         {
-            btnAnalizar.Text = "Traducir3D";
+            btnAnalizar.Text = "Python->T";
             btnCrearPestaña.Text = "AddPestaña";
             bntAbrirArchivo.Text = "Abrir";
             btnGuardar.Text = "Guardar";
             btnEjecutar3D.Text = "Ejecutar3D";
             btnAbrir3d.Text = "Abrir3d";
             btnDebug3d.Text = "Deb3d";
+            generar3D.Text ="Generar3d";
             
 
             WindowState = FormWindowState.Maximized;
@@ -154,15 +158,17 @@ namespace Sec
             panelBotones.Controls.Add(btnEjecutar3D);
             panelBotones.Controls.Add(btnAbrir3d);
             panelBotones.Controls.Add(btnDebug3d);
-            
+            panelBotones.Controls.Add(generar3D);
+
             //acciones de bontos --------------------------------
-            btnAnalizar.Click +=  analizar_click;
+            btnAnalizar.Click +=  python_T_Click;
             btnCrearPestaña.Click += btnCrearPestaña_click;
             bntAbrirArchivo.Click += btnAbirirArchivo_click;
             btnGuardar.Click += btnGuardarArchivo_click;
             btnEjecutar3D.Click += btnEjecutar3d_Click;
             btnAbrir3d.Click += btnAbrir3d_Click;
             btnDebug3d.Click += btnDebug3d_click;
+            generar3D.Click += generar3d_click;
             
   
             
@@ -227,14 +233,26 @@ namespace Sec
             texTraducidBox.LineNumberColor= Color.White;
             texTraducidBox.CurrentLineColor = Color.Gray;
             
+            
             //----------------------
             texTraducidBox.SetBounds(0, 5, 630, 360);
-            string title = "3D";
-            TabPage myTabPage = new TabPage(title);
-            myTabPage.Controls.Add(texTraducidBox);
-            myTabPage.BorderStyle = BorderStyle.Fixed3D;
-            tabeEditor3D.TabPages.Add(myTabPage); 
+            textGramaticaT.SetBounds(0,5,630, 360);
             
+            
+           
+
+            TabPage myTabPage = new TabPage("3d");
+            TabPage pagT = new TabPage("T");
+            
+            
+            myTabPage.Controls.Add(texTraducidBox);
+            pagT.Controls.Add((textGramaticaT));
+            
+            myTabPage.BorderStyle = BorderStyle.Fixed3D;
+            
+            
+            tabeEditor3D.TabPages.Add(myTabPage); 
+            tabeEditor3D.TabPages.Add(pagT);
 
         }
         
@@ -327,10 +345,10 @@ namespace Sec
         }
 
 
-        private void analizar_click(object sender, EventArgs e)
+        private void python_T_Click(object sender, EventArgs e)
         {
       
-            String entada = leer();
+            //String entada = leer();
             
 
         }
@@ -451,6 +469,22 @@ namespace Sec
             var entrada = tabeEditor3D.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is FastColoredTextBox);
             Analizador3D analizar = new Analizador3D();
             analizar.ejecutarAnalizador(entrada.Text);
+            
+        }
+        
+        private void generar3d_click(object sender, EventArgs e)
+        {
+            
+            try
+            {
+                texTraducidBox.Text = TUtils.generarCodigo3D(textGramaticaT.Text);
+
+            }
+            catch (System.Exception exception)
+            {
+                Console.WriteLine(exception);
+                throw;
+            }
             
         }
         
