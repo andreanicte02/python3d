@@ -113,6 +113,16 @@ General crearNullGeneral(){
 }
 
 
+General crearTypeGeneral(){
+    General g = new General;
+    g.valorInt = 1;
+    g.tipo = 9;
+    return g;
+
+}
+
+
+
 //-----------------------------------
 
 void registrar(General ambito, int[] llave, General valor){
@@ -147,7 +157,7 @@ General buscarIdlocal(General ambito, int[] llave, int[] archivo, int linea, int
     
     General temp = ambito;
     while (temp != null){
-        Entrada entrada = buscarEntradaEnActual(ambito, llave);
+        Entrada entrada = buscarEntradaEnActual(temp, llave);
         if (entrada != null){
             return entrada.valor;
         }
@@ -332,7 +342,7 @@ General divGeneral(General g1, General g2, int[] archivo, int fila, int columna)
        
     }
     
-    throw crearException("tipos no compatibles /", "asd.py", 12, 23); 
+    throw crearException("tipos no compatibles /", archivo, fila, columna); 
     
 }
 
@@ -531,7 +541,7 @@ General diferenteQueGeneral(General g1, General g2, int[] archivo, int fila, int
     
 }
 
-//-----------pow 
+//================================================================================pow 
 
 General potenciaGeneral(General g1, General g2, int[] archivo, int fila, int columna){
 
@@ -561,7 +571,7 @@ General potenciaGeneral(General g1, General g2, int[] archivo, int fila, int col
 
 
 
-//-----------operadores logicos
+//=============================================================operadores logicos
 
 General andGeneral(General g1, General g2, int[] archivo, int fila, int columna){
 
@@ -584,6 +594,313 @@ General orGeneral(General g1, General g2, int[] archivo, int fila, int columna){
     
 }
 
+//===============================================================unarios
+
+General uMenosGeneral(General g1, int[] archivo, int fila, int columna){
+
+    if (g1.tipo == 3){
+        
+        return crearIntGeneral(g1.valorInt * -1);
+    
+    
+    }else if(g1.tipo == 4){
+    
+         return crearDoubleGeneral(g1.valorDouble * -1);
+    
+    }
+   
+     
+    throw crearException("error operador - unario", archivo, fila, columna); 
+}
+
+General uMasGeneral(General g1,int[] archivo, int fila, int columna){
+
+    if (g1.tipo == 3){
+        
+        return crearIntGeneral(g1.valorInt * 1);
+    
+    
+    }else if(g1.tipo == 4){
+    
+         return crearDoubleGeneral(g1.valorDouble * 1);
+    
+    }
+    
+    throw crearException("error operador + unario", archivo, fila, columna); 
+
+}
+
+
+General notGeneral(General g1,int[] archivo, int fila, int columna){
+
+    if (g1.tipo == 6){
+        
+        return crearBooleanGeneral(negado(g1.valorInt));
+    
+    
+    }
+    
+    throw crearException("error operador !", archivo, fila, columna); 
+
+}
+
+//============================================================funcion type(exp)
+
+General typeGeneral(General g1,int[] archivo, int fila, int columna){
+
+    if(g1.tipo == 3){
+    
+        int[] a = "<class 'int'>";
+        return crearStringGeneral(a);
+        
+    }else if(g1.tipo == 4){
+        
+        int[] a = "<class 'double'>";
+        return crearStringGeneral(a);
+                
+    }else if(g1.tipo == 5){
+             
+        int[] a = "<class 'str'>";
+        return crearStringGeneral(a);
+                     
+    }else if(g1.tipo == 6){
+                  
+        int[] a = "<class 'bool'>";
+        return crearStringGeneral(a);
+                          
+    }else if(g1.tipo == 9){
+                       
+        int[] a = "<class 'null'>";
+        return crearStringGeneral(a);
+                               
+    }
+    
+    int[] a = "<class 'object'>";
+    return crearStringGeneral(a);
+    
+
+}
+
+//=================================================================int(exp)
+
+General castIntGeneral(General g1,int[] archivo, int fila, int columna){
+
+    if(g1.tipo == 3){
+            
+        return crearIntGeneral(g1.valorInt);
+          
+    }else if(g1.tipo == 4){
+    
+        double a = g1.valorDouble;
+        return crearIntGeneral((int)a);
+        
+        
+    }else if(g1.tipo == 5){
+    
+        double a = str_double(g1.valorString);       
+        return crearIntGeneral((int)a);
+    
+    }else if(g1.tipo == 6){
+    
+        return crearIntGeneral(g1.valorInt);
+    }
+    
+    throw crearException("error int (exp)", archivo, fila, columna); 
+    
+}
+
+//==================================================================str(exp)
+
+General castStrGeneral(General g1,int[] archivo, int fila, int columna){
+
+    if(g1.tipo == 3){
+            
+        return crearStringGeneral(int_str(g1.valorInt));
+          
+    }else if(g1.tipo == 4){
+    
+        return crearStringGeneral(double_str(g1.valorDouble));
+        
+    }else if(g1.tipo == 5){
+    
+        return crearStringGeneral(g1.valorString);
+    
+    }else if(g1.tipo == 6){
+    
+        return crearStringGeneral(stringBool(g1.valorInt));
+        
+    }else if(g1.tipo == 9){
+         
+        int[] a ="None";      
+        return crearStringGeneral(a);
+    }
+         
+    
+    throw crearException("error str (exp)", archivo, fila, columna); 
+    
+}
+
+//================================================================float(exp)
+
+General castFloatGeneral(General g1,int[] archivo, int fila, int columna){
+
+    if(g1.tipo == 3){
+            
+        return crearDoubleGeneral(g1.valorInt*1.00);
+          
+    }else if(g1.tipo == 4){
+    
+        return crearDoubleGeneral(g1.valorDouble);
+        
+    }else if(g1.tipo == 5){
+    
+        double a = str_double(g1.valorString);   
+        return crearDoubleGeneral(a);
+    
+    }else if(g1.tipo == 6){
+    
+        return crearDoubleGeneral(g1.valorInt *1.00);
+        
+    }
+         
+    throw crearException("error float (exp)", archivo, fila, columna); 
+    
+}
+
+//===============================================================
+
+//tipo 2 : Ambito
+//tipo 3 : int
+//tipo 4 : Double
+//tipo 5 : String
+//tipo 6 : boolean
+//tipo 7 : funcion
+//tipo 8 : void
+//tipo 9 : null
+
+//===============cadena a int=================
+
+
+double str_double(int[] cad){
+
+    if(cad == null){
+
+        return 0.0;
+    }
+
+    if(cad.length == 0){
+        return 0.0;
+    }
+
+    int dotPosition = cad.length;
+    int i = 0;
+
+    while(i<cad.length){
+
+        if(cad[i]=='.'){
+            dotPosition = i;
+            break;
+        }
+
+        i=i+1;
+    }
+
+    int result = str_int2(cad,0,dotPosition-1);
+    int decimalValue = str_int2(cad, dotPosition+1, cad.length -1 );
+
+    int decimals = cad.length - 1 - dotPosition;
+
+    double factor = 1.0;
+
+    while (decimals>0){
+        factor = factor *10;
+        decimals = decimals -1;
+    }
+
+    if(result > 0){
+        return result + decimalValue / factor;
+    }else{
+        return  result - decimalValue / factor;
+    }
+    
+}
+
+int str_int1(int[] cad){
+
+    if(cad== null){
+        return 0;
+    }
+    return str_int2(cad,0, cad.length -1 );
+    
+}
+
+
+
+int str_int2(int[] cad, int from, int to){
+
+    if(cad == null){
+
+        return 0;
+    }
+
+    if( (to - from)<0 ){
+        return 0;
+    }
+
+    if(cad.length <= to){
+        return 0;
+    }
+
+    int tieneSimbolo = 0;
+
+    if(cad[0]=='+' || cad[0]=='-'){
+        tieneSimbolo = 1;
+    }
+
+    int inicio = 0;
+
+    if(tieneSimbolo == 1){
+        inicio = from +1;
+    }else{
+        inicio = from;
+    }
+
+    int answer = 0;
+    int factor = 1;
+
+    int i = to;
+    while(i >= inicio){
+        
+        answer = answer + (cad[i] - '0') * factor;
+        factor = factor *10;
+
+        i=i-1;
+    }
+
+    if(tieneSimbolo && cad[0]== '-'){
+        answer = answer*-1;
+    }
+    return answer;
+}
+
+
+
+//=============================================
+
+//----auxiliar negado
+int negado(int a){
+
+    if(a == 0){
+    
+        return 1;
+    }
+    
+    return 0;
+
+
+}
+
+
 //------------------------------------verdadero
 //tipo 2 : Ambito
 //tipo 3 : int
@@ -592,6 +909,7 @@ General orGeneral(General g1, General g2, int[] archivo, int fila, int columna){
 //tipo 6 : boolean
 //tipo 7 : funcion
 //tipo 8 : void
+//tipo 9 : null
 
 int esVerdaderoGeneral(General g1){
 
@@ -614,7 +932,7 @@ int esVerdaderoGeneral(General g1){
     
     }
     
-    throw crearException("no se puede ejecutar el if", "", -1, -1); 
+    return 1;
 
 }
 

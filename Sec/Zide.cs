@@ -39,7 +39,7 @@ namespace Sec
         //
         
         //breakpoints listas
-        Dictionary<int, int> breakPoints;
+        public static Dictionary<int, int> breakPoints;
         public static Dictionary<int,int> breakPoints3d;
         
         //botn guardasr -----
@@ -53,6 +53,8 @@ namespace Sec
         private Button btnDebug3d;
         private Button generar3D;
         
+        private Button reporteAst;
+        private Button btnDebugAltoNivel;
 
 
         /// <summary>
@@ -108,6 +110,8 @@ namespace Sec
             btnAbrir3d = new Button();
             btnDebug3d = new Button();
             generar3D = new Button();
+            reporteAst = new Button();
+            btnDebugAltoNivel = new Button();
             
             //timer
            
@@ -130,6 +134,8 @@ namespace Sec
             btnAbrir3d.Text = "Abrir3d";
             btnDebug3d.Text = "Deb3d";
             generar3D.Text ="Generar3d";
+            reporteAst.Text = "reporteAst";
+            btnDebugAltoNivel.Text = "DebAlto";
             
 
             WindowState = FormWindowState.Maximized;
@@ -159,6 +165,8 @@ namespace Sec
             panelBotones.Controls.Add(btnAbrir3d);
             panelBotones.Controls.Add(btnDebug3d);
             panelBotones.Controls.Add(generar3D);
+            panelBotones.Controls.Add(reporteAst);
+            panelBotones.Controls.Add(btnDebugAltoNivel);
 
             //acciones de bontos --------------------------------
             btnAnalizar.Click +=  python_T_Click;
@@ -169,6 +177,7 @@ namespace Sec
             btnAbrir3d.Click += btnAbrir3d_Click;
             btnDebug3d.Click += btnDebug3d_click;
             generar3D.Click += generar3d_click;
+            reporteAst.Click += reporteAst_click;
             
   
             
@@ -523,6 +532,16 @@ namespace Sec
                 
                 
             }
+        }
+        
+        
+        private void reporteAst_click(object sender, EventArgs e)
+        {
+
+        
+            var entrada = tabEditor.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is FastColoredTextBox);
+            analizarAltoNivel = new AanalizadorAltoNivel();
+            analizarAltoNivel.graficar(entrada.Text);
         }
             
         
