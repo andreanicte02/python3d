@@ -493,13 +493,23 @@ namespace Sec
                     texTraducidBox.Text = TUtils.generarCodigo3D(textGramaticaT.Text);
                 }
             }
-            catch (System.Exception exception)
+            catch (SyntaxException syntaxException)
             {
-                Console.WriteLine(exception);
-                throw;
+                Console.WriteLine("Error sintactico en T:");
+                Console.WriteLine(syntaxException.Message);
+                Console.WriteLine(syntaxException.Line);
+                Console.WriteLine(syntaxException.Column);
             }
-            
+            catch (SemanticException semanticException)
+            {
+                Console.WriteLine("Error semantico en T:");
+                Console.WriteLine(semanticException.Message);
+                Console.WriteLine(semanticException.Location.Line);
+                Console.WriteLine(semanticException.Location.Column);
+            }
         }
+            
+        
         
     
 
