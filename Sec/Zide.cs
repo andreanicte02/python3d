@@ -348,8 +348,19 @@ namespace Sec
         private void python_T_Click(object sender, EventArgs e)
         {
       
-            //String entada = leer();
-            
+           
+            string entrada2 = File.ReadAllText(@"./../../api.c");
+            textGramaticaT.Text += entrada2;
+            //
+            var entrada = tabEditor.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is FastColoredTextBox);
+
+            if (!string.IsNullOrEmpty(entrada.Text))
+            {
+                textGramaticaT.Text += "\n";
+                textGramaticaT.Text += "\n";
+                textGramaticaT.Text += PUtils.generarCodigoT(entrada.Text);
+            }
+
 
         }
 
@@ -477,8 +488,10 @@ namespace Sec
             
             try
             {
-                texTraducidBox.Text = TUtils.generarCodigo3D(textGramaticaT.Text);
-
+                if (!string.IsNullOrEmpty(textGramaticaT.Text))
+                {
+                    texTraducidBox.Text = TUtils.generarCodigo3D(textGramaticaT.Text);
+                }
             }
             catch (System.Exception exception)
             {
