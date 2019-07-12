@@ -314,6 +314,8 @@ namespace Sec.Analizadores
             codigo.agregar($"goto {entorno.labelFin};");
             codigo.comentar($"return;");
 
+            entorno.TieneReturn = true;
+
             return codigo;
         }
     }
@@ -1476,6 +1478,61 @@ public class TNodoMenosUnario : TNodo
             codigo.agregar($"print(\"%{_id}\", {codigoValor.apuntador});");
             
             return codigo;
+        }
+    }
+
+    public class TNodoDoWhile : TNodo
+    {
+        
+        private readonly NodoAst _nodoValor;
+        private readonly List<NodoAst> _nodosTrue;
+
+        public TNodoDoWhile(NodoAst nodoValor, List<NodoAst> nodosTrue)
+        {
+            _nodoValor = nodoValor;
+            _nodosTrue = nodosTrue;
+        }
+        
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+
+
+            var etiquetaInicio = TUtils.generarLabel();
+            var etiquetaFin = TUtils.generarLabel();
+
+            
+            var entornoTrue = new ZEntorno(entorno);
+            entornoTrue.labelLoopBegin = etiquetaInicio;
+            entornoTrue.labelLoopEnd = etiquetaFin;
+
+            var codigo = new Codigo();
+            
+            codigo.agregar($"{etiquetaInicio}:");
+            
+            codigo.agregar(TUtils.generarCodigoBloque(_nodosTrue, entornoTrue));
+            
+            var codigoValor = TUtils.desenvolver(_nodoValor.GenerarCodigo(entorno));
+            if (codigoValor.tipo != ZTipos.tipoInt)
+            {
+                throw new SemanticException("Argumento de if debe de ser numerico");
+            }
+            codigo.agregar(codigoValor);
+            codigo.agregar($"if ({codigoValor.apuntador} == 0) goto {etiquetaFin};");
+            codigo.comentar($"while ({codigoValor.extra})" + "{");
+            
+            
+            codigo.agregar($"goto {etiquetaInicio};");
+            codigo.comentar("}");
+
+            codigo.agregar($"{etiquetaFin}:");
+
+            entorno.TieneReturn = false; // la entrada al bucle es condicional
+
+            return codigo;
+            
+            
+            
+            
         }
     }
 

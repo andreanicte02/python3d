@@ -329,7 +329,7 @@ namespace Sec.Analizadores
 //                                  | sentenciaAlcance + Eos
 //                                  | sentenciaWhile
                                   | sentenciaIf
-//                                  | sentenciaReturn + Eos
+                                  | sentenciaReturn + Eos
 //                                  | sentenciaFor
 //                                  | sentenciaDel + Eos
 //                                  | exp + Eos //llamadas a metodos objetos
@@ -401,7 +401,7 @@ namespace Sec.Analizadores
 
 
 
-            sentenciaReturn.Rule = @return + exp;
+            sentenciaReturn.Rule =  produccion(@return + exp)._accion(v => new PNodoReturn(v[1]));
 
             sentenciaFor.Rule =
                 @for + exp + dosp + Eos + bloqueLocal //exps -> xq aveces puede estar iterando diccionarios
@@ -411,7 +411,13 @@ namespace Sec.Analizadores
 
 
                     exp.Rule = produccion(id)._accion(v => new PNodoBuscarId(v[0]))
+                               | produccion(@decimal)._accion(v => new PNodoCrearDouble(v[0]) )
                                | produccion(numero)._accion(v => new PNodoCrearEntero(v[0]))
+                               
+                               | produccion(cadena)._accion(v => new PNodoCrearCadena(v[0]) )
+                               | produccion(@true)._accion(v => new PNodoCrearBooleano(1))
+                               | produccion(@false)._accion(v => new PNodoCrearBooleano(0))
+                               
                                | invocacion
 
                                | produccion(exp + igualIgual + exp)._accion(v =>
@@ -485,15 +491,12 @@ namespace Sec.Analizadores
                        | self //es como el this
 
                        
-                       | @decimal
-                       | cadena
-                       | @true
-                       | @false
+
                        | None
 
 
                        | invocacionPunto
-                       | invocacion
+
                        | exp + punto + id
                        | @new + id + apar + listaExp + cpar  //alparecer ni se usa
                        

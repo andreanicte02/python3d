@@ -1,6 +1,13 @@
 
-a = 3
-b = a + 3
+def fibbonacci(n):
+    if n == 0:
+        return 0
+    elif n == 1:
+        return 1
+    return fibbonacci(n - 1) + fibbonacci(n - 2)
 
-print()
-
+print(fibbonacci(0))
+print(fibbonacci(1))
+print(fibbonacci(2))
+print(fibbonacci(3))
+print(fibbonacci(4))

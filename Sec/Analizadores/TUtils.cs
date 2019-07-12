@@ -363,38 +363,64 @@ namespace Sec.Analizadores
             return codigo;
         }
 
-        public static string generarCodigo3D(string entrada)
+        
+        
+//        public static string generarCodigo3D(string entrada)
+//        {
+//            var ga = new GramaticaT();
+//            var parser = new Parser(ga);
+//            
+//            
+//            
+//            var arbol = parser.Parse(entrada);
+//            
+//
+//            var raiz = arbol.Root;
+//            
+//
+//            if (raiz == null || arbol.ParserMessages.Count > 0 || arbol.HasErrors())
+//            {
+//                //---------------------> Hay Errores      
+//                
+//                
+//
+//                foreach (var item in arbol.ParserMessages)
+//                {
+////                    MessageBox.Show("Error->"+item.Message+" Line:"+item.Location.Line);
+//                    Console.WriteLine("Error->"+item.Message+" Line:"+item.Location.Line + " Column: " + item.Location.Column);
+//
+//                }
+//
+//                return null;
+//            }
+//            
+//            Console.WriteLine("No hay errores sintacticos");
+//
+//            return generarCodigo3D((List<NodoAst>) raiz.AstNode);
+//
+//        }
+        
+        
+        
+        public static List<NodoAst> obtenerNodos(string entrada)
         {
             var ga = new GramaticaT();
             var parser = new Parser(ga);
             
-            
-            
             var arbol = parser.Parse(entrada);
-            
 
             var raiz = arbol.Root;
             
-
             if (raiz == null || arbol.ParserMessages.Count > 0 || arbol.HasErrors())
             {
-                //---------------------> Hay Errores      
-                
-                
-
                 foreach (var item in arbol.ParserMessages)
                 {
-//                    MessageBox.Show("Error->"+item.Message+" Line:"+item.Location.Line);
-                    Console.WriteLine("Error->"+item.Message+" Line:"+item.Location.Line + " Column: " + item.Location.Column);
-
+                    throw new SyntaxException(item.Message, item.Location.Line, item.Location.Column);
                 }
-
-                return null;
+                throw new SyntaxException("No se pudo analizar la entrada", 0, 0);
             }
-            
-            Console.WriteLine("No hay errores sintacticos");
 
-            return generarCodigo3D((List<NodoAst>) raiz.AstNode);
+            return (List<NodoAst>) raiz.AstNode;
 
         }
         
@@ -451,7 +477,12 @@ namespace Sec.Analizadores
             return codigoFinal.texto;
 
         }
-        
+
+        public static string generarCodigo3D(string textoT)
+        {
+            var nodos = obtenerNodos(textoT);
+            return TUtils.generarCodigo3D(nodos);
+        }
         
         
         //***************
@@ -462,17 +493,32 @@ namespace Sec.Analizadores
             
             
             string entrada2 = File.ReadAllText(@"./../../api.c");
-            
+
             try
             {
-                var codigo3d = TUtils.generarCodigo3D(entrada2 + "\n" + "\n" + extra);
+                var nodosApi = obtenerNodos(entrada2);
+                var nodosTraduccion = obtenerNodos(extra);
+
+                var nodos = new List<NodoAst>();
+                nodos.AddRange(nodosApi);
+                nodos.AddRange(nodosTraduccion);
+
+                var codigo3d = TUtils.generarCodigo3D(nodos);
                 Console.WriteLine(codigo3d);
+            }
+            catch (SyntaxException syntaxException)
+            {
+                Console.WriteLine("Error sintactico en T:");
+                Console.WriteLine(syntaxException.Message);
+                Console.WriteLine(syntaxException.Line);
+                Console.WriteLine(syntaxException.Column);
             }
             catch (SemanticException semanticException)
             {
                 Console.WriteLine("Error semantico en T:");
                 Console.WriteLine(semanticException.Message);
-                Console.WriteLine(semanticException.Location);
+                Console.WriteLine(semanticException.Location.Line);
+                Console.WriteLine(semanticException.Location.Column);
             }
         }
         

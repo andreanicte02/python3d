@@ -7,8 +7,9 @@
 //tipo 4 : Double
 //tipo 5 : String
 //tipo 6 : boolean
+//tipo 7 : funcion
+//tipo 8 : void
 //falta especificar los demas tipos
-
 
 
 struct Exception {
@@ -24,12 +25,20 @@ struct Entrada {
     General valor;
 }
 
+struct InfoFuncion {
+    int id;
+    int parametros;
+    General ambitoCapturado;
+}
+
 struct General {
     int valorInt;
     int[] valorString;
     double valorDouble;
     int tipo;
     
+    General anterior;
+    InfoFuncion infoFuncion;    
     Entrada primeraEntrada;
 }
 
@@ -44,13 +53,27 @@ Exception crearException(int[] mensaje, int[] archivo, int linea, int columna){
     return e;
 }
 
-General creearAmbito(){
+General crearGeneralFuncion(int id, int cantidadParametros, General ambitoCapturado){
     General g = new General;
-    g.tipo  = 2;
+    g.tipo = 7;
+    g.infoFuncion = new InfoFuncion;
+    g.infoFuncion.id = id;
+    g.infoFuncion.cantidadParametros = cantidadParametros;
+    g.infoFuncion.ambitoCapturado = ambitoCapturado;
     return g;
 }
 
-
+General crearAmbito(General ambitoAnterior){
+    General g = new General;
+    g.tipo  = 2;
+    g.anterior = ambitoAnterior;
+    return g;
+}
+General crearVoidGeneral(){
+    General g = new General;
+    g.tipo = 8;
+    return g;
+}
 General crearIntGeneral(int valor){
     General g = new General;
     g.valorInt = valor;
@@ -84,7 +107,7 @@ General crearBooleanGeneral(int valor){
 //-----------------------------------
 
 void registrar(General ambito, int[] llave, General valor){
-    Entrada destino = buscarEntrada(ambito, llave);    
+    Entrada destino = buscarEntradaEnActual(ambito, llave);    
     if (destino == null){
         destino = crearEntrada(llave);
         destino.siguiente = ambito.primeraEntrada;
@@ -98,7 +121,7 @@ Entrada crearEntrada(int[] llave){
     return entrada;
 }
 
-Entrada buscarEntrada(General ambito, int[] llave){
+Entrada buscarEntradaEnActual(General ambito, int[] llave){
     Entrada temp = ambito.primeraEntrada;
     
     while (temp != null){
@@ -110,13 +133,46 @@ Entrada buscarEntrada(General ambito, int[] llave){
     return null;    
 }
 
-
-Entrada buscarIdlocal(General ambito, int[] llave){
-    Entrada entrada = buscarEntrada(ambito, llave);
-    if (entrada == null){
-        throw crearException("llave no encontrada", "asd.py", 12, 23);
+// busca en todos los ambitos
+General buscarIdlocal(General ambito, int[] llave, int[] archivo, int linea, int columna){
+    
+    General temp = ambito;
+    while (temp != null){
+        Entrada entrada = buscarEntradaEnActual(ambito, llave);
+        if (entrada != null){
+            return entrada.valor;
+        }
+        temp = temp.anterior;
     }
-    return entrada;
+
+    throw crearException("llave no encontrada", archivo, linea, columna);
+}
+
+void printGenerales(General[] generales){
+    int i = 0;
+    while (i < generales.length){
+        printGeneral(generales[i]);
+        !print(c, ' ');
+        i = i  + 1;
+    }
+    !print(c, 10);
+}
+void printGeneral(General g){
+    if (g.tipo == 3){
+        printInt(g.valorInt);
+    }
+    else if (g.tipo == 4){
+        printDouble(g.valorDouble);
+    }
+    else if (g.tipo == 5){
+        printString(g.valorString);
+    }
+    else if (g.tipo == 6){
+        printString(stringBool(g.valorInt));
+    }
+    else {
+        printString("<aun no definido>");    
+    }
 }
 
 
@@ -678,17 +734,26 @@ double  pow2(double a, double b){
 }
 
 //--------------------------------------
+void printDouble(double d){
+    !print(d, d);
+}
+void printInt(int i){
+    !print(e, i);
+}
+void printString(int[] cadena){
+    int i = 0;
+    while (i < cadena.length){
+        !print(c, cadena[i]);
+        i = i + 1;
+    }
+}
 void printlnInt(int i){
     !print(e, i);
     !print(c, 10);
 }
 
 void printlnString(int[] cadena){
-    int i = 0;
-    while (i < cadena.length){
-        !print(c, cadena[i]);
-        i = i + 1;
-    }
+    printString(cadena);
     !print(c, 10);
 }
 
@@ -696,56 +761,6 @@ void printlnString(int[] cadena){
 
 void main(){
 
-    /*int[] a = "hola ";
-    int[] b = "hola";
-    int[] c = "sadfasdf";
-    
-    int d = 1;
-    double e = 2.5;
-    double f = 2.5;*/
-    
-    
-
-    int [] a = "hola";
-    General p0 = crearStringGeneral(a);
-    
-    int [] b = "hola2";
-    General p1 = crearStringGeneral(a);
-    
-    General p3 = crearIntGeneral(1);
-    
-    General p4 = crearIntGeneral(3);
-    
-    General p10 = crearDoubleGeneral(4.5);
-    
-    General p6 =  crearDoubleGeneral(3.5);
-        
-    General p7 = crearBooleanGeneral(0);
-    
-    General p8 = crearBooleanGeneral(1);
-        /*
-        
-        
-         
-    General gsuma = masGeneral(p0,p6,a,1,1);
-    General gresta = menosGeneral(gsuma, p4,a,1,1);
-    General gs2 = masGeneral(gsuma, p3,a,1,1);
-    General g0 = porGeneral(gresta, p10 ,a,1,1);
-    General g1 = divGeneral(p6, p4 ,a,1,1);
-    General g2 = divGeneral(p4, p6 ,a,1,1);
-    General g3 = igualIgualGeneral(p7, p8,a,1,1);
-    
-    General g4 = mayorGeneral(p0,p1 ,a,1,1);
-    General g5 = menorGeneral(p7, p8,a,1,1);
-    General g6 = mayorIgualGeneral(p0, p1,a,1,1);
-    General g7 = menorIgualGeneral(p6, p7,a,1,1);
-    General g8 = igualIgualGeneral(p4, p10,a,1,1);
-
-       
-        
-    
-        
-    printlnString(gsuma.valorString);*/
     
 
 }

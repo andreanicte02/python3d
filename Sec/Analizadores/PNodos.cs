@@ -37,7 +37,18 @@ namespace Sec.Analizadores
             agregar(codigoSentencia.texto);
         }
 
-        public string texto => string.Join("\n", _lineas.Select(l => prefix + l) );
+        public string texto
+        {
+            get
+            {
+                var a = _lineas.Select(l =>
+                {
+                    var asdf = l.Split('\n').Select(s => prefix + s);
+                    return string.Join("\n", asdf);
+                });
+                return string.Join("\n", a);
+            }
+        }
 
 //        public void comentar(string comentario)
 //        {
@@ -94,17 +105,24 @@ namespace Sec.Analizadores
         private readonly string _id;
         private readonly List<string> _parametros;
         private readonly List<NodoPythonAst> _sentencias;
+        private readonly string _archivo;
+        public int numeroFuncion { get; set; }
 
-        public PFuncion(string id, List<string> parametros, List<NodoPythonAst> sentencias)
+        public PFuncion(string id, List<string> parametros, List<NodoPythonAst> sentencias, string archivo)
         {
             _id = id;
             _parametros = parametros;
             _sentencias = sentencias;
+            _archivo = archivo;
+            
+            numeroFuncion = PUtils.generarNumeroFunciones();
         }
+
+        public string nombre => $"py_fun_{numeroFuncion}";
 
         public CodigoT GenerarCodigoFuncion()
         {
-            return PUtils.generarBloqueFuncion(_id, _parametros, _sentencias, "\t");
+            return PUtils.generarBloqueFuncion(nombre, _id, _parametros, _sentencias, "\t", _archivo);
         }
     }
     
@@ -144,6 +162,10 @@ namespace Sec.Analizadores
     
     public abstract class PNodo: NodoPythonAst
     {
+        public string archivo { get; set; }
+        public int linea { get; set; }
+        public int columna { get; set; }
+        
         public CodigoT GenerarCodigo(PEntorno entorno)
         {
             return IntentarGenerarCodigo(entorno);
@@ -201,17 +223,17 @@ namespace Sec.Analizadores
             _id = id;
         }
         
-        public static CodigoT buscarId(string id)
+        public static CodigoT buscarId(string id, int linea, int columna)
         {
             var codigo = new CodigoT();
-            codigo.valor = $"buscarIdlocal(ambito, \"{id}\");";
+            codigo.valor = $"buscarIdlocal(ambito, \"{id}\", archivo, {linea}, {columna});";
             codigo.registro = "registrar(ambito, \"" + id + "\", {0});";
             return codigo;
         }
         
         public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
         {
-            return buscarId(_id);
+            return buscarId(_id, this.linea, this.columna);
         }
     }
 
@@ -234,6 +256,7 @@ namespace Sec.Analizadores
 
             var codigoArgumento = PUtils.desenvolver(_argumento.GenerarCodigo(entorno));
             
+            codigo.agregar(codigoArgumento);
             codigo.agregar($"if (esVerdaderoGeneral({codigoArgumento.apuntador}))" + "{");
             var codigoTrue = PUtils.generarBloque(_nodosTrue, "\t", entorno);
             codigo.agregar(codigoTrue);
@@ -299,7 +322,7 @@ namespace Sec.Analizadores
         {
             var codigo = new CodigoT();
 
-            var cMetodo = PUtils.desenvolver(PNodoBuscarId.buscarId(_id));
+            var cMetodo = PUtils.desenvolver(PNodoBuscarId.buscarId(_id, this.linea, this.columna));
             codigo.agregar(cMetodo);
 
             var temp = PUtils.generarTemporal();
@@ -313,22 +336,69 @@ namespace Sec.Analizadores
             }
 
             codigo.apuntador = PUtils.generarTemporal();
-            codigo.agregar($"General {codigo.apuntador} = invocar({cMetodo.apuntador}, {temp});");
+            codigo.agregar($"General {codigo.apuntador} = invocar({cMetodo.apuntador}, {temp}, archivo, {this.linea}, {this.columna});");
 
             return codigo;
             
         }
     }
+    
+    public class PNodoCrearBooleano : PNodo
+    {
+        private readonly int _valor;
+        public PNodoCrearBooleano(int valor)
+        {
+            _valor = valor;
+        }
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var codigo = new CodigoT();
+            codigo.apuntador = PUtils.generarTemporal();
+            codigo.agregar($"General {codigo.apuntador} = crearBooleanGeneral({_valor});");
+            return codigo;
+        }
+    }
 
+    public class PNodoCrearCadena : PNodo
+    {
+        private readonly string _valor;
+        public PNodoCrearCadena(string valor)
+        {
+            _valor = valor;
+        }
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var codigo = new CodigoT();
+            codigo.apuntador = PUtils.generarTemporal();
+            codigo.agregar($"General {codigo.apuntador} = crearStringGeneral({_valor});");
+
+            return codigo;
+        }
+    }
+
+    public class PNodoCrearDouble : PNodo
+    {
+        private readonly double _valor;
+        public PNodoCrearDouble(double valor)
+        {
+            _valor = valor;
+        }
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var codigo = new CodigoT();
+            codigo.apuntador = PUtils.generarTemporal();
+            codigo.agregar($"General {codigo.apuntador} = crearDoubleGeneral({_valor});");
+
+            return codigo;
+        }
+    }
     public class PNodoCrearEntero : PNodo
     {
         private readonly int _valor;
-
         public PNodoCrearEntero(int valor)
         {
             _valor = valor;
         }
-        
         public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
         {
             var codigo = new CodigoT();
@@ -379,12 +449,12 @@ namespace Sec.Analizadores
         
         public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
         {
-            var pFuncion = new PFuncion(_id, _parametros, _sentencias);
+            var pFuncion = new PFuncion(_id, _parametros, _sentencias, this.archivo);
             entorno.agregarFuncionPython(pFuncion);
             
             var codigo = new CodigoT();
             codigo.apuntador = PUtils.generarTemporal();
-            codigo.agregar($"General {codigo.apuntador} = crearGeneralFuncion(); // {_id}");
+            codigo.agregar($"General {codigo.apuntador} = crearGeneralFuncion({pFuncion.numeroFuncion},{_parametros.Count}, ambito); // {_id}");
             codigo.agregar($"registrar(ambito, \"{_id}\", {codigo.apuntador});");
             return codigo;
         }
@@ -392,6 +462,25 @@ namespace Sec.Analizadores
 
 
 
+
+    public class PNodoReturn : PNodo
+    {
+        private readonly NodoPythonAst _nodo;
+
+        public PNodoReturn(NodoPythonAst nodo)
+        {
+            _nodo = nodo;
+        }
+        
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var c = PUtils.desenvolver(_nodo.GenerarCodigo(entorno));
+            var codigo = new CodigoT();
+            codigo.agregar(c);
+            codigo.agregar($"return {c.apuntador};");
+            return codigo;
+        }
+    }
     
 
 
@@ -417,7 +506,7 @@ namespace Sec.Analizadores
             codigo.agregar(c1);
             codigo.agregar(c2);
             codigo.apuntador = PUtils.generarTemporal();
-            codigo.agregar($"General {codigo.apuntador} = {_nombreFuncion}({c1.apuntador}, {c2.apuntador});");
+            codigo.agregar($"General {codigo.apuntador} = {_nombreFuncion}({c1.apuntador}, {c2.apuntador}, archivo, {this.linea}, {this.columna});");
             return codigo;
 
         }
