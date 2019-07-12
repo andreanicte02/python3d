@@ -475,12 +475,16 @@ namespace Sec.Analizadores
                                    new PNodoOperacionBinaria(v[0], v[2], "orBinarioGeneral"))
                                | produccion(exp + xorBinario + exp)._accion(v =>
                                    new PNodoOperacionBinaria(v[0], v[2], "xorBinarioGeneral"))
-
+                               
+                               
+                               | produccion(None)._accion(v=>new PnodoCrearNull())
+                               
                                | menos + exp + ReduceHere()
                                
                                | mas + exp + ReduceHere()
                                
-                               | produccion(None)._accion(v=>new PnodoCrearNull())
+                               | not + exp
+                               
                                
                 ;
                     
@@ -496,7 +500,7 @@ namespace Sec.Analizadores
 
 
 
-                       | not + exp
+                     
 
 
 
@@ -524,9 +528,7 @@ namespace Sec.Analizadores
                        | exp + shiftLet + exp
                        | exp + shiftRight + exp
 
-
-
-
+                        
 
                        | apar + exp + cpar
                        | sentenciaOpTernario
