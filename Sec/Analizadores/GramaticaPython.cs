@@ -480,6 +480,10 @@ namespace Sec.Analizadores
                                
                 ;
                     
+                    
+                    
+                    
+                    
             var asdf = new AutoNonTerminal();
             asdf.Rule = produccion(id)._accion(v => new PNodoBuscarId(v[0]))
                         | produccion(numero)._accion(v => new PNodoCrearEntero(v[0])) 
