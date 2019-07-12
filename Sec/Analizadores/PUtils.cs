@@ -87,6 +87,7 @@ namespace Sec.Analizadores
             return codigo;
         }
 
+        
         public static string generarCodigoT(List<NodoPythonAst> sentencias)
         {
         
@@ -210,7 +211,30 @@ namespace Sec.Analizadores
             return codigo;
         }
         */
-        
+
+
+        public static string generarCodigoT(string entrada)
+        {
+            var ga = new GramaticaPython();
+            var parser = new Parser(ga);
+                
+            var arbol = parser.Parse(entrada);
+
+            var raiz = arbol.Root;
+                
+            if (raiz == null || arbol.ParserMessages.Count > 0 || arbol.HasErrors())
+            {
+                foreach (var item in arbol.ParserMessages)
+                {
+                    throw new SyntaxException(item.Message, item.Location.Line, item.Location.Column);
+                }
+                throw new SyntaxException("No se pudo analizar la entrada", 0, 0);
+            }
+
+            var sentencias = (List<NodoPythonAst>) raiz.AstNode;
+
+            return generarCodigoT(sentencias);
+        }
         
         public static string pruebaP()
         {
