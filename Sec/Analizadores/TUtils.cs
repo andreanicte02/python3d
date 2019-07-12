@@ -38,6 +38,13 @@ namespace Sec.Analizadores
     
     public class TUtils
     {
+
+        public static void limpiar()
+        {
+            _bancoTiposArray.Clear();
+            contadorTemporal = 0;
+            contadorLabel = 0;
+        }
         
         private static Dictionary<string, ZEntorno> _bancoTiposArray = new Dictionary<string, ZEntorno>();
 
@@ -81,6 +88,8 @@ namespace Sec.Analizadores
         {
             return $"L{contadorLabel++}";
         }
+        
+
 
 
         public static Codigo generarCodigoBloque(List<NodoAst> sentencias, ZEntorno entorno)
@@ -426,6 +435,8 @@ namespace Sec.Analizadores
         
         public static string generarCodigo3D(List<NodoAst> sentencias){
             
+            
+            limpiar();
             
             var entornoGlobal = new ZEntorno();
             entornoGlobal.declararTipo("int", ZTipos.tipoInt);
