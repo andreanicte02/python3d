@@ -383,6 +383,27 @@ namespace Sec.Analizadores
             return codigo;
         }
     }
+    
+    
+    public class PnodoCrearNull : PNodo
+    {
+
+        public PnodoCrearNull()
+        {
+            
+            
+        }
+
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var codigo = new CodigoT();
+            codigo.apuntador = PUtils.generarTemporal();
+            codigo.agregar($"General {codigo.apuntador}= crearNullGeneral();");
+            return codigo;
+        }
+    }
+    
+    
 
     public class PNodoCrearCadena : PNodo
     {
@@ -433,6 +454,8 @@ namespace Sec.Analizadores
             return codigo;
         }
     }
+
+ 
 
 
     public class PNodoCrearClase : PNodo

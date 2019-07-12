@@ -347,7 +347,8 @@ namespace Sec
 
         private void python_T_Click(object sender, EventArgs e)
         {
-      
+
+            textGramaticaT.Text = "";
            
             string entrada2 = File.ReadAllText(@"./../../api.c");
             textGramaticaT.Text += entrada2;
@@ -485,7 +486,8 @@ namespace Sec
         
         private void generar3d_click(object sender, EventArgs e)
         {
-            
+
+            consoleErrores.Text = "";
             try
             {
                 if (!string.IsNullOrEmpty(textGramaticaT.Text))
@@ -499,6 +501,13 @@ namespace Sec
                 Console.WriteLine(syntaxException.Message);
                 Console.WriteLine(syntaxException.Line);
                 Console.WriteLine(syntaxException.Column);
+
+                consoleErrores.Text += "Error sintactico en T:\n";
+                consoleErrores.Text += syntaxException.Message+"\n";
+                consoleErrores.Text += syntaxException.Line+"\n";
+                consoleErrores.Text += syntaxException.Column+"\n";
+                
+                
             }
             catch (SemanticException semanticException)
             {
@@ -506,6 +515,13 @@ namespace Sec
                 Console.WriteLine(semanticException.Message);
                 Console.WriteLine(semanticException.Location.Line);
                 Console.WriteLine(semanticException.Location.Column);
+                
+                consoleErrores.Text += "Error semantico en T: :\n";
+                consoleErrores.Text += semanticException.Message +":\n";
+                consoleErrores.Text += semanticException.Location.Line+":\n";
+                consoleErrores.Text += semanticException.Location.Column+":\n";
+                
+                
             }
         }
             

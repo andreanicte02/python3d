@@ -32,8 +32,8 @@ namespace Sec.Analizadores
             
 //            AstContext
 
-            CommentTerminal COMENTARIO_SIMPLE = new CommentTerminal("comentario_simple", "//", "\n", "\r\n");
-            CommentTerminal COMENTARIO_MULT = new CommentTerminal("comentario_mult", "/*", "*/");
+            CommentTerminal COMENTARIO_SIMPLE = new CommentTerminal("comentario_simple", "#", "\n", "\r\n");
+            CommentTerminal COMENTARIO_MULT = new CommentTerminal("comentario_mult", "\"\"\"", "*/");
             NonGrammarTerminals.Add(COMENTARIO_SIMPLE);
             NonGrammarTerminals.Add(COMENTARIO_MULT);
 
@@ -244,7 +244,7 @@ namespace Sec.Analizadores
 //            RegexBasedTerminal numero = new RegexBasedTerminal("numero", "[0-9]+");
 //            RegexBasedTerminal @decimal = new RegexBasedTerminal("decimal", "[0-9]+[.][0-9]+");
 //            RegexBasedTerminal id = new RegexBasedTerminal("id", "[A-Za-z]([A-Za-z|_|0-9]+)?");
-            StringLiteral cadena = new StringLiteral("cadena", "\"", StringOptions.AllowsAllEscapes);
+            StringLiteral cadena = new StringLiteral("cadena", "'", StringOptions.AllowsAllEscapes);
             
             var numero = new NumberLiteral("Entero", NumberOptions.IntOnly | NumberOptions.NoDotAfterInt);
             numero._accion((v, n) => n.Token.Value);
@@ -476,6 +476,8 @@ namespace Sec.Analizadores
                                
                                | mas + exp + ReduceHere()
                                
+                               | produccion(None)._accion(v=>new PnodoCrearNull())
+                               
                 ;
                     
             var asdf = new AutoNonTerminal();
@@ -494,7 +496,7 @@ namespace Sec.Analizadores
 
                        
 
-                       | None
+                      // | produccion(None)._accion(v=>new PnodoCrearNull())
 
 
                        | invocacionPunto

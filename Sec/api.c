@@ -9,6 +9,7 @@
 //tipo 6 : boolean
 //tipo 7 : funcion
 //tipo 8 : void
+//tipo 9 : null o noe
 //falta especificar los demas tipos
 
 
@@ -99,6 +100,14 @@ General crearBooleanGeneral(int valor){
     General g = new General;
     g.valorInt = valor;
     g.tipo = 6;
+    return g;
+
+}
+
+General crearNullGeneral(){
+    General g = new General;
+    g.valorInt = 1;
+    g.tipo = 9;
     return g;
 
 }
@@ -575,7 +584,39 @@ General orGeneral(General g1, General g2, int[] archivo, int fila, int columna){
     
 }
 
+//------------------------------------verdadero
+//tipo 2 : Ambito
+//tipo 3 : int
+//tipo 4 : Double
+//tipo 5 : String
+//tipo 6 : boolean
+//tipo 7 : funcion
+//tipo 8 : void
 
+int esVerdaderoGeneral(General g1){
+
+    if(g1.tipo == 3){
+    
+        if(g1.valorInt == 0){
+            
+            return 0;
+        }
+        
+        return 1;
+        
+    }else if(g1.tipo == 6){
+    
+        return g1.valorInt;
+        
+    }else if(g1.tipo == 9){
+    
+        return 1;
+    
+    }
+    
+    throw crearException("no se puede ejecutar el if", "", -1, -1); 
+
+}
 
 /*
 General divDobleGeneral(General g1, General g2, int[] archivo, int fila, int columna){
