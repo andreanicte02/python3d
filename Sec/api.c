@@ -147,15 +147,25 @@ General buscarIdlocal(General ambito, int[] llave, int[] archivo, int linea, int
     
     General temp = ambito;
     while (temp != null){
-        Entrada entrada = buscarEntradaEnActual(ambito, llave);
+        Entrada entrada = buscarEntradaEnActual(temp, llave);
         if (entrada != null){
             return entrada.valor;
         }
         temp = temp.anterior;
     }
+    throw crearException("llave no encontrada", archivo, linea, columna);
+}
+
+General buscarIdEnObjeto(General ambito, int[] llave, int[] archivo, int linea, int columna){
+
+    Entrada entrada = buscarEntradaEnActual(ambito, llave);
+    if (entrada != null){
+        return entrada.valor;
+    }
 
     throw crearException("llave no encontrada", archivo, linea, columna);
 }
+
 
 void printGenerales(General[] generales){
     int i = 0;

@@ -355,11 +355,43 @@ namespace Sec
             //
             var entrada = tabEditor.SelectedTab.Controls.Cast<Control>().FirstOrDefault(x => x is FastColoredTextBox);
 
-            if (!string.IsNullOrEmpty(entrada.Text))
+
+            try
             {
-                textGramaticaT.Text += "\n";
-                textGramaticaT.Text += "\n";
-                textGramaticaT.Text += PUtils.generarCodigoT(entrada.Text);
+                if (!string.IsNullOrEmpty(entrada.Text))
+                {
+                    textGramaticaT.Text += "\n";
+                    textGramaticaT.Text += "\n";
+                    textGramaticaT.Text += PUtils.generarCodigoT(entrada.Text);
+                }   
+            }
+            catch (SyntaxException syntaxException)
+            {
+                Console.WriteLine("Error sintactico en T:");
+                Console.WriteLine(syntaxException.Message);
+                Console.WriteLine(syntaxException.Line);
+                Console.WriteLine(syntaxException.Column);
+
+                consoleErrores.Text += "Error sintactico en T:\n";
+                consoleErrores.Text += syntaxException.Message+"\n";
+                consoleErrores.Text += syntaxException.Line+"\n";
+                consoleErrores.Text += syntaxException.Column+"\n";
+                
+                
+            }
+            catch (PythonSemanticException semanticException)
+            {
+                Console.WriteLine("Error semantico en T:");
+                Console.WriteLine(semanticException.Message);
+//                Console.WriteLine(semanticException.Line);
+//                Console.WriteLine(semanticException.Location.Column);
+                
+                consoleErrores.Text += "Error semantico en T: :\n";
+                consoleErrores.Text += semanticException.Message +":\n";
+//                consoleErrores.Text += semanticException.Location.Line+":\n";
+//                consoleErrores.Text += semanticException.Location.Column+":\n";
+                
+                
             }
 
 

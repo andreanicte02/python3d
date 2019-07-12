@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Irony.Parsing;
 
 namespace Sec.Analizadores
@@ -18,9 +19,17 @@ namespace Sec.Analizadores
     {
 
         private static int contador_clases = 1;
-        private static int contador_funciones = 1;
+        private static int contador_funciones = 0;
 
-        public static int totalFunciones => contador_funciones - 1;
+        public static int totalFunciones => contador_funciones;
+        public static int totalClases => contador_clases;
+        public static int inicioClases => 20;
+
+        public static void limpiar()
+        {
+            contador_clases = inicioClases;
+            contador_funciones = 0;
+        }
         
         public static int generarNumeroClase()
         {
@@ -49,28 +58,45 @@ namespace Sec.Analizadores
             
             var c = new CodigoT();
             c.apuntador = generarTemporal();
+            c.agregar(codigo);
             c.agregar($"General {c.apuntador} = {codigo.valor}");
             return c;
         }
 
 
         
-        public static CodigoT generarBloqueClase(string id, List<NodoPythonAst> sentencias, string sangria)
+        public static CodigoT generarBloqueClase(string id, string metodoInstancia, string comentario, List<NodoPythonAst> sentencias, string sangria)
         {
 
             var entorno = new PEntorno();
             
             var codigo = new CodigoT();
-            codigo.agregar($"General {id}()" + "{");
+            codigo.agregar($"General {id}(General ambitoAnterior)" + "{");
             codigo.agregar($"{sangria}General ambito = crearAmbito(ambitoAnterior);");
             
-            
-            var codigoFuncionesAnidadas = new CodigoT();
-            var codigoBloque = generarBloque(sentencias, sangria, entorno);
+            var codigoSoloFunciones = new CodigoT();
+
+
+            var codigoBloque = generarBloque(sentencias, sangria, entorno, codigoSoloFunciones);
             
             codigo.agregar(codigoBloque);
             codigo.agregar($"{sangria}return ambito;");
             codigo.agregar("}");
+            
+            
+            codigo.agregar($"//{comentario}");
+            codigo.agregar($"General {metodoInstancia}(General ambitoAnterior, General[] argumentos)" + "{");
+            codigo.agregar($"{sangria}General ambito = crearInstanciaGeneral();");
+            codigo.agregar(codigoSoloFunciones);
+            if (string.IsNullOrEmpty(codigoSoloFunciones.extra))
+            {
+                codigo.agregar($"General[] args = new General[1 + argumentos.length];");
+                codigo.agregar($"");
+                codigo.agregar($"{codigoSoloFunciones.extra}(args);");                
+            }
+            
+            codigo.agregar($"{sangria}return ambito;");
+            codigo.agregar($"");
             
             
             foreach (var pFuncion in entorno.obtenerPFunciones())
@@ -95,9 +121,25 @@ namespace Sec.Analizadores
             
             codigo.agregar("General invocar(General objetoFuncion, General[] parametros, int[] archivo, int linea, int columna){");
             
-            codigo.agregar("\tif (objetoFuncion.tipo != 7){");
+            codigo.agregar("\tif (objetoFuncion.tipo != 7 && objetoFuncion.tipo != 2){");
             codigo.agregar("\t\tthrow crearException(\"objeto no es una funcion\", archivo, linea, columna);");
             codigo.agregar("\t}");
+
+            codigo.agregar("if (objetoFuncion.tipo == 2){");
+            for (int i = inicioClases; i < totalClases; i++)
+            {
+                codigo.agregar("\tif (objetoFuncion.infoFuncion.id == "+ i + "){");
+//                codigo.agregar($"\tif(objetoFuncion.infoFuncion)" + "{");
+//                codigo.agregar("}");
+
+                codigo.agregar($"\t\tGeneral instancia = objeto_instancia_{i}(objetoFuncion.infoFuncion.ambitoCapturado);");
+                
+//                if ()
+                codigo.agregar($"");
+                codigo.agregar($"\t\treturn instancia;");
+                codigo.agregar("\t}");
+            }
+            codigo.agregar("}");
             
             for (int i = 0; i < totalFunciones; i++)
             {
@@ -148,8 +190,10 @@ namespace Sec.Analizadores
             return codigo;
         }
         
-        public static CodigoT generarBloque(List<NodoPythonAst> sentencias, string sangria, PEntorno anterior)
+        public static CodigoT generarBloque(List<NodoPythonAst> sentencias, string sangria, PEntorno anterior, CodigoT soloFunciones = null)
         {
+
+            
             var entorno = new PEntorno();
 
             var codigo = new CodigoT();
@@ -160,6 +204,17 @@ namespace Sec.Analizadores
                 var c = sentencia.GenerarCodigo(entorno);
                 c.prefix = sangria;
                 codigo.agregar(c);
+                if (soloFunciones != null)
+                {
+                    if (sentencia is PNodoCrearMetodo n)
+                    {
+                        soloFunciones.agregar(c);
+                        if (n.Id == "__init__")
+                        {
+                            soloFunciones.extra = c.extra;
+                        }
+                    }
+                }
             }
             
             foreach (var pFuncion in entorno.obtenerPFunciones())
@@ -215,6 +270,8 @@ namespace Sec.Analizadores
 
         public static string generarCodigoT(string entrada)
         {
+            limpiar();
+            
             var ga = new GramaticaPython();
             var parser = new Parser(ga);
                 

@@ -48,7 +48,7 @@ namespace Sec.Analizadores
              MarkReservedWords("else");
              MarkReservedWords("elif");
              MarkReservedWords("return");
-             MarkReservedWords("self");
+//             MarkReservedWords("self");
              MarkReservedWords("new");
              MarkReservedWords("for");
              MarkReservedWords("in");
@@ -245,6 +245,7 @@ namespace Sec.Analizadores
 //            RegexBasedTerminal @decimal = new RegexBasedTerminal("decimal", "[0-9]+[.][0-9]+");
 //            RegexBasedTerminal id = new RegexBasedTerminal("id", "[A-Za-z]([A-Za-z|_|0-9]+)?");
             StringLiteral cadena = new StringLiteral("cadena", "'", StringOptions.AllowsAllEscapes);
+            StringLiteral cadena2 = new StringLiteral("cadena", "\"", StringOptions.AllowsAllEscapes);
             
             var numero = new NumberLiteral("Entero", NumberOptions.IntOnly | NumberOptions.NoDotAfterInt);
             numero._accion((v, n) => n.Token.Value);
@@ -255,6 +256,7 @@ namespace Sec.Analizadores
             id._accion((v, n) => n.Token.Value);
 
             cadena._accion((v, n) => n.Token.Value);
+            cadena2._accion((v, n) => n.Token.Value);
 
             
             //----------------------------------------------------------------------------------
@@ -415,11 +417,13 @@ namespace Sec.Analizadores
                                | produccion(numero)._accion(v => new PNodoCrearEntero(v[0]))
                                
                                | produccion(cadena)._accion(v => new PNodoCrearCadena(v[0]) )
+                               | produccion(cadena2)._accion(v => new PNodoCrearCadena(v[0]) )
                                | produccion(@true)._accion(v => new PNodoCrearBooleano(1))
                                | produccion(@false)._accion(v => new PNodoCrearBooleano(0))
                                
                                | produccion(exp + punto + id)._accion(v => new PNodoAccessoPunto(v[0], v[2]))
-                               
+
+                               | invocacionPunto
                                | invocacion
 
                                | produccion(exp + igualIgual + exp)._accion(v =>
@@ -503,7 +507,7 @@ namespace Sec.Analizadores
                       // | produccion(None)._accion(v=>new PnodoCrearNull())
 
 
-                       | invocacionPunto
+
 
 
                        | @new + id + apar + listaExp + cpar  //alparecer ni se usa
@@ -545,12 +549,11 @@ namespace Sec.Analizadores
 
 
             invocacion.Rule = produccion(id + apar +listaExp + cpar)._accion(v => new PNodoInvocar(v[0], v[2]))
-                ; 
+                ;
 
-
-                       
-
-            invocacionPunto.Rule = exp + punto+ id+ apar +listaExp +cpar;
+            
+            invocacionPunto.Rule = produccion(exp + punto + id + apar + listaExp + cpar)._accion(v => new PNodoInvocacionPunto(v[0], v[2], v[4]))
+                ;
 
             sentenciaImport.Rule = import + cadena;
 

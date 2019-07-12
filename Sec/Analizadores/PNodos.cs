@@ -30,7 +30,7 @@ namespace Sec.Analizadores
         public string valor { get; set; } = "";
         public string registro { get; set; } = "";
 
-//        public string extra { get; set; }
+        public string extra { get; set; }
 
         public void agregar(CodigoT codigoSentencia)
         {
@@ -86,6 +86,7 @@ namespace Sec.Analizadores
 
         private readonly int _numeroClase;
         public string metodo => $"objeto_clase_{_numeroClase}_{_id}";
+        public string metodo_instancia => $"objeto_instancia_{_numeroClase}";
         
 
         public PClase(string id, List<NodoPythonAst> sentencias)
@@ -97,7 +98,7 @@ namespace Sec.Analizadores
 
         public CodigoT GenerarCodigoClase()
         {
-            return PUtils.generarBloqueClase(metodo, _sentencias, "\t");
+            return PUtils.generarBloqueClase(metodo, metodo_instancia, _id, _sentencias, "\t");
         }
     }
     public class PFuncion
@@ -289,10 +290,13 @@ namespace Sec.Analizadores
 
             var c = PUtils.desenvolver(_nodoValor.GenerarCodigo(entorno));
 
-            codigo.apuntador = PUtils.generarTemporal();
-            
             codigo.agregar(c);
-            codigo.agregar($"General {codigo.apuntador} = buscarPropiedad({c.apuntador},"+ "\"" + _id + "\"" + $", archivo, {this.linea}, {this.columna});");
+//            codigo.agregar($"buscarPropiedad({c.apuntador},"+ "\"" + _id + "\"" + $", archivo, {this.linea}, {this.columna});");
+            
+
+            codigo.valor = $"buscarPropiedad({c.apuntador},"+ "\"" + _id + "\"" + $", archivo, {this.linea}, {this.columna});";
+            codigo.registro = $"registrar({c.apuntador}, \"" + _id + "\", {0});";
+            return codigo;
 
             return codigo;
             
@@ -325,6 +329,51 @@ namespace Sec.Analizadores
             }
             
             codigo.agregar($"printGenerales({temp});");
+
+            return codigo;
+            
+        }
+    }
+    
+    public class PNodoInvocacionPunto : PNodo
+    {
+        private readonly NodoPythonAst _nodo;
+        private readonly string _id;
+        private readonly List<NodoPythonAst> _nodosArgumento;
+
+        public PNodoInvocacionPunto(NodoPythonAst nodo, string id, List<NodoPythonAst> nodosArgumento)
+        {
+            _nodo = nodo;
+            _id = id;
+            _nodosArgumento = nodosArgumento;
+        }
+        
+        
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var codigo = new CodigoT();
+
+            var c = PUtils.desenvolver(_nodo.GenerarCodigo(entorno));
+            
+            
+            codigo.agregar(c);
+
+            var temp1 = PUtils.generarTemporal();
+            codigo.agregar($"General {temp1} = buscarIdEnObjeto({c.apuntador}, \"{_id}\", archivo, {linea}, {columna});");
+
+            
+            var temp = PUtils.generarTemporal();
+            codigo.agregar($"General[] {temp} = new General[{_nodosArgumento.Count}];");
+            
+            for (int i = 0; i < _nodosArgumento.Count; i++)
+            {
+                var cArg = PUtils.desenvolver(_nodosArgumento[i].GenerarCodigo(entorno));
+                codigo.agregar(cArg);
+                codigo.agregar($"{temp}[{i}] = {cArg.apuntador};");
+            }
+
+            codigo.apuntador = PUtils.generarTemporal();
+            codigo.agregar($"General {codigo.apuntador} = invocar({temp1}, {temp}, archivo, {this.linea}, {this.columna});");
 
             return codigo;
             
@@ -476,7 +525,7 @@ namespace Sec.Analizadores
 
             var codigo = new CodigoT();
             codigo.apuntador = PUtils.generarTemporal();
-            codigo.agregar($"General {codigo.apuntador} = {pClase.metodo}();");
+            codigo.agregar($"General {codigo.apuntador} = {pClase.metodo}(ambito);");
             codigo.agregar($"registrar(ambit, \"{_id}\", {codigo.apuntador});");
             return codigo;
         }
@@ -484,26 +533,27 @@ namespace Sec.Analizadores
 
     public class PNodoCrearMetodo : PNodo
     {
-        private readonly string _id;
+        public string Id { get; }
         private readonly List<string> _parametros;
         private readonly List<NodoPythonAst> _sentencias;
 
         public PNodoCrearMetodo(string id, List<string> parametros, List<NodoPythonAst> sentencias)
         {
-            _id = id;
+            Id = id;
             _parametros = parametros;
             _sentencias = sentencias;
         }
         
         public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
         {
-            var pFuncion = new PFuncion(_id, _parametros, _sentencias, this.archivo);
+            var pFuncion = new PFuncion(Id, _parametros, _sentencias, this.archivo);
             entorno.agregarFuncionPython(pFuncion);
             
             var codigo = new CodigoT();
+            codigo.extra = pFuncion.nombre;
             codigo.apuntador = PUtils.generarTemporal();
-            codigo.agregar($"General {codigo.apuntador} = crearGeneralFuncion({pFuncion.numeroFuncion},{_parametros.Count}, ambito); // {_id}");
-            codigo.agregar($"registrar(ambito, \"{_id}\", {codigo.apuntador});");
+            codigo.agregar($"General {codigo.apuntador} = crearGeneralFuncion({pFuncion.numeroFuncion},{_parametros.Count}, ambito); // {Id}");
+            codigo.agregar($"registrar(ambito, \"{Id}\", {codigo.apuntador});");
             return codigo;
         }
     }
