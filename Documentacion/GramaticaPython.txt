@@ -1,0 +1,68 @@
+Andrea Nicte Vicente Campos
+201404104
+
+      
+            this.Root = INICIO;
+
+            INICIO.Rule = listaSentencia;
+
+            listaSentencia.Rule = Empty
+                                  | sentencias;
+
+            sentencias.Rule = sentencias + sentencia
+                              | sentencia;
+
+            sentencia.Rule = asignar + Eos
+                            |crearClase;
+
+            crearClase.Rule = @class + id + dosp +Eos+ bloqueClase;
+
+            bloqueClase.Rule = Indent + sentenciasClases + Dedent
+                               | Empty;
+
+            
+                              
+
+            sentenciasClases.Rule = sentenciasClases + sentenciaClase
+                                    | sentenciaClase;
+
+            //es como la de prueba
+            sentenciaClase.Rule = asignar + Eos
+                                  | sentenciaPrint + Eos
+                                  | crearMetodo
+                                  | sentenciaAlcance + Eos;
+             
+
+
+
+            crearMetodo.Rule = def + id + apar + parametros + cpar + dosp + Eos + bloqueClase ;
+            
+            sentenciaPrint.Rule = print + apar + listaExp + cpar; 
+            
+            asignar.Rule = exp + igual + exp;
+
+            sentenciaAlcance.Rule = global + exp
+                                    | nonlocal + exp;
+
+            
+
+            listaExp.Rule = listaExp + coma + exp
+                            | exp;
+
+
+            parametros.Rule = listaId
+                              | Empty;
+
+            listaId.Rule = listaId + coma + id
+                           | id;
+
+            exp.Rule = exp + ToTerm("+") + exp
+                       | exp + ToTerm("-") + exp
+                       | exp + ToTerm("*") + exp
+                       | exp + ToTerm("/") + exp
+                       | id
+                       | numero
+                       | @decimal
+                       | cadena;
+
+                
