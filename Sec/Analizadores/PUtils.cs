@@ -29,6 +29,7 @@ namespace Sec.Analizadores
         {
             contador_clases = inicioClases;
             contador_funciones = 0;
+            contadorTemporal = 0;
         }
         
         public static int generarNumeroClase()
@@ -65,14 +66,15 @@ namespace Sec.Analizadores
 
 
         
-        public static CodigoT generarBloqueClase(string id, string metodoInstancia, string comentario, List<NodoPythonAst> sentencias, string sangria)
+        public static CodigoT generarBloqueClase(string id, string metodoInstancia, string comentario, int numeroClase, List<NodoPythonAst> sentencias, string sangria)
         {
 
             var entorno = new PEntorno();
             
             var codigo = new CodigoT();
             codigo.agregar($"General {id}(General ambitoAnterior)" + "{");
-            codigo.agregar($"{sangria}General ambito = crearAmbito(ambitoAnterior);");
+            codigo.agregar($"{sangria}General ambitoCapturado = ambitoAnterior;");
+            codigo.agregar($"{sangria}General ambito = crearObjetoClase(ambitoAnterior, {numeroClase});");
             
             var codigoSoloFunciones = new CodigoT();
 
@@ -85,18 +87,28 @@ namespace Sec.Analizadores
             
             
             codigo.agregar($"//{comentario}");
-            codigo.agregar($"General {metodoInstancia}(General ambitoAnterior, General[] argumentos)" + "{");
-            codigo.agregar($"{sangria}General ambito = crearInstanciaGeneral();");
+            codigo.agregar($"General {metodoInstancia}(General ambitoAnterior, General[] argumentos,int[] archivo, int linea, int columna)" + "{");
+            codigo.agregar($"{sangria}General ambito = crearInstanciaGeneral({numeroClase});");
+            codigo.agregar($"{sangria}General ambitoCapturado = ambitoAnterior;");
             codigo.agregar(codigoSoloFunciones);
-            if (string.IsNullOrEmpty(codigoSoloFunciones.extra))
+            if (!string.IsNullOrEmpty(codigoSoloFunciones.extra))
             {
-                codigo.agregar($"General[] args = new General[1 + argumentos.length];");
-                codigo.agregar($"");
-                codigo.agregar($"{codigoSoloFunciones.extra}(args);");                
+                codigo.agregar(sangria + $"if (argumentos.length != {codigoSoloFunciones.extra2 - 1})" + "{");
+                codigo.agregar(sangria + $"\tthrow crearException(\"cantidad de parametros incorrecto\", archivo, linea, columna);");
+                codigo.agregar(sangria + "}");
+                
+                codigo.agregar($"{sangria}General[] args = new General[1 + argumentos.length];");
+                codigo.agregar($"{sangria}args[0] = ambito;");
+                codigo.agregar(sangria +"int i = 0;");
+                codigo.agregar(sangria + "while(i < argumentos.length){");
+                codigo.agregar(sangria + sangria + "args[i + 1] = argumentos[i];");
+                codigo.agregar(sangria + sangria + "i = i + 1;");
+                codigo.agregar(sangria + "}");
+                codigo.agregar($"\t{codigoSoloFunciones.extra}(ambitoCapturado, args);");                
             }
             
             codigo.agregar($"{sangria}return ambito;");
-            codigo.agregar($"");
+            codigo.agregar("}");
             
             
             foreach (var pFuncion in entorno.obtenerPFunciones())
@@ -119,7 +131,7 @@ namespace Sec.Analizadores
         
             var codigo = generarBloqueFuncion("python_main","", new List<string>(),  sentencias, "\t", "prueba");
             
-            codigo.agregar("General invocar(General objetoFuncion, General[] parametros, int[] archivo, int linea, int columna){");
+            codigo.agregar("General invocar(General objetoFuncion, General[] argumentos, int[] archivo, int linea, int columna){");
             
             codigo.agregar("\tif (objetoFuncion.tipo != 7 && objetoFuncion.tipo != 2){");
             codigo.agregar("\t\tthrow crearException(\"objeto no es una funcion\", archivo, linea, columna);");
@@ -128,25 +140,36 @@ namespace Sec.Analizadores
             codigo.agregar("if (objetoFuncion.tipo == 2){");
             for (int i = inicioClases; i < totalClases; i++)
             {
-                codigo.agregar("\tif (objetoFuncion.infoFuncion.id == "+ i + "){");
-//                codigo.agregar($"\tif(objetoFuncion.infoFuncion)" + "{");
-//                codigo.agregar("}");
-
-                codigo.agregar($"\t\tGeneral instancia = objeto_instancia_{i}(objetoFuncion.infoFuncion.ambitoCapturado);");
+                codigo.agregar("\t\tif (objetoFuncion.infoFuncion.id == "+ i + "){");
                 
-//                if ()
-                codigo.agregar($"");
-                codigo.agregar($"\t\treturn instancia;");
-                codigo.agregar("\t}");
+                codigo.agregar($"\t\t\treturn objeto_instancia_{i}(objetoFuncion.infoFuncion.ambitoCapturado, argumentos, archivo, linea, columna);");
+                
+                codigo.agregar("\t\t}");
             }
             codigo.agregar("}");
+
+
+
+            codigo.agregar("\tif (objetoFuncion.infoFuncion.argumentoSelf != null){");
+            codigo.agregar("\t	General[] args = new General[1 + argumentos.length];");
+            codigo.agregar("\t	args[0] = objetoFuncion.infoFuncion.argumentoSelf;");
+            codigo.agregar("\t	int i = 0;");
+            codigo.agregar("\t	while(i < argumentos.length){");
+            codigo.agregar("\t    	args[i + 1] = argumentos[i];");
+            codigo.agregar("\t    	i = i + 1;");
+            codigo.agregar("\t	}");
+            codigo.agregar("\t	argumentos = args;");
+            codigo.agregar("\t}");
+            codigo.agregar("\tif (objetoFuncion.infoFuncion.cantidadParametros != argumentos.length){");
+            codigo.agregar("\t    throw crearException(\"Cantidad de parametros incorrectos\", archivo, linea, columna);");
+            codigo.agregar("\t}");
+            
             
             for (int i = 0; i < totalFunciones; i++)
             {
                 codigo.agregar("\tif (objetoFuncion.infoFuncion.id == "+ i + "){");
-//                codigo.agregar($"\tif(objetoFuncion.infoFuncion)" + "{");
-//                codigo.agregar("}");
-                codigo.agregar($"\t\treturn py_fun_{i}(objetoFuncion.infoFuncion.ambitoCapturado, parametros);");
+
+                codigo.agregar($"\t\treturn py_fun_{i}(objetoFuncion.infoFuncion.ambitoCapturado, argumentos);");
                 codigo.agregar("\t}");
             }
             
@@ -162,8 +185,10 @@ namespace Sec.Analizadores
             var codigo = new CodigoT();
             codigo.agregar($"//{comentario}");
             codigo.agregar($"General {id}(General ambitoAnterior, General[] argumentos)" + "{");
+            
             codigo.agregar(sangria +"int[] archivo = \"" + archivo + "\";");
             codigo.agregar($"{sangria}General ambito = crearAmbito(ambitoAnterior);");
+            codigo.agregar($"{sangria}General ambitoCapturado = ambito;");
 
             for (var i = 0 ; i < parametros.Count; i++)
             {
@@ -212,6 +237,7 @@ namespace Sec.Analizadores
                         if (n.Id == "__init__")
                         {
                             soloFunciones.extra = c.extra;
+                            soloFunciones.extra2 = n.CantidadParametros;
                         }
                     }
                 }

@@ -155,6 +155,43 @@ namespace Sec.Analizadores
             };
             return term;
         }
+        
+        
+        public static T _accionP<T>(this T term, DefinitionDelegate definitionDelegate) where T : BnfTerm
+        {
+            return term._accionP(0, definitionDelegate);
+        }
+        
+        public static T _accionP<T>(this T term, int pos, DefinitionDelegate definitionDelegate) where T : BnfTerm
+        {
+            term.AstConfig.NodeCreator = (c, n) =>
+            {
+                var values = n.ChildNodes.Select(child => (dynamic) child.AstNode).ToArray();
+                n.AstNode = definitionDelegate(values);
+                
+                     
+                if (n.AstNode is PNodo node)
+                {
+                    try
+                    {
+                        node.archivo = "pendientexD";
+                        node.linea = n.ChildNodes[pos].Span.Location.Line;
+                        node.columna = n.ChildNodes[pos].Span.Location.Column;
+                        
+                    }
+                    catch (SystemException e)
+                    {
+                        node.archivo = "<sin archivo>";
+                        node.linea = -1;
+                        node.columna = -1;
+                        Console.WriteLine(e); 
+                    }
+                }
+                
+                
+            };
+            return term;
+        }
 
         public static T _accionT<T>(this T term, DefinitionDelegate definitionDelegate) where T : BnfTerm
         {

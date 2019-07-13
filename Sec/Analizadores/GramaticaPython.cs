@@ -7,6 +7,7 @@ namespace Sec.Analizadores
 {
     public class GramaticaPython: Grammar
     {
+        public string Archivo { get; }
 //        public override void BuildAst(LanguageData language, ParseTree parseTree)
 //        {
 //            if (!LanguageFlags.IsSet(LanguageFlags.CreateAst))
@@ -25,15 +26,16 @@ namespace Sec.Analizadores
         
 //        public override
         
-           public GramaticaPython():  base(caseSensitive: true)
+           public GramaticaPython(string archivo = ""):  base(caseSensitive: true)
         {
+            Archivo = archivo;
             LanguageFlags |= LanguageFlags.CreateAst;
             
             
 //            AstContext
 
             CommentTerminal COMENTARIO_SIMPLE = new CommentTerminal("comentario_simple", "#", "\n", "\r\n");
-            CommentTerminal COMENTARIO_MULT = new CommentTerminal("comentario_mult", "\"\"\"", "*/");
+            CommentTerminal COMENTARIO_MULT = new CommentTerminal("comentario_mult", "\"\"\"", "\"\"\"");
             NonGrammarTerminals.Add(COMENTARIO_SIMPLE);
             NonGrammarTerminals.Add(COMENTARIO_MULT);
 
@@ -276,14 +278,14 @@ namespace Sec.Analizadores
 //                asignar + Eos
 //                             | crearMetodo
 //                             | crearClase
-//                             | sentenciaImport + Eos
+                             | sentenciaImport + Eos
 //                             | sentenciasLocales
                 ;
 
 //            crearClase.Rule = @class + id + dosp +Eos+ bloqueClase;
             
             crearClase.Rule = produccion(@class + id + dosp +Eos+ bloqueLocal)
-                    ._accion(v => new PNodoCrearClase(v[1], v[3]))
+                    ._accionP(v => new PNodoCrearClase(v[1], v[3]))
                 ;
 
             bloqueClase.Rule = Indent + sentenciasClases + Dedent
@@ -302,11 +304,11 @@ namespace Sec.Analizadores
             //crear metodo
 
             crearMetodo.Rule = produccion(def + id + apar + parametros + cpar + dosp + Eos + bloqueLocal)
-                    ._accion(v => new PNodoCrearMetodo(v[1], v[3], v[6]))
+                    ._accionP(v => new PNodoCrearMetodo(v[1], v[3], v[6]))
                 ;
             
             var parametro = new AutoNonTerminal();
-            parametro.Rule = produccion(id)._accion(v => v[0]);
+            parametro.Rule = produccion(id)._accionP(v => v[0]);
 
             this.ConfigList<string>(false, parametros, parametro, ",");
             
@@ -315,8 +317,8 @@ namespace Sec.Analizadores
 
             
             //bloque con las sentencias locales
-            bloqueLocal.Rule = produccion(Indent + sentenciasLocales + Dedent)._accion(v => v[0])
-                               | produccion(Empty)._accion(v => new List<NodoPythonAst>())
+            bloqueLocal.Rule = produccion(Indent + sentenciasLocales + Dedent)._accionP(v => v[0])
+                               | produccion(Empty)._accionP(v => new List<NodoPythonAst>())
                 ;
             
             
@@ -329,15 +331,15 @@ namespace Sec.Analizadores
                                   | exp + Eos
                                   | sentenciaPrint + Eos
 //                                  | sentenciaAlcance + Eos
-//                                  | sentenciaWhile
+                                  | sentenciaWhile
                                   | sentenciaIf
                                   | sentenciaReturn + Eos
 //                                  | sentenciaFor
 //                                  | sentenciaDel + Eos
 //                                  | exp + Eos //llamadas a metodos objetos
 //                                  | pass + Eos
-//                                  | @continue + Eos
-//                                  | @break + Eos
+                                  | produccion(@continue + Eos)._accion(v => new PNodoContinue())
+                                  | produccion(@break + Eos)._accion(v => new PNodoBreak())
                 ;
 
 
@@ -345,10 +347,10 @@ namespace Sec.Analizadores
 
 
 
-            sentenciaPrint.Rule = produccion(print + apar + listaExp + cpar)._accion(v => new PNodoPrint(v[2]))
+            sentenciaPrint.Rule = produccion(print + apar + listaExp + cpar)._accionP(v => new PNodoPrint(v[2]))
                 ;
 
-            asignar.Rule = produccion(exps + igual + exps)._accion(v => new PNodoAsignacion(v[0], v[2]))
+            asignar.Rule = produccion(exps + igual + exps)._accionP(v => new PNodoAsignacion(v[0], v[2]))
 //            produccion(exps + igual + lInitAsignar)
 //                           | exps + masIgual + lInitAsignar
 //                           | exps + menosIgual + lInitAsignar
@@ -388,22 +390,22 @@ namespace Sec.Analizadores
 
 
 
-            sentenciaWhile.Rule = @while + exp + dosp  + Eos+ bloqueLocal ;
+            sentenciaWhile.Rule = produccion(@while + exp + dosp  + Eos+ bloqueLocal) ._accionP(v => new PNodoWhile(v[1], v[3]));
             
 
-            sentenciaIf.Rule =  produccion(@if + exp + dosp + Eos + bloqueLocal)._accion(v => new PNodoIf(v[1], v[3]))
-                               | produccion(@if + exp + dosp + Eos + bloqueLocal + @else + dosp + Eos + bloqueLocal)._accion(v => new PNodoIf(v[1], v[3], v[6]))
-                               | produccion(@if + exp + dosp + Eos + bloqueLocal + elif +sentenciaElif)._accion(v => new PNodoIf(v[1], v[3], new List<NodoPythonAst>() { v[5] } ))
+            sentenciaIf.Rule =  produccion(@if + exp + dosp + Eos + bloqueLocal)._accionP(v => new PNodoIf(v[1], v[3]))
+                               | produccion(@if + exp + dosp + Eos + bloqueLocal + @else + dosp + Eos + bloqueLocal)._accionP(v => new PNodoIf(v[1], v[3], v[6]))
+                               | produccion(@if + exp + dosp + Eos + bloqueLocal + elif +sentenciaElif)._accionP(v => new PNodoIf(v[1], v[3], new List<NodoPythonAst>() { v[5] } ))
                 ;
             
-            sentenciaElif.Rule =  produccion(exp + dosp + Eos + bloqueLocal)._accion(v => new PNodoIf(v[0], v[2]))
-                                 | produccion(exp + dosp + Eos + bloqueLocal + @else + dosp + Eos + bloqueLocal)._accion(v => new PNodoIf(v[0], v[2], v[5]))
-                                 | produccion(exp + dosp + Eos + bloqueLocal + elif +sentenciaElif)._accion(v => new PNodoIf(v[0], v[2], new List<NodoPythonAst>() { v[4] } ))
+            sentenciaElif.Rule =  produccion(exp + dosp + Eos + bloqueLocal)._accionP(v => new PNodoIf(v[0], v[2]))
+                                 | produccion(exp + dosp + Eos + bloqueLocal + @else + dosp + Eos + bloqueLocal)._accionP(v => new PNodoIf(v[0], v[2], v[5]))
+                                 | produccion(exp + dosp + Eos + bloqueLocal + elif +sentenciaElif)._accionP(v => new PNodoIf(v[0], v[2], new List<NodoPythonAst>() { v[4] } ))
                 ;
 
 
 
-            sentenciaReturn.Rule =  produccion(@return + exp)._accion(v => new PNodoReturn(v[1]));
+            sentenciaReturn.Rule =  produccion(@return + exp)._accionP(v => new PNodoReturn(v[1]));
 
             sentenciaFor.Rule =
                 @for + exp + dosp + Eos + bloqueLocal //exps -> xq aveces puede estar iterando diccionarios
@@ -412,79 +414,86 @@ namespace Sec.Analizadores
 
 
 
-                    exp.Rule = produccion(id)._accion(v => new PNodoBuscarId(v[0]))
-                               | produccion(@decimal)._accion(v => new PNodoCrearDouble(v[0]) )
-                               | produccion(numero)._accion(v => new PNodoCrearEntero(v[0]))
+                    exp.Rule = produccion(id)._accionP(v => new PNodoBuscarId(v[0]))
+                               | produccion(@decimal)._accionP(v => new PNodoCrearDouble(v[0]) )
+                               | produccion(numero)._accionP(v => new PNodoCrearEntero(v[0]))
                                
-                               | produccion(cadena)._accion(v => new PNodoCrearCadena(v[0]) )
-                               | produccion(cadena2)._accion(v => new PNodoCrearCadena(v[0]) )
-                               | produccion(@true)._accion(v => new PNodoCrearBooleano(1))
-                               | produccion(@false)._accion(v => new PNodoCrearBooleano(0))
+                               | produccion(cadena)._accionP(v => new PNodoCrearCadena(v[0]) )
+                               | produccion(cadena2)._accionP(v => new PNodoCrearCadena(v[0]) )
+                               | produccion(@true)._accionP(v => new PNodoCrearBooleano(1))
+                               | produccion(@false)._accionP(v => new PNodoCrearBooleano(0))
                                
-                               | produccion(exp + punto + id)._accion(v => new PNodoAccessoPunto(v[0], v[2]))
+                               | produccion(exp + punto + id)._accionP(v => new PNodoAccessoPunto(v[0], v[2]))
 
                                | invocacionPunto
                                | invocacion
 
-                               | produccion(exp + igualIgual + exp)._accion(v =>
+                               | produccion(exp + igualIgual + exp)._accionP(v =>
                                    new PNodoOperacionBinaria(v[0], v[2], "igualIgualGeneral"))
-                               | produccion(exp + diferenteQue + exp)._accion(v =>
+                               | produccion(exp + diferenteQue + exp)._accionP(v =>
                                    new PNodoOperacionBinaria(v[0], v[2], "diferenteQueGeneral"))
 
                                | produccion(exp + mayor + exp)
-                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "mayorGeneral"))
+                                   ._accionP(v => new PNodoOperacionBinaria(v[0], v[2], "mayorGeneral"))
                                | produccion(exp + menor + exp)
-                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "menorGeneral"))
-                               | produccion(exp + mayorIgualQue + exp)._accion(v =>
+                                   ._accionP(v => new PNodoOperacionBinaria(v[0], v[2], "menorGeneral"))
+                               | produccion(exp + mayorIgualQue + exp)._accionP(v =>
                                    new PNodoOperacionBinaria(v[0], v[2], "mayorIgualQueGeneral"))
-                               | produccion(exp + menorIgualQue + exp)._accion(v =>
+                               | produccion(exp + menorIgualQue + exp)._accionP(v =>
                                    new PNodoOperacionBinaria(v[0], v[2], "menorIgualQueGeneral"))
 
                                | produccion(exp + mas + exp)
-                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "masGeneral"))
+                                   ._accionP(v => new PNodoOperacionBinaria(v[0], v[2], "masGeneral"))
                                | produccion(exp + menos + exp)
-                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "menosGeneral"))
+                                   ._accionP(v => new PNodoOperacionBinaria(v[0], v[2], "menosGeneral"))
                                | produccion(exp + por + exp)
-                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "porGeneral"))
+                                   ._accionP(v => new PNodoOperacionBinaria(v[0], v[2], "porGeneral"))
                                | produccion(exp + div + exp)
-                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "divGeneral"))
-                               | produccion(exp + divDoble + exp)._accion(v =>
+                                   ._accionP(v => new PNodoOperacionBinaria(v[0], v[2], "divGeneral"))
+                               | produccion(exp + divDoble + exp)._accionP(v =>
                                    new PNodoOperacionBinaria(v[0], v[2], "divDobleGeneral"))
 
                                | produccion(exp + or + exp)
-                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "orGeneral"))
+                                   ._accionP(v => new PNodoOperacionBinaria(v[0], v[2], "orGeneral"))
                                | produccion(exp + and + exp)
-                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "andGeneral"))
+                                   ._accionP(v => new PNodoOperacionBinaria(v[0], v[2], "andGeneral"))
 
                                | produccion(exp + isNot + exp)
-                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "isNotGeneral"))
+                                   ._accionP(v => new PNodoOperacionBinaria(v[0], v[2], "isNotGeneral"))
 
 
 
                                | produccion(exp + @in + exp)
-                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "inGeneral"))
+                                   ._accionP(v => new PNodoOperacionBinaria(v[0], v[2], "inGeneral"))
                                | produccion(exp + @is + exp)
-                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "isGeneral"))
+                                   ._accionP(v => new PNodoOperacionBinaria(v[0], v[2], "isGeneral"))
                                | produccion(exp + notIn + exp)
-                                   ._accion(v => new PNodoOperacionBinaria(v[0], v[2], "notInGeneral"))
+                                   ._accionP(v => new PNodoOperacionBinaria(v[0], v[2], "notInGeneral"))
 
 
-                               | produccion(exp + andBinario + exp)._accion(v =>
+                               | produccion(exp + andBinario + exp)._accionP(v =>
                                    new PNodoOperacionBinaria(v[0], v[2], "andBinarioGenral"))
-                               | produccion(exp + orBinario + exp)._accion(v =>
+                               | produccion(exp + orBinario + exp)._accionP(v =>
                                    new PNodoOperacionBinaria(v[0], v[2], "orBinarioGeneral"))
-                               | produccion(exp + xorBinario + exp)._accion(v =>
+                               | produccion(exp + xorBinario + exp)._accionP(v =>
                                    new PNodoOperacionBinaria(v[0], v[2], "xorBinarioGeneral"))
                                
                                
-                               | produccion(None)._accion(v=>new PnodoCrearNull())
+                               | produccion(None)._accionP(v=>new PnodoCrearNull())
                                
-                               | menos + exp + ReduceHere()
+                               | produccion(menos + exp + ReduceHere())._accionP(v => new PNodoOperacionUnaria(v[1], "uMenosGEneral"))
                                
-                               | mas + exp + ReduceHere()
+                               | produccion(mas + exp + ReduceHere())._accionP(v => new PNodoOperacionUnaria(v[1], "uMasGeneral"))
                                
-                               | not + exp
+                               | produccion(not + exp)._accionP(v => new PNodoOperacionUnaria(v[1], "notGeneral"))
                                
+                               | produccion( @int + apar + exp   + cpar)._accionP(v => new PNodoOperacionUnaria(v[2], "castIntGeneral"))
+//                               | produccion( @bool + apar + exp + cpar )._accionP(v => new PNodoOperacionUnaria(v[2], "castStrGeneral"))
+//                               | produccion( chr + apar + exp + cpar)._accionP(v => new PNodoOperacionUnaria(v[2], "notGeneral"))
+                               | produccion( @float + apar + exp + cpar)._accionP(v => new PNodoOperacionUnaria(v[2], "castFloatGeneral"))
+                               | produccion( str + apar + exp + cpar )._accionP(v => new PNodoOperacionUnaria(v[2], "castStrGeneral"))
+
+//                               | produccion(exp + acor + exp + ccor)
                                
                 ;
                     
@@ -493,37 +502,17 @@ namespace Sec.Analizadores
                     
                     
             var asdf = new AutoNonTerminal();
-            asdf.Rule = produccion(id)._accion(v => new PNodoBuscarId(v[0]))
-                        | produccion(numero)._accion(v => new PNodoCrearEntero(v[0])) 
-                        
+            asdf.Rule = produccion(id)._accionP(v => new PNodoBuscarId(v[0]))
+                        | produccion(numero)._accionP(v => new PNodoCrearEntero(v[0]))
 
 
 
-
-                     
-
-
-
-                       | self //es como el this
-
-                       
-
-                      // | produccion(None)._accion(v=>new PnodoCrearNull())
-
-
-
-
-
-                       | @new + id + apar + listaExp + cpar  //alparecer ni se usa
+                        | @new + id + apar + listaExp + cpar  //alparecer ni se usa
                        
                        
-                       | @bool + apar + exp + cpar
-                       | chr + apar + exp + cpar
-                       | @float + apar + exp + cpar
-                       | str + apar + exp + cpar //falta la fncion type
-                       
 
-                       | exp + acor + pot + exp + ccor
+
+
 
                        | exp + shiftLet + exp
                        | exp + shiftRight + exp
@@ -537,7 +526,7 @@ namespace Sec.Analizadores
                        | type + apar + exp + cpar //devuele el tipo de loq ue se lemanda
                        | type + apar + exp+ coma + exp + coma + exp + cpar //dice que devuele un nuevo tipo de objeto
                        | len  + apar + exp  + cpar
-                       | @int + apar + exp   + cpar
+
                        | @int + apar + exp + coma + exp + cpar
                        | input + apar + cpar
                        
@@ -550,14 +539,17 @@ namespace Sec.Analizadores
             //nose si agregar la funcion range, enumerate, dic, rservate, sorted
 
 
-            invocacion.Rule = produccion(id + apar +listaExp + cpar)._accion(v => new PNodoInvocar(v[0], v[2]))
+            invocacion.Rule = produccion(id + apar + listaExp + cpar)._accionP(v => new PNodoInvocar(v[0], v[2]))
+                              | produccion("@" + id + apar + listaExp + cpar)._accionP(v => new PNodoInvocacionHope(v[1], v[3]))
                 ;
 
             
-            invocacionPunto.Rule = produccion(exp + punto + id + apar + listaExp + cpar)._accion(v => new PNodoInvocacionPunto(v[0], v[2], v[4]))
+            invocacionPunto.Rule = produccion(exp + punto + id + apar + listaExp + cpar)._accionP(v => new PNodoInvocacionPunto(v[0], v[2], v[4]))
                 ;
 
-            sentenciaImport.Rule = import + cadena;
+            sentenciaImport.Rule = produccion(import + cadena)._accion(v => new PNodoImport(v[1]))
+                                   | produccion(import + cadena2)._accion(v => new PNodoImport(v[1]))
+                ;
 
             arrayInit.Rule = acor + cuerpoArray + ccor           //listas
                              | apar + cuerpoArray + cpar        //tuplas y secuencias

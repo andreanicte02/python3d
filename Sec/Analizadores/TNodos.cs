@@ -75,8 +75,7 @@ namespace Sec.Analizadores
 
             var codigo = new Codigo();
 
-            var codigoHayError = TUtils.accesoPunto(ZTipos.codigoDollar, PropiedadDollar.hayError);
-            var codigoAsignacionHayError = TUtils.asignar(codigoHayError, TNodoCrearInt.crearCodigoInt(1));
+
 
             // TODO: captura de linea
 //            var codigoLinea = TUtils.accesoPunto(ZTipos.codigoDollar, PropiedadDollar.hayError);
@@ -89,8 +88,12 @@ namespace Sec.Analizadores
             var codigoValor = TUtils.accesoPunto(ZTipos.codigoDollar, PropiedadDollar.valor);
             var codigoAsignacionValor = TUtils.asignar(codigoValor, codigoExpr, true);
 
-            codigo.agregar(codigoAsignacionHayError);
             codigo.agregar(codigoAsignacionValor);
+            
+            var codigoHayError = TUtils.accesoPunto(ZTipos.codigoDollar, PropiedadDollar.hayError);
+            var codigoAsignacionHayError = TUtils.asignar(codigoHayError, TNodoCrearInt.crearCodigoInt(1));
+            codigo.agregar(codigoAsignacionHayError);
+            
             codigo.agregar($"goto {entorno.labelFin};");
             return codigo;
         }
@@ -357,6 +360,14 @@ namespace Sec.Analizadores
             }
 
             return Codigo.vacio;
+        }
+    }
+
+    public class TNodoObtenerDollar : TNodo
+    {
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            return ZTipos.codigoDollar;
         }
     }
 
@@ -1536,6 +1547,90 @@ public class TNodoMenosUnario : TNodo
         }
     }
 
+
+    public class TNodoNoSe : TNodo
+    {
+        
+        private readonly List<NodoAst> _nodosTrue;
+
+        public TNodoNoSe(List<NodoAst> nodosTrue)
+        {
+            _nodosTrue = nodosTrue;
+        }
+        
+        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+        {
+            var entornoTrue = new ZEntorno(entorno);
+            
+            var codigo = new Codigo();
+            
+            var etiquetaFin = TUtils.generarLabel();
+            entornoTrue.labelFin = etiquetaFin;
+            
+            codigo.agregar(TUtils.generarCodigoBloque(_nodosTrue, entornoTrue));
+            codigo.agregar($"{etiquetaFin}:");
+
+            entorno.TieneReturn = entornoTrue.TieneReturn; // la entrada al bucle es condicional
+
+            return codigo;
+        }
+    }
+    
+    
+//    public class TNodoDoWhile : TNodo
+//    {
+//        
+//        private readonly NodoAst _nodoValor;
+//        private readonly List<NodoAst> _nodosTrue;
+//
+//        public TNodoDoWhile(NodoAst nodoValor, List<NodoAst> nodosTrue)
+//        {
+//            _nodoValor = nodoValor;
+//            _nodosTrue = nodosTrue;
+//        }
+//        
+//        public override Codigo IntentarGenerarCodigo(ZEntorno entorno)
+//        {
+//            
+//            var etiquetaInicio = TUtils.generarLabel();
+//            var etiquetaFin = TUtils.generarLabel();
+//            
+//            var entornoTrue = new ZEntorno(entorno);
+//            entornoTrue.labelLoopBegin = etiquetaInicio;
+//            entornoTrue.labelLoopEnd = etiquetaFin;
+//
+//            var codigo = new Codigo();
+//            
+//            codigo.agregar($"{etiquetaInicio}:");
+//            
+//
+//            
+//            codigo.agregar(TUtils.generarCodigoBloque(_nodosTrue, entornoTrue));
+//            
+//            
+//            var codigoValor = TUtils.desenvolver(_nodoValor.GenerarCodigo(entorno));
+//
+//            if (codigoValor.tipo != ZTipos.tipoInt)
+//            {
+//                throw new SemanticException("Argumento de if debe de ser numerico");
+//            }
+//            codigo.agregar(codigoValor);
+//
+//            codigo.agregar($"if ({codigoValor.apuntador} == 0) goto {etiquetaFin};");
+//            codigo.comentar($"while ({codigoValor.extra})" + "{");
+//            
+//            
+//            codigo.agregar($"goto {etiquetaInicio};");
+//            codigo.comentar("}");
+//
+//            codigo.agregar($"{etiquetaFin}:");
+//
+//            entorno.TieneReturn = false; // la entrada al bucle es condicional
+//
+//            return codigo;
+//        }
+//    }
+    
     public class TNodoWhile : TNodo
     {
         

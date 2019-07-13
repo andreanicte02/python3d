@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Irony.Parsing;
 
 namespace Sec.Analizadores
 {
@@ -31,6 +33,7 @@ namespace Sec.Analizadores
         public string registro { get; set; } = "";
 
         public string extra { get; set; }
+        public int extra2 { get; set; }
 
         public void agregar(CodigoT codigoSentencia)
         {
@@ -98,7 +101,7 @@ namespace Sec.Analizadores
 
         public CodigoT GenerarCodigoClase()
         {
-            return PUtils.generarBloqueClase(metodo, metodo_instancia, _id, _sentencias, "\t");
+            return PUtils.generarBloqueClase(metodo, metodo_instancia,  _id, _numeroClase, _sentencias, "\t");
         }
     }
     public class PFuncion
@@ -175,6 +178,55 @@ namespace Sec.Analizadores
         public abstract CodigoT IntentarGenerarCodigo(PEntorno entorno);
     }
 
+
+    public class PNodoImport : PNodo
+    {
+        private readonly string _path;
+
+        public PNodoImport(string path)
+        {
+            _path = path;
+        }
+        
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+
+            try
+            {
+                string entrada = File.ReadAllText(_path);
+
+
+                var ga = new GramaticaPython();
+                var parser = new Parser(ga);
+                var arbol = parser.Parse(entrada);
+                var raiz = arbol.Root;
+                if (raiz == null || arbol.ParserMessages.Count > 0 || arbol.HasErrors())
+                {
+                    foreach (var item in arbol.ParserMessages)
+                    {
+                        throw new SyntaxException(item.Message + _path, item.Location.Line, item.Location.Column);
+                    }
+
+                    throw new SyntaxException("No se pudo analizar la entrada: " + _path, 0, 0);
+                }
+
+                var sentencias = (List<NodoPythonAst>) raiz.AstNode;
+                
+                var codigo = new CodigoT();
+                foreach (var sentencia in sentencias)
+                {
+                    codigo.agregar(sentencia.GenerarCodigo(entorno));
+                }
+                return codigo;
+            }
+            catch (System.Exception e)
+            {
+                throw new PythonSemanticException($"No se pudo procesar archivo : " + _path + "\n" + e.Message);
+            }
+
+        }
+    }
+
     public class PNodoAsignacion : PNodo
     {
         private readonly List<NodoPythonAst> _nodosDestino;
@@ -205,6 +257,7 @@ namespace Sec.Analizadores
                 
                 var c2 = PUtils.desenvolver(_nodosValor[i].GenerarCodigo(entorno));
 
+                codigo.agregar(c1);
                 codigo.agregar(c2);
                 codigo.agregar(string.Format(c1.registro, c2.apuntador));
 //                codigo.agregar($"asignar({c1.apuntador}, {c2.apuntador});");
@@ -235,6 +288,38 @@ namespace Sec.Analizadores
         public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
         {
             return buscarId(_id, this.linea, this.columna);
+        }
+    }
+
+    public class PNodoWhile : PNodo
+    {
+        private readonly NodoPythonAst _argumento;
+        private readonly List<NodoPythonAst> _nodosTrue;
+
+        public PNodoWhile(NodoPythonAst argumento, List<NodoPythonAst> nodosTrue)
+        {
+            _argumento = argumento;
+            _nodosTrue = nodosTrue;
+        }
+        
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var codigo = new CodigoT();
+
+            var codigoArgumento = PUtils.desenvolver(_argumento.GenerarCodigo(entorno));
+
+            codigo.agregar("do {");
+            codigo.agregar(codigoArgumento);
+            codigo.agregar($"if (esVerdaderoGeneral({codigoArgumento.apuntador}) == 0) " + "{");
+            codigo.agregar("\tbreak;");
+            codigo.agregar("}");
+            var codigoTrue = PUtils.generarBloque(_nodosTrue, "\t", entorno);
+            codigo.agregar(codigoTrue);
+            codigo.agregar("}");
+            codigo.agregar($"while (1)");
+
+
+            return codigo;
         }
     }
 
@@ -294,7 +379,7 @@ namespace Sec.Analizadores
 //            codigo.agregar($"buscarPropiedad({c.apuntador},"+ "\"" + _id + "\"" + $", archivo, {this.linea}, {this.columna});");
             
 
-            codigo.valor = $"buscarPropiedad({c.apuntador},"+ "\"" + _id + "\"" + $", archivo, {this.linea}, {this.columna});";
+            codigo.valor = $"buscarIdEnObjeto({c.apuntador},"+ "\"" + _id + "\"" + $", archivo, {this.linea}, {this.columna});";
             codigo.registro = $"registrar({c.apuntador}, \"" + _id + "\", {0});";
             return codigo;
 
@@ -374,6 +459,70 @@ namespace Sec.Analizadores
 
             codigo.apuntador = PUtils.generarTemporal();
             codigo.agregar($"General {codigo.apuntador} = invocar({temp1}, {temp}, archivo, {this.linea}, {this.columna});");
+
+            return codigo;
+            
+        }
+    }
+
+
+    public class PNodoContinue : PNodo
+    {
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var codigo = new CodigoT();
+
+            codigo.agregar("continue;");
+
+            return codigo;
+        }
+    }
+    public class PNodoBreak : PNodo
+    {
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var codigo = new CodigoT();
+
+            codigo.agregar("break;");
+
+            return codigo;
+        }
+    }
+    
+    public class PNodoInvocacionHope : PNodo
+    {
+        private readonly string _id;
+        private readonly List<NodoPythonAst> _nodosArgumento;
+
+        public PNodoInvocacionHope(string id, List<NodoPythonAst> nodosArgumento)
+        {
+            _id = id;
+            _nodosArgumento = nodosArgumento;
+        }
+        
+        
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var codigo = new CodigoT();
+
+
+//            var textoArgs = string.Join(",", _nodosArgumento.Select(n => PUtils.desenvolver(n.GenerarCodigo(entorno)).apuntador) );
+
+
+            var textoArgs = "";
+            var comma = "";
+
+            for (int i = 0; i < _nodosArgumento.Count; i++)
+            {
+                var cArg = PUtils.desenvolver(_nodosArgumento[i].GenerarCodigo(entorno));
+                codigo.agregar(cArg);
+
+                textoArgs = comma + " " + cArg.apuntador;
+                comma = ",";
+            }
+
+            codigo.apuntador = PUtils.generarTemporal();
+            codigo.agregar($"General {codigo.apuntador} = {_id}({textoArgs});");
 
             return codigo;
             
@@ -526,7 +675,7 @@ namespace Sec.Analizadores
             var codigo = new CodigoT();
             codigo.apuntador = PUtils.generarTemporal();
             codigo.agregar($"General {codigo.apuntador} = {pClase.metodo}(ambito);");
-            codigo.agregar($"registrar(ambit, \"{_id}\", {codigo.apuntador});");
+            codigo.agregar($"registrar(ambito, \"{_id}\", {codigo.apuntador});");
             return codigo;
         }
     }
@@ -536,6 +685,8 @@ namespace Sec.Analizadores
         public string Id { get; }
         private readonly List<string> _parametros;
         private readonly List<NodoPythonAst> _sentencias;
+
+        public int CantidadParametros => _parametros.Count;
 
         public PNodoCrearMetodo(string id, List<string> parametros, List<NodoPythonAst> sentencias)
         {
@@ -552,7 +703,7 @@ namespace Sec.Analizadores
             var codigo = new CodigoT();
             codigo.extra = pFuncion.nombre;
             codigo.apuntador = PUtils.generarTemporal();
-            codigo.agregar($"General {codigo.apuntador} = crearGeneralFuncion({pFuncion.numeroFuncion},{_parametros.Count}, ambito); // {Id}");
+            codigo.agregar($"General {codigo.apuntador} = crearGeneralFuncion({pFuncion.numeroFuncion},{_parametros.Count}, ambitoCapturado); // {Id}");
             codigo.agregar($"registrar(ambito, \"{Id}\", {codigo.apuntador});");
             return codigo;
         }
@@ -581,6 +732,30 @@ namespace Sec.Analizadores
     }
     
 
+    
+    public class PNodoOperacionUnaria : PNodo
+    {
+        private readonly NodoPythonAst _e1;
+        private readonly string _nombreFuncion;
+
+        public PNodoOperacionUnaria(NodoPythonAst e1, string nombreFuncion)
+        {
+            _e1 = e1;
+            _nombreFuncion = nombreFuncion;
+        }
+        
+        public override CodigoT IntentarGenerarCodigo(PEntorno entorno)
+        {
+            var c1 = PUtils.desenvolver(_e1.GenerarCodigo(entorno));
+
+            var codigo = new CodigoT();
+            codigo.agregar(c1);
+            codigo.apuntador = PUtils.generarTemporal();
+            codigo.agregar($"General {codigo.apuntador} = {_nombreFuncion}({c1.apuntador}, archivo, {this.linea}, {this.columna});");
+            return codigo;
+
+        }
+    }
 
     public class PNodoOperacionBinaria : PNodo
     {
