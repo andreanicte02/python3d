@@ -29,6 +29,7 @@ namespace Sec.Analizadores
         {
             contador_clases = inicioClases;
             contador_funciones = 0;
+            contadorTemporal = 0;
         }
         
         public static int generarNumeroClase()

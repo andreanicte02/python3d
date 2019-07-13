@@ -108,6 +108,7 @@
     <ClCompile Include="api.c" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="api.py" />
     <Content Include="prueba.py" />
   </ItemGroup>
   <ItemGroup>

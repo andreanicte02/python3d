@@ -113,8 +113,10 @@ namespace Sec.Analizadores
                                     | produccion(ToTerm("!") + "print" + "(" + id + "," + expr + ")" + ";")._accionT(v => new TNodoPrintSimple(v[3], v[5]))
                                     | produccion("throw" + expr + ";" )._accionT(v => new TNodoThrow(v[1]))
                                     | produccion(ToTerm("while") + "(" + expr + ")" +"{"+ sentenciasFuncion + "}")._accionT(v => new TNodoWhile(v[2], v[5]))
+                                    | produccion(ToTerm("do") +"{"+ sentenciasFuncion + "}" + "while" + "(" + expr + ")")._accionT(v => new TNodoDoWhile(v[6], v[2]))
                                     | produccion("break" + ToTerm(";"))._accion(v => new TNodoBreak())
                                     | produccion("continue" + ToTerm(";"))._accion(v => new TNodoContinue())
+                                    | produccion(ToTerm("?") + "{" + sentenciasFuncion + "}")._accion(v => new TNodoNoSe(v[2]))
                 ;
 
             declaracion.Rule = produccion(tipo + id + "=" + expr)
@@ -170,6 +172,7 @@ namespace Sec.Analizadores
                         | produccion(@double)._accionT(v => new TNodoCrearDouble(v[0]))
                         | produccion(@int)._accionT(v => new TNodoCrearInt(v[0]))
                         | produccion(id)._accionT(v => new TNodoBuscarPropiedad(v[0]))
+                        | produccion("$")._accion(v => new TNodoObtenerDollar())
                         | produccion("null")._accionT(v => new TNodoCrearNull())
                         | produccion("-" + expr + ReduceHere())._accionT(v => new TNodoMenosUnario(v[1]))
                         | invocacion

@@ -186,7 +186,7 @@ General buscarIdlocal(General ambito, int[] llave, int[] archivo, int linea, int
         }
         temp = temp.anterior;
     }
-    throw crearException("llave no encontrada", archivo, linea, columna);
+    throw crearException(concatString("llave no encontrada: ", llave), archivo, linea, columna);
 }
 
 General buscarIdEnObjeto(General ambito, int[] llave, int[] archivo, int linea, int columna){
@@ -196,7 +196,7 @@ General buscarIdEnObjeto(General ambito, int[] llave, int[] archivo, int linea, 
         return entrada.valor;
     }
 
-    throw crearException("llave no encontrada", archivo, linea, columna);
+    throw crearException(concatString("Propiedad no encontrada: ", llave), archivo, linea, columna);
 }
 
 
@@ -524,53 +524,65 @@ General igualIgualGeneral(General g1, General g2, int[] archivo, int fila, int c
         
         return crearBooleanGeneral(cadenasIguales(g1.valorString, g2.valorString));
     
-    }else if(g1.tipo  == 6 && g2.tipo == 6){
+    }
+    else if(g1.tipo  == 6 && g2.tipo == 6){
     
         return crearBooleanGeneral(g1.valorInt == g2.valorInt);
     }
     
+    else if(g1.tipo  == 8 && g2.tipo == 8){
+        return crearBooleanGeneral(1);
+    }
+    else if(g1.tipo  == 9 && g2.tipo == 9){
+            return crearBooleanGeneral(1);
+    }
     
-    throw crearException("tipos no compatibles ==", archivo, fila, columna); 
+    return crearBooleanGeneral(g1 == g2);
+//    throw crearException("tipos no compatibles ==", archivo, fila, columna); 
     
 }
 
 
 General diferenteQueGeneral(General g1, General g2, int[] archivo, int fila, int columna){
 
-    if (g1.tipo == 3 && g2.tipo == 3) {
-    
-        return crearBooleanGeneral(g1.valorInt == g2.valorInt);
-        
-    }else if(g1.tipo == 4 && g2.tipo == 4){
-    
-       return crearBooleanGeneral(g1.valorDouble == g2.valorDouble);
-    
-    }else if(g1.tipo == 4 && g2.tipo == 3){
-         
-       return crearBooleanGeneral(g1.valorDouble == g2.valorInt);
-         
-    }else if(g1.tipo == 3 && g2.tipo == 4){
-              
-        return crearBooleanGeneral(g1.valorInt == g2.valorDouble);
-              
-    }else if(g1.tipo == 5 && g2.tipo == 5){
-        
-        int i = cadenasIguales(g1.valorString, g2.valorString);
-        if(i == 1){
-        
-           return crearBooleanGeneral(0);
-        }
-        return crearBooleanGeneral(1);
-    
-    }else if(g1.tipo  == 6 && g2.tipo == 6){
-         
-        return crearBooleanGeneral(g1.valorInt != g2.valorInt);
-             
-    }
-         
-    
-    
-    throw crearException("tipos no compatibles ==", archivo, fila, columna); 
+    General i = igualIgualGeneral(g1, g2, archivo, fila, columna);
+    return notGeneral(i, archivo, fila, columna);
+
+
+//    if (g1.tipo == 3 && g2.tipo == 3) {
+//    
+//        return crearBooleanGeneral(g1.valorInt == g2.valorInt);
+//        
+//    }else if(g1.tipo == 4 && g2.tipo == 4){
+//    
+//       return crearBooleanGeneral(g1.valorDouble == g2.valorDouble);
+//    
+//    }else if(g1.tipo == 4 && g2.tipo == 3){
+//         
+//       return crearBooleanGeneral(g1.valorDouble == g2.valorInt);
+//         
+//    }else if(g1.tipo == 3 && g2.tipo == 4){
+//              
+//        return crearBooleanGeneral(g1.valorInt == g2.valorDouble);
+//              
+//    }else if(g1.tipo == 5 && g2.tipo == 5){
+//        
+//        int i = cadenasIguales(g1.valorString, g2.valorString);
+//        if(i == 1){
+//        
+//           return crearBooleanGeneral(0);
+//        }
+//        return crearBooleanGeneral(1);
+//    
+//    }else if(g1.tipo  == 6 && g2.tipo == 6){
+//         
+//        return crearBooleanGeneral(g1.valorInt != g2.valorInt);
+//             
+//    }
+//         
+//    
+//    
+//    throw crearException("tipos no compatibles ==", archivo, fila, columna); 
     
 }
 
@@ -961,7 +973,7 @@ int esVerdaderoGeneral(General g1){
         
     }else if(g1.tipo == 9){
     
-        return 1;
+        return 0;
     
     }
     
@@ -1215,5 +1227,23 @@ void printlnString(int[] cadena){
 //============
 
 void main(){
-    python_main(null, null);
+    ?{
+        python_main(null, null);
+    }
+    if ($.hayError) {
+        $.hayError = 0;
+        
+//        printlnString("finalizo");
+//        printlnInt($.valor);
+        
+        Exception e = (Exception) ($.valor);
+        printlnString("Error en tiempo de ejecucion");
+        printString("Mensaje: ");
+        printlnString(e.mensaje);
+        printString("Linea: ");
+        printlnInt(e.linea);
+        printString("Columna: ");
+        printlnInt(e.columna);
+    }
+
 }

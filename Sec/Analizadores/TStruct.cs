@@ -20,10 +20,10 @@ namespace Sec.Analizadores
 
     public class PropiedadDollar
     {
-        public const string hayError = "$hayError";
-        public const string linea = "$linea";
-        public const string columna = "$columna";
-        public const string valor = "$valor";
+        public const string hayError = "hayError";
+        public const string linea = "linea";
+        public const string columna = "columna";
+        public const string valor = "valor";
     }
 
     public class ZTipos
