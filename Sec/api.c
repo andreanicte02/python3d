@@ -721,7 +721,8 @@ General castIntGeneral(General g1,int[] archivo, int fila, int columna){
 
 //==================================================================str(exp)
 
-General castStrGeneral(General g1,int[] archivo, int fila, int columna){
+General 
+(General g1,int[] archivo, int fila, int columna){
 
     if(g1.tipo == 3){
             
