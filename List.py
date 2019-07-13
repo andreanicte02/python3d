@@ -2,7 +2,7 @@ class Nodo:
 	"""docstring for cualquierCosa"""
 	def __init__(self, cualquierCosa):
 		self.cualquierCosa = cualquierCosa
-		self.pos = 0;
+		self.pos = 0
 		self.siguente = None
 		self.anterior = None
 		
@@ -19,7 +19,7 @@ class List:
 		
 		if self.primero == None:
 			self.primero = elemento
-			elemento.pos = 0;
+			elemento.pos = 0
 			elemento.siguente = elemento
 			elemento.anterior = elemento
 		else: 
@@ -27,7 +27,7 @@ class List:
 			while temporal.siguente != None:
 				temporal = temporal.siguente
 
-			elemento.pos = temporal.pos+1;
+			elemento.pos = temporal.pos+1
 			temporal.siguente= elemento
 			elemento.anterior = temporal
 		
