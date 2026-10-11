@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Compila el compilador original de Sec/ (sin la interfaz de Windows Forms) para usarlo desde la web -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Sec</RootNamespace>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <NoWarn>$(NoWarn);CS0108;CS0114;CS0162;CS0168;CS0169;CS0219;CS0414;CS0649;CS8321</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../Sec/**/*.cs" Exclude="../Sec/Zide.cs;../Sec/Program.cs;../Sec/Interprete3D/utilidadesParaDegg.cs;../Sec/Properties/**;../Sec/obj/**;../Sec/bin/**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Irony" Version="1.1.0" />
+  </ItemGroup>
+
+</Project>
