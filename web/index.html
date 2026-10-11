@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Python a 3D</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<div class="pagina">
+    <header>
+        <h1>Python → código de tres direcciones</h1>
+        <p>
+            Compilador de un subconjunto de <strong>Python</strong> (clases, métodos, funciones recursivas,
+            <code>if/elif</code>, <code>while</code>) hecho en C# con Irony. Compila en tres etapas y luego ejecuta
+            el resultado con su propio intérprete de 3D.
+            <a href="https://github.com/andreanicte02/python3d" target="_blank" rel="noopener">Código fuente</a>
+        </p>
+    </header>
+
+    <div class="barra">
+        <label>
+            Ejemplo
+            <select id="ejemplo"></select>
+        </label>
+        <p id="descripcion" class="descripcion"></p>
+    </div>
+
+    <ol class="etapas" id="etapas"></ol>
+
+    <section class="visor">
+        <nav class="pestanias" id="pestanias"></nav>
+        <p class="nota" id="nota"></p>
+        <pre class="codigo" id="codigo"></pre>
+    </section>
+
+    <p class="pie" id="pie"></p>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

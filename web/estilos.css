@@ -1,0 +1,116 @@
+:root {
+    --fondo: #f6f7f9;
+    --panel: #ffffff;
+    --texto: #1f2328;
+    --suave: #59636e;
+    --borde: #d1d9e0;
+    --acento: #0969da;
+    --codigo-fondo: #0d1117;
+    --codigo-texto: #e6edf3;
+    --salida: #7ee787;
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --fondo: #0d1117;
+        --panel: #161b22;
+        --texto: #e6edf3;
+        --suave: #9198a1;
+        --borde: #30363d;
+        --acento: #4493f8;
+        --codigo-fondo: #010409;
+        color-scheme: dark;
+    }
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+a { color: var(--acento); }
+code { font: 0.88em ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+.pagina { max-width: 1200px; margin: 0 auto; padding: 16px; }
+
+header h1 { margin: 0 0 4px; font-size: 1.5rem; }
+header p { margin: 0 0 12px; color: var(--suave); max-width: 900px; }
+
+.barra { display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: end; margin-bottom: 12px; }
+.barra label { display: flex; flex-direction: column; font-size: 0.85rem; color: var(--suave); gap: 2px; }
+.descripcion { margin: 0; color: var(--suave); }
+
+select, button {
+    font: inherit;
+    color: var(--texto);
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+
+button { cursor: pointer; }
+
+.etapas {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    counter-reset: etapa;
+}
+
+@media (max-width: 760px) {
+    .etapas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.etapas button {
+    width: 100%;
+    height: 100%;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+}
+
+.etapas strong { font-size: 1rem; }
+.etapas span { color: var(--suave); font-size: 0.82rem; }
+.etapas small { color: var(--suave); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.etapas button.activa { border-color: var(--acento); box-shadow: inset 0 0 0 1px var(--acento); }
+
+.visor {
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    background: var(--panel);
+    overflow: hidden;
+}
+
+.pestanias { display: flex; gap: 4px; padding: 6px 6px 0; }
+.pestanias:empty { display: none; }
+.pestanias button { border: none; background: transparent; }
+.pestanias button.activa { background: var(--fondo); font-weight: 600; }
+
+.nota { margin: 8px 12px; color: var(--suave); font-size: 0.88rem; }
+
+.codigo {
+    margin: 0;
+    padding: 12px;
+    height: 60vh;
+    min-height: 320px;
+    overflow: auto;
+    background: var(--codigo-fondo);
+    color: var(--codigo-texto);
+    font: 13px/1.45 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    tab-size: 4;
+}
+
+.codigo.salida { color: var(--salida); }
+
+.pie { color: var(--suave); font-size: 0.82rem; }
